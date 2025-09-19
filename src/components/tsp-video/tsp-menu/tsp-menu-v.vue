@@ -45,10 +45,11 @@
 					<view class="fabulous-num">{{discussNum}}</view>
 				</view>
 				<!-- 收藏 -->
-				<view class="fabulous" style="margin-top: 30rpx;" @click="JumpBtn(3)">
+				<view class="fabulous" :class="collectionMeans" style="margin-top: 30rpx;" @click="collectionBtn(index)">
 					<view class="fabulous-image">
-						<!-- <image src="/static/tsp-icon/ward.png" mode="" class="fabulous-image"></image> -->
-						<up-icon name="star-fill" color="#fff" size="45" class="fabulous-image"></up-icon>
+						<up-icon name="star-fill" color="#ffff00" size="45" class="fabulous-image" v-if="item.collectionShow"></up-icon>
+						<up-icon name="star-fill" color="#fff" size="45" class="fabulous-image" v-else></up-icon>
+						<view class="collection-pellet" :class="[collectionShow ?'collection-pellet-active':'']"></view>
 					</view>
 					<text class="fabulous-num" style="font-size: 26rpx;">20</text>
 				</view>
@@ -121,12 +122,16 @@
 				followOpen:false,
 				fabuTimeOut:null,
 				likeeffect:null, //点赞动效判断
+				collectionShow:null, //收藏动效判断
 				expandDesc:false
 			}
 		},
 		computed:{
 			likeeMeans(){
 				return this.likeeffect == true ? 'fabulous-taoxin' : this.likeeffect == false ?'cancel-taoxin' : ''
+			},
+			collectionMeans(){
+				return this.item.collectionShow == true ? 'fabulous-collection' : this.item.collectionShow == false ?'cancel-collection' : ''
 			}
 		},
 		methods:{
@@ -160,6 +165,13 @@
 						},300)
 					},100)
 				},500)
+			},
+			/** 收藏特效 */
+			collectionBtn(index){
+				let obj = Object.assign({},this.item)
+				obj.collectionShow = !obj.collectionShow
+				this.collectionShow = obj.collectionShow
+				this.$emit('handleInfo',obj)  //收藏成功
 			},
 			/* 点击右侧菜单选项 1头像 2评论 3转发 4旋转头像 */
 			JumpBtn(index){
@@ -326,6 +338,28 @@
 			transform: rotate(360deg);
 		}
 	}
+	.collection-pellet{
+		width: 5rpx;
+		height: 5rpx;
+		background-color: transparent;
+		border-radius: 50%;
+		/* 绝对定位 居中 */
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%,-50%) scale(0);
+		/* 设置各个方向的阴影 */
+		box-shadow: 2rpx -70rpx 0 #ff0,
+		-40rpx -35rpx 0 #ff0,
+		45rpx -35rpx 0 #ff0,
+		35rpx 20rpx 0 #ff0, 
+		-25rpx 20rpx 0 #ff0;
+	}
+	.collection-pellet-active{
+		animation: likeBlink 0.5s ease-in-out forwards;
+	}
+
+
 	.like-pellet{
 		width: 5rpx;
 		height: 5rpx;
@@ -448,7 +482,7 @@
 	.k-running{
 		animation-play-state: running;
 	}
-	.fabulous-taoxin{
+	.fabulous-taoxin,.fabulous-collection{
 		animation: likeName 0.5s linear 1;
 	}
 	@keyframes likeName{
@@ -477,7 +511,7 @@
 			transform: scale(1);
 		}
 	}
-	.cancel-taoxin{
+	.cancel-taoxin,.cancel-collection{
 		animation: likeCancel 0.2s linear 1;
 	}
 	@keyframes likeCancel{

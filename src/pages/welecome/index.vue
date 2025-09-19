@@ -12,7 +12,7 @@
 		<up-image :src="bannerlist[0]?.imageUrl" width="100%" height="80vh" @click="handleOpenPage(bannerlist[0].clickUrl)"></up-image>
 		<up-count-down :time="5 * 1000" format="ss" class="count-down" @finish="countDownFinsh"></up-count-down>
 		<view class="logo">
-			<!-- <image src="/static/images/logo2.png" mode=""></image> -->
+			<image src="/static/images/logo2.png" mode=""></image>
 		</view>
 	</view>
 </template>
