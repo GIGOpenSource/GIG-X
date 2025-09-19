@@ -47,7 +47,7 @@
 			<view class="head-operate">
 				<!-- <image src="/static/tsp-icon/home-menu.png" class="head-operate-icon"></image> -->
 				 <span></span>
-				<image src="/static/tsp-icon/home-search.png" class="head-operate-icon"></image>
+				<image src="/static/tsp-icon/home-search.png" class="head-operate-icon" @click="handleJump2Search"></image>
 			</view>
 		</view>
 		
@@ -201,6 +201,12 @@
 			},
 			touchendSlider(event){
 				this.pageList[this.tabIndex].tabPageTouchendSlider(event)
+			},
+			/* 跳转搜索 */
+			handleJump2Search(){
+				uni.navigateTo({
+					url:'/pages/search/search'
+				})
 			}
 		}
 	}
