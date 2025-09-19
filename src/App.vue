@@ -15,6 +15,20 @@ export default {
 <style lang="scss">
 /* 注意要写在第一行，同时给style标签加入lang="scss"属性 */
 @import "uview-plus/index.scss";
+
+/* #ifdef H5 */
+:deep(.uni-tabbar){
+  .uni-tabbar__item:nth-of-type(4){
+    .uni-tabbar__icon{
+      width: 42px !important;
+      height: 42px !important;
+      margin-top: -2px !important;
+    }
+  }
+}
+/* #endif */
+
+
 /* #ifndef APP-NVUE */
 page {
   --status-bar-height: 25px;
