@@ -9,7 +9,8 @@
 				:src="item.imageUrl"
 			/>
 		</scroll-view> -->
-		<up-image :src="bannerlist[0]?.imageUrl" width="100%" height="80vh" @click="handleOpenPage(bannerlist[0].clickUrl)"></up-image>
+		<up-image :src="bannerlist[0]?.imageUrl" width="100%" height="80vh"
+			@click="handleOpenPage(bannerlist[0].clickUrl)"></up-image>
 		<up-count-down :time="5 * 1000" format="ss" class="count-down" @finish="countDownFinsh"></up-count-down>
 		<view class="logo">
 			<image src="/static/images/logo2.png" mode=""></image>
@@ -19,7 +20,7 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { onLoad, onHide, onReachBottom } from '@dcloudio/uni-app';
-import {getAdsList} from '@/api/public.js'
+import { getAdsList } from '@/api/public.js'
 import { userinfoStore } from '@/store/userinfos'
 const store = userinfoStore()
 import {
@@ -33,21 +34,22 @@ const total = ref(0);
 const page = ref(1);
 const isFirst = ref(false)
 
-onLoad(() => {
+onLoad(async () => {
 	isFirst.value = uni.getStorageSync('isFirst');
-
 	const params = {
-		username: 'Lisi2',
-		password: 'password123'
+		username: 'admin',
+		password: '123456'
 	};
 	login(params).then((res) => {
-		if (res.code === 200) {
-			uni.setStorageSync('user_info', res.data.userInfo)
-			uni.setStorageSync('token', res.data.token)
-			list(); //获取轮播图列表
-			 store.getUserinfo({id: res.data.userInfo.id})
-		}
-	});
+		console.log(res, 'ceeng ');
+		// uni.setStorageSync('user_info', res.data)
+		// uni.setStorageSync('token', res.data.token)
+		// list(); //获取轮播图列表
+		store.getUserinfo({ id: res.data.userInfo.id })
+	}).catch(err => {
+		console.log(err, '222');
+
+	})
 });
 onHide(() => {
 	uni.setStorageSync('isFirst', false);
@@ -71,11 +73,11 @@ const lower = () => {
 };
 
 // 打开页面
-const handleOpenPage = (url)=>{
+const handleOpenPage = (url) => {
 	// #ifdef APP-PLUS
-	plus.runtime.openURL( url, ()=>{
+	plus.runtime.openURL(url, () => {
 		console.log('打开外链失败');
-	} );
+	});
 	// #endif
 
 	// #ifdef APP-PLUS
@@ -84,7 +86,7 @@ const handleOpenPage = (url)=>{
 }
 
 // 倒计时结束跳转页面
-const countDownFinsh = ()=>{
+const countDownFinsh = () => {
 	if (isFirst.value === false) {
 		uni.switchTab({
 			// #ifdef APP-PLUS

@@ -10,7 +10,7 @@ export const updataUserinfo = (id,params) => {
 
 // 登录
 export const login = (data) => {
-	return postRequest('/auth/login', data, {
+	return postRequest('/auth/login/', data, {
 		header: {
 			'Content-Type': 'application/x-www-form-urlencoded'
 		}

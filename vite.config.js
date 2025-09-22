@@ -43,9 +43,29 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    port: 8080,
-    hmr: true 
+ server: {
+    // 开发服务器配置
+    host: '0.0.0.0', // 允许外部访问
+    port: 3000, // 开发服务器端口
+    // 代理配置解决跨域问题
+    proxy: {
+      // 代理所有以 /api 开头的请求
+      '/api': {
+        target: 'http://192.168.77.222:8000', // 后端服务器地址，与config.js保持一致
+        changeOrigin: true, // 是否更换源
+        secure: false, // 如果目标服务器无 HTTPS，需关闭安全验证
+        rewrite: (path) => path.replace(/^\/api/, '/api'), // 保留 /api 前缀
+        // 配置请求头
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // 添加跨域相关头部
+            proxyReq.setHeader('Access-Control-Allow-Origin', '*');
+            proxyReq.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+            proxyReq.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, token, is-dev');
+          });
+        }
+      }
+    }
   },
   resolve: {
     alias: {
