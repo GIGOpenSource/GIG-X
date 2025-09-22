@@ -66,7 +66,7 @@ function request(url, params, other) {
 				if (data.statusCode == 200) {
 					if (!(data.data.code == 403 && !expired)) {
 						expired = false;
-						if (data.data.code !== 200) resolve(data.data);
+						if (data.data.code == 200) resolve(data.data);
 						else {
 							if (httpConfig.errorOutput) {
 								uni.showToast({
@@ -74,7 +74,7 @@ function request(url, params, other) {
 									icon: 'none'
 								})
 							}
-							resolve(data.data);
+							reject(data.data);
 						}
 					} else {
 						uni.removeStorage({
