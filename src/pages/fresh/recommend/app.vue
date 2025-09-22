@@ -20,9 +20,9 @@
 		<!-- z-paging默认铺满全屏，此时页面所有view都应放在z-paging标签内，否则会被盖住 -->
 		<!-- 需要固定在页面顶部的view请通过slot="top"插入，包括自定义的导航栏 -->
 		<view class="content">
-			<view class="app-item" v-for="item in dataList" @click="handleClickApp(item.clickUrl)">
-				<up-image :src="item.imageUrl" radius="32rpx" width="120rpx" height="120rpx"></up-image>
-				<view class="app-name">{{ item.adName }}</view>
+			<view class="app-item" v-for="item in dataList" @click="handleClickApp(item.click_url)">
+				<up-image :src="item.image_url" radius="32rpx" width="120rpx" height="120rpx"></up-image>
+				<view class="app-name">{{ item.name.length > 5 ? item.name.slice(0,5)+'...' : item.name }}</view>
 			</view>
 		</view>
 	</z-paging>
@@ -39,7 +39,7 @@ const dataList = ref([]);
 
 const queryList = (pageNo, pageSize) => {
 	const params = {
-		adType: 'app',
+		type: 'app',
 		currentPage: pageNo,
 		pageSize
 	};
@@ -47,7 +47,7 @@ const queryList = (pageNo, pageSize) => {
 		.then((res) => {
 			console.log('resres', res);
 			// 将请求结果通过complete传给z-paging处理，同时也代表请求结束，这一行必须调用
-			paging.value.complete(res.data.records);
+			paging.value.complete(res.data.results);
 		})
 		.catch((res) => {
 			// 如果请求失败写paging.value.complete(false);
@@ -58,6 +58,10 @@ const queryList = (pageNo, pageSize) => {
 const handleClickApp = (url) => {
 	// #ifdef APP-PLUS
 	plus.runtime.openURL(url);
+	// #endif
+	
+	// #ifdef H5
+	window.open(url, '_blank');
 	// #endif
 };
 </script>

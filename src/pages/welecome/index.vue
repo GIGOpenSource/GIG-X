@@ -37,7 +37,7 @@ const isFirst = ref(false)
 onLoad(async () => {
 	isFirst.value = uni.getStorageSync('isFirst');
 	const params = {
-		username: 'admin',
+		username: 'wyz1',
 		password: '123456'
 	};
 	login(params).then((res) => {
@@ -88,7 +88,6 @@ const handleOpenPage = (url) => {
 
 // 倒计时结束跳转页面
 const countDownFinsh = () => {
-	return
 	if (isFirst.value === false) {
 		uni.switchTab({
 			// #ifdef APP-PLUS

@@ -20,7 +20,7 @@
 		<!-- z-paging默认铺满全屏，此时页面所有view都应放在z-paging标签内，否则会被盖住 -->
 		<!-- 需要固定在页面顶部的view请通过slot="top"插入，包括自定义的导航栏 -->
 		<view class="content">
-			<up-swiper height="166" radius="15" keyName="imageUrl" :list="bannerList" @click="handleClickSwiper" v-if="bannerList.length > 0"></up-swiper>
+			<up-swiper height="166" radius="15" keyName="image_url" :list="bannerList" @click="handleClickSwiper" v-if="bannerList.length > 0"></up-swiper>
 
 			<!-- 游戏分类 -->
 			<!-- 		<view class="game-category">
@@ -44,10 +44,10 @@
 			<view class="game-list">
 				<view class="game-item" v-for="item in dataList">
 					<view class="game">
-						<up-image :src="item.imageUrl" width="120rpx" height="120rpx" radius="20rpx"></up-image>
+						<up-image :src="item.image_url" width="120rpx" height="120rpx" radius="20rpx"></up-image>
 						<view class="des">
-							<view class="name">{{ item.adName }}</view>
-							<view class="sub">{{ item.adDescription }}</view>
+							<view class="name">{{ item.name }}</view>
+							<view class="sub">{{ item.description }}</view>
 						</view>
 					</view>
 
@@ -106,10 +106,14 @@ const categoryList = ref([
 
 // 点击banner
 const handleClickSwiper = (i) => {
-	const url = bannerList.value[i].clickUrl;
+	const url = bannerList.value[i].click_url;
 
 	// #ifdef APP-PLUS
 	plus.runtime.openURL(url);
+	// #endif
+
+	// #ifdef H5
+	window.open(url, '_blank');
 	// #endif
 };
 
@@ -120,13 +124,13 @@ onLoad(() => {
 // 游戏广告banner
 const getBannerList = async () => {
 	const params = {
-		adType: 'game_ads',
+		type: 'game_ads',
 		currentPage: 1,
 		pageSize: 5
 	};
 	const res = await getAdsList(params);
 	if (res.code === 200) {
-		bannerList.value = res.data.records;
+		bannerList.value = res.data.results;
 	}
 };
 
@@ -137,7 +141,7 @@ const dataList = ref([]);
 
 const queryList = (pageNo, pageSize) => {
 	const params = {
-		adType: 'game',
+		type: 'game',
 		currentPage: pageNo,
 		pageSize
 	};
@@ -145,7 +149,7 @@ const queryList = (pageNo, pageSize) => {
 		.then((res) => {
 			console.log('resres', res);
 			// 将请求结果通过complete传给z-paging处理，同时也代表请求结束，这一行必须调用
-			paging.value.complete(res.data.records);
+			paging.value.complete(res.data.results);
 		})
 		.catch((res) => {
 			// 如果请求失败写paging.value.complete(false);
