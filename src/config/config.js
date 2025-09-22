@@ -1,8 +1,8 @@
 // 开发中？
 const develop = true;
 
-let host = '/api/v1';
-if (develop) host = '/api/v1';
+let host = '/api';
+if (develop) host = '/api';
 else '';
 console.log = develop ? console.log : () => {};
 console.info = develop ? console.info : () => {};

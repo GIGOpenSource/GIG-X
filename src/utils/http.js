@@ -11,8 +11,7 @@ const token = uni.getStorageSync('token') || ''
 let httpConfig = {
 	header: {
 		'Content-Type': "application/json",
-		'Authorization': token,
-		'token':token ?? '',
+		'Authorization':'Token ' +  token,
 		'is-dev': 'true'
 	},
 	method: 'POST',
@@ -60,15 +59,14 @@ function request(url, params, other) {
 			method: other.method,
 			timeout: other.timeout,
 			complete: data => {
-				// 请求返回后，隐藏loading(如果请求返回快的话，可能会没有loading)
 				uni.hideLoading();
-				// 清除定时器，如果请求回来了，就无需loading
 				clearTimeout(httpConfig.timer);
 				httpConfig.timer = null;
+	
 				if (data.statusCode == 200) {
-					if (!(data.data.msg === '身份已过期' && !expired)) {
+					if (!(data.data.code == 403 && !expired)) {
 						expired = false;
-						if (data.data.success) resolve(data.data);
+						if (data.data.code !== 200) resolve(data.data);
 						else {
 							if (httpConfig.errorOutput) {
 								uni.showToast({
@@ -76,7 +74,7 @@ function request(url, params, other) {
 									icon: 'none'
 								})
 							}
-							reject(data.data);
+							resolve(data.data);
 						}
 					} else {
 						uni.removeStorage({
@@ -95,7 +93,6 @@ function request(url, params, other) {
 						reject(data.data)
 					}
 				} else {
-					console.warn(host + url, data);
 					if (httpConfig.errorOutput) {
 						uni.showToast({
 							title: '请求失败',

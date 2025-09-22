@@ -5,7 +5,7 @@ import {
 
 // 广告查询
 export const getAdsList = (params) => {
-	return getRequest('/ads/list', params)
+	return getRequest('/ad/ads/', params)
 }
 // 用户信息
 export const getUserinfo = (params) => {

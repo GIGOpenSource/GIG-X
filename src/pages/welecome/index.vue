@@ -41,29 +41,30 @@ onLoad(async () => {
 		password: '123456'
 	};
 	login(params).then((res) => {
-		console.log(res, 'ceeng ');
-		// uni.setStorageSync('user_info', res.data)
-		// uni.setStorageSync('token', res.data.token)
-		// list(); //获取轮播图列表
-		store.getUserinfo({ id: res.data.userInfo.id })
-	}).catch(err => {
-		console.log(err, '222');
-
+		uni.setStorageSync('user_info', res.data)
+		uni.setStorageSync('token', res.data.token)
+		store.getUserinfo({ id: res.data.user_id })
 	})
+	
 });
 onHide(() => {
 	uni.setStorageSync('isFirst', false);
 });
 const list = () => {
 	getAdsList({
-		adType: 'ads',
-		currentPage: page.value,
+		type: 'ads',
+		page: page.value,
 		pageSize: 20
 	}).then((res) => {
-		console.log(res);
+		console.log(res,'resres');
+		
 		bannerlist.value = res.data.records;
 		total.value = res.data.total;
-	});
+	})
+	.catch(err => {
+		console.log(err,'err');
+		
+	})
 };
 const lower = () => {
 	if (total.value > bannerlist.length) {
@@ -87,6 +88,7 @@ const handleOpenPage = (url) => {
 
 // 倒计时结束跳转页面
 const countDownFinsh = () => {
+	return
 	if (isFirst.value === false) {
 		uni.switchTab({
 			// #ifdef APP-PLUS
