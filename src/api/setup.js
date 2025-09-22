@@ -1,11 +1,12 @@
 import {
 	getRequest,
 	postRequest,
-	putRequest
+	putRequest,
+	patchRequest
 } from '@/utils/http.js'
 
 export const updataUserinfo = (id,params) => {
-	return putRequest('/users/'+id, params)
+	return patchRequest('/auth/users/'+id + '/', params)
 }
 
 // 登录

@@ -63,10 +63,10 @@ function request(url, params, other) {
 				clearTimeout(httpConfig.timer);
 				httpConfig.timer = null;
 	
-				if (data.statusCode == 200) {
+				if (data.statusCode == 200 || data.statusCode == 201) {
 					if (!(data.data.code == 403 && !expired)) {
 						expired = false;
-						if (data.data.code == 200) resolve(data.data);
+						if (data.data.code == 200 || data.data.code == 201) resolve(data.data);
 						else {
 							if (httpConfig.errorOutput) {
 								uni.showToast({
@@ -128,9 +128,16 @@ function putRequest(url, params = {}, other = {}) {
 		method: 'PUT'
 	})
 }
+function patchRequest(url, params = {}, other = {}) {
+	return request(url, params, {
+		...other,
+		method: 'PUT'
+	})
+}
 export {
 	request,
 	getRequest,
 	postRequest,
-	putRequest
+	putRequest,
+	patchRequest
 }
