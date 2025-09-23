@@ -5,16 +5,16 @@
 				<view class="user-line">
 					<view class="user">
 						<view class="" @click.stop="uni.navigateTo({ url: '/pages/my/person' })">
-							<up-avatar :src="item.userAvatar"></up-avatar>
+							<up-avatar :src="item.user_avatar"></up-avatar>
 						</view>
 						<view class="info">
-							<view class="name">{{ item.userNickname || '用户名' }}</view>
-							<view class="nums">{{ item.createTime }}</view>
+							<view class="name">{{ item.user_nickname || '用户名' }}</view>
+							<view class="nums">{{ item.create_time }}</view>
 						</view>
 					</view>
 					<view class="now" @click="give(item)">
 						<up-icon :name="item.flag ? 'heart-fill' : 'heart'" :color="item.flag ? '#ff0000' : '#D9D9D9'" size="22"></up-icon>
-						<text style="margin-left: 10rpx">{{ item.likeCount }}</text>
+						<text style="margin-left: 10rpx">{{ item.like_count }}</text>
 					</view>
 				</view>
 
@@ -48,7 +48,7 @@ const reload = () => {
 	getCommentList(params).then((res) => {
 		console.log(res.data);
 		if (res.code === 200) {
-			list.value = res.data.results;
+			list.value = res.data;
 		}
 	});
 };

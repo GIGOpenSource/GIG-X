@@ -123,15 +123,16 @@ const queryList = () => {
 
 const publish = async () => {
 	const params = {
-		targetId: id.value,
+		target_id: id.value,
 		content: commenValue.value,
-		commentType: 'LONGVIDEO',
-		userId: uni.getStorageSync('user_info').id
+		type: 'long',
+		parent_comment_id:0,
 	};
 	const res = await addComment(params);
 	console.log('res', res);
-	if (res.code === 200) {
+	if (res.code === 201) {
 		commentRef.value.reload();
+		commenValue.value = ''
 	}
 };
 </script>

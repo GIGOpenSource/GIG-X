@@ -23,3 +23,8 @@ export const contentList= (params) => {
 export const contentDetail= (id) => {
 	return getRequest('/contents/' + id)
 }
+
+// 猜你喜欢
+export const guessLike= (params) => {
+	return getRequest('/contents/guesslike/', params)
+}
