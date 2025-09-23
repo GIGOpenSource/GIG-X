@@ -41,14 +41,14 @@ const list = ref([]);
 
 const reload = () => {
 	const params = {
-		targetId: props.id,
+		target_id: props.id,
 		currentPage: 1,
 		pageSize: 9999
 	};
 	getCommentList(params).then((res) => {
 		console.log(res.data);
 		if (res.code === 200) {
-			list.value = res.data.records;
+			list.value = res.data.results;
 		}
 	});
 };

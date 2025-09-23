@@ -95,15 +95,16 @@ const handleClickPiece = (item) => {
 	}
 	item.isActive = !item.isActive;
 	item.isActive ? item.num++ : item.num--;
+	// todo ：点赞，收藏接口
 };
 
 watch(
 	() => props.detail,
 	(val) => {
-		pieceList.value[0].num = props.detail.likeCount;
-		pieceList.value[1].num = props.detail.scoreCount;
-		pieceList.value[2].num = props.detail.favoriteCount;
-		pieceList.value[3].num = props.detail.shareCount;
+		pieceList.value[0].num = props.detail.like_count;
+		pieceList.value[1].num = props.detail.score_count;
+		pieceList.value[2].num = props.detail.favorite_count;
+		pieceList.value[3].num = props.detail.share_count;
 	}
 );
 </script>

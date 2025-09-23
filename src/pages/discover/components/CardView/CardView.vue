@@ -1,14 +1,14 @@
 <template>
 	<view class="card-view">
-		<up-image :src="item.icon_url" :lazy-load="true" width="100%" height="220rpx" radius="20rpx 20rpx 0 0 " mode="aspectFill"></up-image>
+		<up-image :src="item.cover_url" :lazy-load="true" width="100%" height="220rpx" radius="20rpx 20rpx 0 0 " mode="aspectFill"></up-image>
 
 		<view class="desc">
 			<view class="title">{{ item.title }}</view>
 			<view class="auther">
 				<view class="" @click.stop="uni.navigateTo({ url: '/pages/my/person' })">
-					<up-avatar :src="item.authorAvatar" size="25"></up-avatar>
+					<up-avatar :src="item.author_avatar" size="25"></up-avatar>
 				</view>
-				<view class="name">{{ item.authorNickname }}</view>
+				<view class="name">{{ item.author_nickname }}</view>
 			</view>
 		</view>
 	</view>

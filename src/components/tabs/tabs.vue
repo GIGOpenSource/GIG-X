@@ -38,7 +38,7 @@
 	])
 
 	const handleClick = (index) => {
-		console.log('index', index);
+		// console.log('index', index);
 		emit('change', index)
 	}
 </script>

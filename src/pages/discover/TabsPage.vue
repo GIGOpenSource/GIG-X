@@ -1,5 +1,5 @@
 <template>
-	<z-paging ref="pagingRef" v-model="dataList" @query="queryList">
+	<z-paging ref="pagingRef" v-model="dataList" @query="queryList" >
 		<view class="content">
 			<!-- <BannerSwiper /> -->
 
@@ -13,13 +13,21 @@
 <script setup>
 import { ref, watch } from 'vue';
 
-const props = defineProps(['tabIndex', 'current']);
+const props = defineProps({
+	current: {
+		type: String,
+		default: 'recommend'
+	},
+	tabsIndex: {
+		type: Number,
+		default: 0
+	}
+});
 
 import BannerSwiper from './components/BannerSwiper/BannerSwiper.vue';
 import CardView from './components/CardView/CardView.vue';
 
-import { discoverList } from '@/api/content.js';
-import { categoryList } from '@/api/common.js';
+import { contentList } from '@/api/common.js';
 
 const pagingRef = ref();
 const dataList = ref([]);
@@ -27,17 +35,20 @@ const dataList = ref([]);
 watch(
 	() => props.current,
 	(val, oldVal) => {
+		console.log("🚀 ~ val:", val)
 		pagingRef.value.reload();
 	}
 );
 
 const queryList = (pageNo, pageSize) => {
 	const params = {
+		type:"long",
+		tabs: props.current,
 		currentPage: pageNo,
 		pageSize
 	};
-	categoryList(params).then((res) => {
-		console.log('props.current', res);
+	contentList(params).then((res) => {
+		console.log('resresres', res);
 		if (res.code === 200) {
 			pagingRef.value.complete(res.data.results);
 		}

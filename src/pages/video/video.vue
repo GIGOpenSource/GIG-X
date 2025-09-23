@@ -66,9 +66,9 @@ import Introduction from './components/Introduction.vue';
 import CommentPage from './components/CommentPage.vue';
 import forwardMenu from '@/components/tsp-video/forward-menu/forward-menu.vue';
 
-import { contentDetail } from '@/api/content.js';
+// import { contentDetail } from '@/api/content.js';
 import { addComment } from '@/api/community.js';
-import { categoryDetail } from '@/api/common.js';
+import { contentDetail } from '@/api/common';
 
 const commentRef = ref();
 
@@ -113,7 +113,7 @@ const handlClickBack = (e) => {
 };
 
 const queryList = () => {
-	categoryDetail(id.value).then((res) => {
+	contentDetail(id.value).then((res) => {
 		console.log('res', res);
 		if (res.code === 200) {
 			detail.value = res.data;

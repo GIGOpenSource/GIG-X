@@ -1,5 +1,5 @@
 <template>
-	<z-paging-swiper ref="paging" :loading-more-enabled="false">
+	<z-paging-swiper ref="paging" :loading-more-enabled="false" :swiper-style="{ bottom: '0 !important'}">
 		<template #top>
 			<!-- 导航栏 -->
 			<up-navbar bgColor="transparent" placeholder :autoBack="false" :fixed="false" @rightClick="rightClick">
@@ -35,9 +35,9 @@
 			/> -->
 		</template>
 
-		<swiper :current="currentCategory" style="height: 100%" @animationfinish="swiperAnimationfinish">
-			<swiper-item v-for="(item, index) in list.length">
-				<tabs-page :current="currentCategory" :tabsIndex="index" v-if="currentCategory === index"></tabs-page>
+		<swiper :current="currentTab" style="height: 100%" @animationfinish="swiperAnimationfinish">
+			<swiper-item v-for="(item, index) in list">
+				<tabs-page :current="currentTab" :tabsIndex="index" v-if="currentTab == item.tab"></tabs-page>
 			</swiper-item>
 		</swiper>
 	</z-paging-swiper>
@@ -65,14 +65,19 @@ onMounted(() => {
 
 const list = ref([
 	{
-		name: '发现'
+		name: '发现',
+		tab:'recommend'
 	},
 	{
-		name: '精选'
+		name: '精选',
+		tab: 'selected'
 	}
 ]);
 
 const currentCategory = ref(0);
+// 当前tab
+const currentTab  = ref('recommend');
+
 const categoryList = ref([
 	{
 		name: '关注'
@@ -116,8 +121,8 @@ const handleClickCategory = (tab) => {
 	currentCategory.value = tab.index;
 };
 const onTabChange = (tab) => {
-	console.log(tab);
-	currentCategory.value = tab.index;
+	// currentCategory.value = tab.index;
+	currentTab.value = tab.tab
 };
 
 // 定义方法

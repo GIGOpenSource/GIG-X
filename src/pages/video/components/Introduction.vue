@@ -5,11 +5,11 @@
 		<view class="user-line">
 			<view class="user">
 				<view class="" @click.stop="uni.navigateTo({ url: '/pages/my/person' })">
-					<up-avatar :src="detail.authorAvatar"></up-avatar>
+					<up-avatar :src="detail.author_avatar"></up-avatar>
 				</view>
 				<view class="info">
-					<view class="name">{{ detail.authorNickname }}</view>
-					<view class="nums">{{ detail.favoriteCount }}粉丝</view>
+					<view class="name">{{ detail.author_nickname }}</view>
+					<view class="nums">{{ detail.favorite_count }}粉丝</view>
 				</view>
 			</view>
 			<!-- <view class="now">2355人正在看</view> -->

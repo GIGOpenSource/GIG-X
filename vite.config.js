@@ -10,7 +10,7 @@ export default defineConfig({
     VitePWA({
 			registerType: 'autoUpdate',
       devOptions:{  // 想在开发环境看效果就打开
-        enabled: true
+        enabled: false
       },
 			workbox: {
 				globPatterns: ['**/*.{js,css,html,ico,png,svg}']

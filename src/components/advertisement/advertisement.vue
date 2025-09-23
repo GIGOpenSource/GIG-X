@@ -4,8 +4,8 @@
 			<up-image :src="item.imageUrl" width="170rpx" height="100rpx" radius="10rpx"></up-image>
 
 			<view class="desc">
-				<view class="name">{{ item.adTitle }}</view>
-				<view class="nums">{{ item.adDescription }}</view>
+				<view class="name">{{ item.title }}</view>
+				<view class="nums">{{ item.description }}</view>
 				<!-- <view class="nums">累计下载24.3W</view> -->
 			</view>
 		</view>
