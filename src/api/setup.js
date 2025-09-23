@@ -24,14 +24,8 @@ export const followCheck= (params) => {
 }
 
 //动态列表
-export const dynamicsList = (id,params) => {
-	return getRequest('/social/dynamics/user/'+id,params)
-}
-
-// 视频列表
-export const getVideoList = (id,params)=> {
-	
-	return getRequest('/users/'+id + '/contents', params);
+export const dynamicsList = (params) => {
+	return getRequest('/social/dynamic/',params)
 }
 
 //互动列表

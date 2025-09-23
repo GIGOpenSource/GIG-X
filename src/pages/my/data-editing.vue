@@ -42,7 +42,7 @@
 	const form = reactive([{
 		name: '昵称',
 		type: 'input',
-		key: userinfo.nickname
+		key: userinfo.user_nickname
 	}, {
 		name: 'ID',
 		type: 'input',
@@ -50,7 +50,7 @@
 	}, {
 		name: '签名',
 		type: 'textera',
-		key: userinfo.bio || ''
+		key: userinfo.user_bio || ''
 	}])
 	const uploadImage = () => {
 		uni.chooseImage({
@@ -63,7 +63,7 @@
 	};
 	const save = () => {
 		const params = form.reduce((acc, item, idx) => {
-			const map = ['nickname', 'id', 'bio']
+			const map = ['user_nickname', 'id', 'user_bio']
 			acc[map[idx]] = item.key
 			return acc
 		}, {})

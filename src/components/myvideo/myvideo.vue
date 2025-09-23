@@ -8,13 +8,13 @@
 		<view class="con">
 			<view class="list" v-for="(item,index) in list" :key="index"
 				@click="uni.navigateTo({url:'/pages/video/video?id='+item.id})">
-				<image :src="item.coverUrl" mode="widthFix"></image>
+				<image :src="item.images[0]" mode="widthFix"></image>
 				<view class="play">
 					<text>播放：{{item.viewCount}}</text>
 					<!-- <text>01:01:01</text>   -->
 				</view>
 				<view class="title">{{item.title}}</view>
-				<view class="time">{{item.createTime}}</view>
+				<view class="time">{{item.create_time}}</view>
 			</view>
 		</view>
 		<up-empty mode="data" v-if="!list.length"></up-empty>
@@ -27,7 +27,7 @@
 		watch
 	} from 'vue'
 	import { 
-		getVideoList
+		dynamicsList
 	} from '@/api/setup.js'
 	const current = ref(0)
 	const page = ref(1)
@@ -42,13 +42,15 @@
 		}
 	});
 	const getlist = () => {
-		getVideoList(props.isfollow?uni.getStorageSync('otherId'):uni.getStorageSync('user_info').id,{
-			// contentType: current ? 'SHORTVIDEO' : 'LONGVIDEO',
-			authorId: props.isfollow?uni.getStorageSync('otherId'):uni.getStorageSync('user_info').id, //作者id
+
+		let params = {
 			currentPage: page.value,
-			pageSize: 20
-		}).then(res => {
-			list.value = res.data.records
+			pageSize: 20,
+			user_id:props.isfollow?uni.getStorageSync('otherId'):uni.getStorageSync('user_info').user_id,
+			type:'video'
+		}
+		dynamicsList(params).then(res => {
+			list.value = res.data.results
 			total.value = res.data.total
 		})
 	}

@@ -5,11 +5,11 @@
 			<up-avatar :src="personInfo.avatar" size="60"></up-avatar>
 			<view class="right">
 				<view class="name">
-					<text>{{personInfo.nickname}}</text>
+					<text>{{personInfo.user_nickname}}</text>
 					<text class="vip">VIP</text>
 				</view>
 				<view class="phone">{{personInfo.phone}}</view>
-				<view class="phone">{{personInfo.bio || '暂无'}}</view>
+				<view class="phone">{{personInfo.user_bio || '暂无'}}</view>
 			</view>
 			<view class="" v-if="isFollow && uni.getStorageSync('user_info').id !== userId" @click="follow">{{status?'取消关注':'关注'}}
 			</view>
@@ -80,6 +80,8 @@
 			})
 	}
 	onShow(() => {
+		console.log(props,'paoajdb');
+		
 		store.getPersonInfo({
 			id: props.userId
 		})

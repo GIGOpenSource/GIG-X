@@ -4,15 +4,15 @@
 			@click="uni.navigateTo({ url: '/pages/community/details?id='+item.id})">
 			<view class="top">
 				<view class="left">
-					<view class="" @click.stop="topath(item.userId)"><up-avatar :src="item.userAvatar"
+					<view class="" @click.stop="topath(item.user_id)"><up-avatar :src="item.user_avatar"
 							size="40"></up-avatar></view>
 					<view class="message">
-						<text>{{item.userNickname || item.followeeNickname||  '用户已注销'}}</text>
-						<text class="time">{{item.createTime}}</text>
+						<text>{{item.user_nickname || item.followeeNickname||  '用户已注销'}}</text>
+						<text class="time">{{item.create_time}}</text>
 					</view>
 				</view>
 				<view class="follow">
-					<text v-if="isfollow && !item.isFollowed && item.userId !== userinfo.id"
+					<text v-if="isfollow && !item.isFollowed && item.user_id !== userinfo.id"
 						@click.stop="follow(index)">关注</text>
 					<view class="" @click.stop="oparea">
 						<up-icon name="more-dot-fill" color="#ffffff" size="28" v-if="more"></up-icon>
@@ -21,29 +21,29 @@
 			</view>
 			<view class="title">{{item.title}}</view>
 			<view class="images" v-if="item.images">
-				<image v-for="(image,indx) in item.images" :key="indx" :src="image" mode="" @click="previewImage">
+				<image v-for="(image,indx) in item.images" :key="indx" :src="image" mode="" @click="previewImage(item.images)">
 				</image>
 			</view>
 			<view class="distance" v-if="tabs == 3">距离你{{ (Math.random() * 50).toFixed(2) }}km</view>
 			<view class="bottom">
 				<view class="" @click.stop="share(index,item.id)">
 					<up-icon name="share-square" color="#ffffff" size="26"></up-icon>
-					<text>{{ item.shareCount }}</text>
+					<text>{{ item.share_count }}</text>
 				</view>
 				<view class="right">
 					<view class="" @click.stop="give(index,item.id)">
 						<up-icon :name="item.isLiked ? 'thumb-up-fill' : 'thumb-up'"
 							:color="item.isLiked ? '#ff0000' : '#ffffff'" size="26"></up-icon>
-						<text>{{ item.likeCount }}</text>
+						<text>{{ item.like_count }}</text>
 					</view>
 					<view class="">
 						<up-icon name="order" color="#ffffff" size="26"></up-icon>
-						<text>{{ item.commentCount }}</text>
+						<text>{{ item.comment_count }}</text>
 					</view>
 				</view>
 			</view>
 		</view>
-
+       <up-empty mode="data" v-if="!list.length"></up-empty>
 		<operation :show="show" @update:show="(val) => (show = val)" />
 	</scroll-view>
 </template>
@@ -171,9 +171,9 @@
 		show.value = true;
 	};
 	//预览图片
-	const previewImage = () => {
+	const previewImage = (images) => {
 		uni.previewImage({
-			urls: ['/static/tsp-icon/touxiang.jpg']
+			urls: images
 		});
 	};
 	const topath = (id) => {
@@ -183,24 +183,30 @@
 		});
 	};
 	const getlist = async (newVal) => {
-		console.log(newVal, 'neijen');
+		console.log(newVal, 'neijen',userinfo);
 		let params = {
 			currentPage: page.value,
 			pageSize: 20,
-			userId: userinfo.id
+			user_id: userinfo.id,
+			type:'dynamic'
 		}
 		let res = {}
-		if (newVal == 0 || newVal == 3 || newVal == 2) {
-			delete params.userId
+		if(newVal == 0){
+           res = await communityList(params)
+		    list.value = [...list.value, ...res.data.results]
+			total.value = res.data.pagination.total
+		   
+		}else if (newVal == 3 || newVal == 2) {
+			delete params.user_id
 			params.currentUserId = userinfo.id
 			res = await getLatestList(params)
 			list.value = [...list.value, ...res.data.records]
-			total.value = res.data.total
+			total.value = res.data.pagination.total
 		} else if (newVal == 1) {
 			// res = await getFollwingList(params)
 			res = await followList({userId: userinfo.id})
 			list.value = [...list.value, ...res.data.records]
-			total.value = res.data.total
+			total.value = res.data.pagination.total
 		} else if (newVal == 4) {
 			res = await getDetails({
 				dynamic_id: props.detailId,
@@ -209,14 +215,9 @@
 			})
 			list.value = [res.data]
 		} else if (newVal == 6) {
-			res = await dynamicsList(props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync(
-				'user_info').id, {
-				currentPage: 1,
-				pageSize: 20,
-				userId: userinfo.id
-			})
-			list.value = [...list.value, ...res.data.records]
-			total.value = res.data.total
+			res = await dynamicsList(params)
+			list.value = [...list.value, ...res.data.results]
+			total.value = res.data.pagination.total
 		}
 	}
 

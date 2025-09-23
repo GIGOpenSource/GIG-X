@@ -54,6 +54,8 @@
 	const tarbar = ref(['动态', '视频', '互动'])
 	const current = ref(0)
 	const clicks = (index) => {
+		console.log(index,'111');
+		
 		current.value = index
 	}
 	const onTabChange = (tab) => {

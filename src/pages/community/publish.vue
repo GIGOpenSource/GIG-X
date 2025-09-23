@@ -5,7 +5,7 @@
 				<up-icon name="arrow-left" color="#ffffff" size="20"></up-icon>
 			</template>
 			<template #center>
-				资料编辑
+				发布动态
 			</template>
 			<template #right>
 				<view @click="pubilsh">发布</view>
@@ -17,8 +17,8 @@
 				<up-upload :fileList="fileList1" @afterRead="afterRead" @delete="deletePic" name="1" multiple
 					:maxCount="10" uploadIcon="plus"></up-upload>
 			</view>
-			<view v-else class="back">
-				<input type="text" :placeholder="item.name" @click="choose(index,item.key)"
+			<view v-else class="back" @click="choose(index,item.key)">
+				<input type="text"  :placeholder="item.name" 
 					:disabled="index == 0 || index == 4" v-model="params[item.key]" />
 				<up-icon v-if="index == 0 || index == 4" name="arrow-right" color="#ffffff" size="20"></up-icon>
 			</view>
@@ -38,7 +38,7 @@
 	} from '@/api/community.js'
 	const form = reactive([{
 		name: '选择发布类型',
-		key: 'dynamicType'
+		key: 'type'
 	}, {
 		name: '输入发布标题',
 		key: 'title'
@@ -48,7 +48,7 @@
 	}, {
 		name: '图片',
 		key: 'images',
-		images: ['https://example.com/image1.jpg', 'https://example.com/image1.jpg']
+		images: ['https://fpoimg.com/375x580', 'https://fpoimg.com/375x580']
 	}, {
 		name: '是否免费',
 		key: 'isFree'
@@ -57,10 +57,10 @@
 		key: 'price'
 	}])
 	const params = reactive({
-		dynamicType: '',
+		type: '',
 		title: '',
 		content: '',
-		images: '',
+		images: ['https://fpoimg.com/375x580', 'https://fpoimg.com/375x580'],
 		isFree: '',
 		price: ''
 	})
@@ -132,13 +132,13 @@
 		show.value = false
 	}
 	const pubilsh = () => {
-		params.userId = uni.getStorageSync('user_info').id
-		if (!params.dynamicType) return toast('请选择发布类型')
+		params.user_id = uni.getStorageSync('user_info').user_id
+		if (!params.type) return toast('请选择发布类型')
 		if (!params.title) return toast('请输入发布标题')
 		if (!params.title) return toast('请输入发布内容')
 		if (params.isFree == '') return toast('请选择是否免费')
 		params.isFree = params.isFree == '是' ? true : false
-		params.dynamicType = params.dynamicType == '视频' ? 'video' : 'text'
+		params.type = params.type == '视频' ? 'video' : 'dynamic'
 		createCommunity(params)
 			.then(res => {
 				uni.showToast({
@@ -166,7 +166,6 @@
 		border-radius: 20rpx;
 		width: 89%;
 		display: flex;
-
 		input {
 			width: 95%;
 		}

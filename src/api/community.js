@@ -5,12 +5,12 @@ import {
 
 //创建社区内容
 export const createCommunity = (params) => {
-	return postRequest('/social/dynamics/create', params)
+	return postRequest('/social/dynamic/', params)
 }
 
 //获取推荐社区列表
 export const communityList = (params) => {
-	return postRequest('/social/dynamics/query', params)
+	return getRequest('/social/dynamic/', params)
 }
 //关注
 export const getFollwingList = (params) => {
@@ -22,7 +22,7 @@ export const getLatestList = (params) => {
 }
 //详情
 export const getDetails = (params) => {
-	return getRequest('/social/dynamics/detail', params)
+	return getRequest(`/social/dynamic/${params.dynamic_id}/`)
 }
 
 
@@ -54,7 +54,7 @@ export const getCommentList = (params) => {
 
 //关注
 export const addFollow = (params) => {
-	return postRequest('/follow/create', params)
+	return postRequest('/follows/', params)
 }
 
 //取消关注
