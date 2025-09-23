@@ -25,17 +25,11 @@ export const getDetails = (params) => {
 	return getRequest(`/social/dynamic/${params.dynamic_id}/`)
 }
 
-
-
-//点赞
-export const addLike = (params) => {
-	return postRequest('/social/dynamics/like/increase', params)
+//点赞切换
+export const liketoggle = (params) => {
+	return postRequest('/likes/toggle/', params)
 }
 
-//取消点赞
-export const likeDelete =  params => {
-    return postRequest('/social/dynamics/like/decrease', params);
-}
 
 //分享
 export const addShare = (params) => {
@@ -44,12 +38,12 @@ export const addShare = (params) => {
 
 //创建评论
 export const addComment = (params) => {
-	return postRequest('/comments/create', params)
+	return postRequest('/comments/', params)
 }
 
 //获取评论
 export const getCommentList = (params) => {
-	return getRequest('/comments/list', params)
+	return getRequest('/comments/', params)
 }
 
 //关注

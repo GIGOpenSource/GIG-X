@@ -53,8 +53,7 @@
 	import {
 		addFollow,
 		cancelFollow,
-		likeDelete,
-		addLike
+		liketoggle
 	} from '@/api/community.js'
 	import {
 		allList
@@ -70,11 +69,11 @@
 			id: list.value[index].targetId
 		}
 		if (list.value[index].isLike) {
-			likeDelete(params).then(res => {
+			liketoggle(params).then(res => {
 				list.value[index].likeCount -= 1;
 			})
 		} else {
-			addLike(params).then(res => {
+			liketoggle(params).then(res => {
 				list.value[index].likeCount += 1;
 			})
 		}

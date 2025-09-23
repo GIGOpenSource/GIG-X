@@ -9,8 +9,8 @@
 				 </view>
 			</view>
              <view class="right">
-				  <view class="">{{item.updateTime.split(' ')[0]}}</view>
-				  <view class="">{{item.updateTime.split(' ')[1]}}</view>
+				  <view class="">{{item.update_time.split(' ')[0]}}</view>
+				  <view class="">{{item.update_time.split(' ')[1]}}</view>
 			 </view>
 		</view>
 	</view>
@@ -28,7 +28,7 @@ const getMessage = () => {
 		 currentPage:1,
 		 pageSize:20
 	 }).then(res => {
-		 list.value = res.data.records
+		 list.value = res.data
 	 })
 }
 onMounted(() => {

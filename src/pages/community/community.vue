@@ -17,7 +17,7 @@
 		</template>
 		<swiper :current="current" class="content">
 			<swiper-item v-for="(item, index) in 4" :key="index">
-				<active :more="true" :tabs="current" />
+				<active :more="true" :tabs="current" :isfollow="false"/>
 			</swiper-item>
 		</swiper>
 

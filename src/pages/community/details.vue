@@ -59,15 +59,13 @@
 	const publish = () => {
 		if(!con.value) return uni.showToast({title:'内容不能为空',icon:'none'})
 		addComment({
-			targetId:detailId.value,
-			userId:userinfo.id,
-			userNickname:userinfo.nickname,
-			userAvatar:userinfo.avatar,
-			commentType:'COMMUNITY',
+	        type:'dynamic',
+			target_id:detailId.value,
+			parent_comment_id:0,
 			content: con.value,	
 		}).then(res => {
 			commentList.value.getlist()
-			activelist .value.getlist(4)
+			activelist.value.getlist(4)
 			con.value = ''
 		})
 	

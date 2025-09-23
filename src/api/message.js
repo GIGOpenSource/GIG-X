@@ -4,11 +4,11 @@ import {
 } from '@/utils/http.js'
 //消息列表查询
 export const getList = (params) => {
-	return getRequest('/messages/list', params)
+	return getRequest('/chat/message/', params)
 }
 //创建消息
 export const addlist = (params) => {
-	return postRequest('/messages/write', params)
+	return postRequest('/notifications/', params)
 }
 
 //获取会话详情

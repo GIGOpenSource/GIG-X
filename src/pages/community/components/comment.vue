@@ -90,12 +90,12 @@
 		getCommentList({
 			    userId: userinfo.id,
 				targetId: props.detailId,
-				commentType: 'COMMUNITY',
+				commentType: 'dynamic',
 				currentPage: page.value,
 				pageSize: 20
 			})
 			.then(res => {
-				list.value = res.data.records
+				list.value = res.data
 				total.value = res.data.total
 			})
 	}

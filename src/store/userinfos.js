@@ -17,8 +17,6 @@ export const userinfoStore = defineStore('userinfos', {
 			this.userinfo = res.data
 		},
 		async getPersonInfo(params) {
-			console.log(params,'spfkfjd');
-			
 			const res = await getUserinfo(params)
 			this.personInfo = res.data
 		},

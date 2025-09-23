@@ -25,7 +25,7 @@
 		<view style="height: 80rpx;" v-if="isBack"></view>
 	</z-paging>
 	
-	<view class="private-message" v-if="isBack" @click="toPath('/pages/my/dialogue')">私信</view>
+	<view class="private-message" v-if="isBack && uni.getStorageSync('user_info').user_id !== uni.getStorageSync('otherId')" @click="toPath('/pages/my/dialogue')">私信</view>
 </template>
 
 <script setup>
