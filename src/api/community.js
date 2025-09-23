@@ -12,14 +12,12 @@ export const createCommunity = (params) => {
 export const communityList = (params) => {
 	return getRequest('/social/dynamic/', params)
 }
-//关注
-export const getFollwingList = (params) => {
-	return getRequest('/social/dynamics/following', params)
+
+//关注列表 
+export const followList = (params) => {
+	return getRequest('/social/dynamic_follow/', params)
 }
-//最新
-export const getLatestList = (params) => {
-	return getRequest('/social/dynamics/latest', params)
-}
+
 //详情
 export const getDetails = (params) => {
 	return getRequest(`/social/dynamic/${params.dynamic_id}/`)

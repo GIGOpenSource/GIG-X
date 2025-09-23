@@ -10,7 +10,7 @@
 				@click="uni.navigateTo({url:'/pages/video/video?id='+item.id})">
 				<image :src="item.images[0]" mode="widthFix"></image>
 				<view class="play">
-					<text>播放：{{item.viewCount}}</text>
+					<text>播放：{{item.view_count}}</text>
 					<!-- <text>01:01:01</text>   -->
 				</view>
 				<view class="title">{{item.title}}</view>

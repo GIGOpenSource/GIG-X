@@ -41,7 +41,8 @@
 			"path": "pages/community/community",
 			"style": {
 				"navigationBarTitleText": "社区",
-				"enablePullDownRefresh": true
+				"enablePullDownRefresh": true,
+				"backgroundColor": "#000000"
 			}
 		}, {
 			"path": "pages/community/details",

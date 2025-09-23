@@ -59,20 +59,12 @@ import {
 } from 'vue';
 import {
 	communityList,
-	getFollwingList,
-	getLatestList,
 	getDetails,
 	liketoggle,
 	addShare,
-	followtoggle
+	followtoggle,
+	followList
 } from '@/api/community.js'
-import {
-	onShow
-} from '@dcloudio/uni-app'
-import {
-	dynamicsList,
-	login
-} from '@/api/setup.js'
 import {
 	userinfoStore
 } from '@/store/userinfos'
@@ -116,9 +108,9 @@ const props = defineProps({
 });
 const list = ref([]);
 const todetails = (id) => {
-	if(props.isList){
-      uni.navigateTo({ url: '/pages/community/details?id=' + id })
-	} 
+	if (props.isList) {
+		uni.navigateTo({ url: '/pages/community/details?id=' + id })
+	}
 }
 //切换点赞状态
 const give = (index, id) => {
@@ -167,6 +159,8 @@ const topath = (id) => {
 	});
 };
 const getlist = async (newVal) => {
+	console.log(newVal, 'newVal');
+
 	let params = {
 		currentPage: page.value,
 		pageSize: 20,
@@ -182,11 +176,31 @@ const getlist = async (newVal) => {
 			currentUserId: userinfo.id
 		})
 		list.value = [res.data]
+	} else if (newVal == 1) {
+		res = await followList({
+			currentPage: page.value,
+			pageSize: 20,
+		})
+		list.value = [...list.value, ...res.data.results]
+		total.value = res.data.pagination.total
 	} else {
 		res = await communityList(params)
 		list.value = [...list.value, ...res.data.results]
 		total.value = res.data.pagination.total
 	}
+}
+
+// 重置数据
+const resetData = () => {
+	list.value = [];
+	page.value = 1;
+	total.value = 0;
+}
+
+// 刷新数据
+const refreshData = async () => {
+	resetData();
+	await getlist(props.tabs);
 }
 
 const lower = () => {
@@ -196,9 +210,6 @@ const lower = () => {
 	}
 
 }
-// onMounted(() => {
-// 	getlist(0)
-// })
 watch(() => props.tabs, (newVal) => {
 	list.value = []
 	getlist(newVal)
@@ -207,7 +218,9 @@ watch(() => props.tabs, (newVal) => {
 });
 //暴露
 defineExpose({
-	getlist
+	getlist,
+	resetData,
+	refreshData
 })
 </script>
 
