@@ -1,6 +1,6 @@
 <template>
 	<view class="card-view">
-		<up-image :src="item.coverUrl" :lazy-load="true" width="100%" height="220rpx" radius="20rpx 20rpx 0 0 " mode="aspectFill"></up-image>
+		<up-image :src="item.icon_url" :lazy-load="true" width="100%" height="220rpx" radius="20rpx 20rpx 0 0 " mode="aspectFill"></up-image>
 
 		<view class="desc">
 			<view class="title">{{ item.title }}</view>

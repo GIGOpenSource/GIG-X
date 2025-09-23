@@ -24,7 +24,7 @@ const ads = ref([]);
 
 onMounted(() => {
 	const params = {
-		adsType: 'app'
+		type: 'app'
 	};
 
 	getAdsList(params).then((res) => {

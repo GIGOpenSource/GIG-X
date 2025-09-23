@@ -25,11 +25,11 @@
 
 		<view class="content">
 			<view class="game-info">
-				<up-image :src="dataDetail.imageUrl" width="200rpx" height="200rpx" radius="30rpx"></up-image>
+				<up-image :src="dataDetail.image_url" width="200rpx" height="200rpx" radius="30rpx"></up-image>
 
 				<view class="info">
-					<view class="name">{{ dataDetail.adName }}</view>
-					<view class="des">{{ dataDetail.adDescription }}</view>
+					<view class="name">{{ dataDetail.name }}</view>
+					<view class="des">{{ dataDetail.description }}</view>
 				</view>
 			</view>
 
@@ -37,7 +37,7 @@
 				<view class="tit">游戏截图</view>
 				<scroll-view scroll-x="true" style="white-space: nowrap">
 					<view class="scroll-shoot">
-						<up-image :src="dataDetail.imageUrl" width="710rpx" height="320rpx" radius="30rpx" style="margin-right: 40rpx"></up-image>
+						<up-image :src="dataDetail.image_url" width="710rpx" height="320rpx" radius="30rpx" style="margin-right: 40rpx"></up-image>
 					</view>
 				</scroll-view>
 			</view>
@@ -45,7 +45,7 @@
 			<view class="long-des">
 				<view class="tit">游戏文案</view>
 				<view class="des">
-					{{ dataDetail.adDescription }}
+					{{ dataDetail.description }}
 				</view>
 			</view>
 		</view>
@@ -56,7 +56,7 @@
 import { ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
-import { gameDetail } from '@/api/public.js';
+import { adsDetail } from '@/api/public.js';
 
 const id = ref(0);
 const paging = ref(null);
@@ -69,7 +69,7 @@ onLoad((options) => {
 });
 
 const queryList = (pageNo, pageSize) => {
-	gameDetail(id.value).then((res) => {
+	adsDetail(id.value).then((res) => {
 		console.log('res', res);
 		if (res.code === 200) {
 			dataDetail.value = res.data;
@@ -79,7 +79,11 @@ const queryList = (pageNo, pageSize) => {
 
 const handleClickDown = () => {
 	// #ifdef APP-PLUS
-	plus.runtime.openURL(dataDetail.value.clickUrl);
+	plus.runtime.openURL(dataDetail.value.click_url);
+	// #endif
+
+	// #ifdef H5
+	window.open(dataDetail.value.clickUrl, '_blank');
 	// #endif
 };
 </script>

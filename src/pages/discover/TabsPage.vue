@@ -19,6 +19,7 @@ import BannerSwiper from './components/BannerSwiper/BannerSwiper.vue';
 import CardView from './components/CardView/CardView.vue';
 
 import { discoverList } from '@/api/content.js';
+import { categoryList } from '@/api/common.js';
 
 const pagingRef = ref();
 const dataList = ref([]);
@@ -32,15 +33,13 @@ watch(
 
 const queryList = (pageNo, pageSize) => {
 	const params = {
-		contentType: 'LONGVIDEO',
-		selectType: props.current == 0 ? 'F' : 'T',
 		currentPage: pageNo,
 		pageSize
 	};
-	discoverList(params).then((res) => {
+	categoryList(params).then((res) => {
 		console.log('props.current', res);
 		if (res.code === 200) {
-			pagingRef.value.complete(res.data.records);
+			pagingRef.value.complete(res.data.results);
 		}
 	});
 };

@@ -17,9 +17,9 @@ export const userInterestLabel = params => {
 	return getRequest('/user-interest-tags/list', params)
 }
 
-// 游戏详情
-export const gameDetail = (id, params) => {
-	return getRequest(`/game/detail/${id}`, params)
+// 广告（游戏）详情
+export const adsDetail = (id, params) => {
+	return getRequest(`/ad/ads/${id}`, params)
 }
 
 // 搜索
