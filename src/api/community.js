@@ -46,26 +46,15 @@ export const getCommentList = (params) => {
 	return getRequest('/comments/', params)
 }
 
-//关注
-export const addFollow = (params) => {
-	return postRequest('/follows/', params)
+
+
+//关注切换
+export const followtoggle = (params) => {
+	return postRequest('/follows/toggle/', params)
 }
 
-//取消关注
-export const cancelFollow = (params) => {
-	return postRequest('/follow/unfollow', params)
-}
 
-//评论点赞
-export const commentlike = (params) => {
-	return postRequest('/like/toggle', params)
-}
 
-//  获取关注列表
-export const followList = params =>{
-	console.log('params', params);
-	return getRequest(`/follow/following/${params.userId}`)
-}
 
 
 

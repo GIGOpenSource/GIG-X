@@ -5,20 +5,20 @@
 				全部评论（{{list.length }}）
 			</view>
 			<view class="tabs">
-				<text :class="current == 0 ? 'current':''" @click="current = 0">推荐</text>
+				<text :class="current == 0 ? 'current':''" @click="tabs(0)">推荐</text>
 				<text> / </text>
-				<text :class="current == 1 ? 'current':''" @click="current = 1">最新</text>
+				<text :class="current == 1 ? 'current':''" @click="tabs(1)">最新</text>
 			</view>
 		</view>
 		<view class="center" v-for="(item,index) in list" :key="index">
-			<view class="" @click.stop="uni.navigateTo({url:'/pages/my/person'})">
-				<up-avatar :src="item.userAvatar" size="40"></up-avatar>
+			<view class="" @click.stop="topath(item.user_id)">
+				<up-avatar :src="item.user_avatar" size="40"></up-avatar>
 			</view>
 			<view class="right">
 				<view class="r-top">
 					<view class="info">
 						<text class="name">{{item.userNickname}}</text>
-						<text class="time">{{item.createTime}}</text>
+						<text class="time">{{item.create_time}}</text>
 					</view>
 					<view class="give" @click.stop="give(index)">
 
@@ -44,7 +44,7 @@
 	} from 'vue'
 	import {
 		getCommentList,
-		commentlike
+		// commentlike
 	} from '@/api/community.js'
 	import {
 		userinfoStore
@@ -66,33 +66,38 @@
 	})
 	//点赞
 	const give = (index) => {
-		commentlike({
-			userId: userinfo.id,
-			likeType: "COMMENT",
-			targetId: list.value[index].id,
-			targetTitle: list.value[index].content,
-			targetAuthorId: list.value[index].userId,
-			userNickname: list.value[index].userNickname,
-			userAvatar: list.value[index].userAvatar
-		}).then(res => {
-			list.value[index].isLiked = !list.value[index].isLiked
-			if (list.value[index].isLiked) {
-				list.value[index].likeCount += 1
-			} else {
-				list.value[index].likeCount -= 1
-			}
-		})
+		// commentlike({
+		// 	userId: userinfo.id,
+		// 	likeType: "COMMENT",
+		// 	targetId: list.value[index].id,
+		// 	targetTitle: list.value[index].content,
+		// 	targetAuthorId: list.value[index].userId,
+		// 	userNickname: list.value[index].userNickname,
+		// 	userAvatar: list.value[index].userAvatar
+		// }).then(res => {
+		// 	list.value[index].isLiked = !list.value[index].isLiked
+		// 	if (list.value[index].isLiked) {
+		// 		list.value[index].likeCount += 1
+		// 	} else {
+		// 		list.value[index].likeCount -= 1
+		// 	}
+		// })
 	}
 	const commentCon = () => {
 		emits('onfocus')
 	}
+	const tabs = (num) => {
+		current.value = num
+		getlist()
+	}
 	const getlist = () => {
 		getCommentList({
-			    userId: userinfo.id,
-				targetId: props.detailId,
-				commentType: 'dynamic',
+		    	parent_comment_id:0,
+				target_id: props.detailId,
+				type: 'dynamic',
 				currentPage: page.value,
-				pageSize: 20
+				pageSize: 20,
+				tabs:current.value?'latest':'recommend'
 			})
 			.then(res => {
 				list.value = res.data
@@ -104,6 +109,10 @@
 			total.value++;
 			getlist()
 		}
+	}
+	const topath = (id) => {
+		uni.setStorageSync('otherId', id)
+		uni.navigateTo({url:'/pages/my/person'})
 	}
 	onMounted(() => {
 		getlist()

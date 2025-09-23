@@ -15,7 +15,7 @@
 		</up-navbar>
 		<!-- 作品 -->
 		<view class="content">
-			<active :isList="false" :more="false" :isPath="true" :tabs="4" :detailId="detailId" ref="activelist"/>
+			<active :isList="false" :more="false" :isPath="true" :tabs="4" :detailId="detailId" ref="activelist" :isfollow="false"/>
 		</view>
 		<!-- 评论 -->
 		<comment ref="commentList" @onfocus="onfocus" :detailId="detailId"  />

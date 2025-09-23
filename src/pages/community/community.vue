@@ -35,7 +35,7 @@
 import { ref, onMounted } from 'vue';
 import tabs from '@/components/tabs/tabs.vue';
 import SocialPost from './components/SocialPost.vue';
-import { onReachBottom } from '@dcloudio/uni-app';
+import { onPullDownRefresh } from '@dcloudio/uni-app';
 const current = ref(0);
 const dataList = ref([]);
 const page = ref(1);

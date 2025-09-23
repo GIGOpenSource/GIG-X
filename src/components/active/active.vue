@@ -1,7 +1,7 @@
 <template>
 	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 90vh">
 		<view v-for="(item, index) in isList ? list : list.slice(0, 1)" :key="index" class="con"
-			@click="uni.navigateTo({ url: '/pages/community/details?id=' + item.id })">
+			@click="todetails(item.id)">
 			<view class="top">
 				<view class="left">
 					<view class="" @click.stop="topath(item.user_id)"><up-avatar :src="item.user_avatar"
@@ -12,7 +12,8 @@
 					</view>
 				</view>
 				<view class="follow">
-					<text v-if="!isfollow && !item.is_follower && item.user_id !== userinfo.id"
+					<text
+						v-if="!isfollow && !item.is_follower && item.user_id !== uni.getStorageSync('user_info').user_id"
 						@click.stop="follow(index)">关注</text>
 					<view class="" @click.stop="oparea">
 						<up-icon name="more-dot-fill" color="#ffffff" size="28" v-if="more"></up-icon>
@@ -59,13 +60,11 @@ import {
 import {
 	communityList,
 	getFollwingList,
-	followList,
 	getLatestList,
 	getDetails,
 	liketoggle,
 	addShare,
-	addFollow,
-	cancelFollow
+	followtoggle
 } from '@/api/community.js'
 import {
 	onShow
@@ -116,6 +115,11 @@ const props = defineProps({
 	}
 });
 const list = ref([]);
+const todetails = (id) => {
+	if(props.isList){
+      uni.navigateTo({ url: '/pages/community/details?id=' + id })
+	} 
+}
 //切换点赞状态
 const give = (index, id) => {
 	let params = { target_id: id }
@@ -127,34 +131,17 @@ const give = (index, id) => {
 	liketoggle(params).then(res => {
 		list.value[index].is_liked = !list.value[index].is_liked
 	})
-	
+
 
 };
 //关注
 const follow = (index) => {
 	let params = {
-		followerId: userinfo.id,
-		followeeId: list.value[index].userId
+		followee_id: list.value[index].user_id
 	}
-	if (list.value[index].is_follower) {
-		cancelFollow(params).then(res => {
-			uni.showToast({
-				title: '取消关注',
-				icon: 'none'
-			});
-			getlist(props.tabs)
-
-		})
-	} else {
-		addFollow(params).then(res => {
-			list.value[index].is_follower = true
-			uni.showToast({
-				title: '关注成功',
-				icon: 'none'
-			});
-		})
-		getlist(props.tabs)
-	}
+	followtoggle(params).then(res => {
+		list.value[index].is_follower = !list.value[index].is_follower
+	})
 };
 const share = (index, id) => {
 	addShare({
@@ -180,39 +167,23 @@ const topath = (id) => {
 	});
 };
 const getlist = async (newVal) => {
-	console.log(newVal, 'neijen', userinfo);
 	let params = {
 		currentPage: page.value,
 		pageSize: 20,
-		user_id: props.isfollow ? uni.getStorageSync('otherId'): uni.getStorageSync('user_info').user_id,
-		type: 'dynamic'
+		user_id: props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id,
+		type: 'dynamic',
+		tabs: newVal == 0 || newVal == 3 ? 'recommend' : newVal == 1 ? 'follow' : 'latest'
 	}
 	let res = {}
-	if (newVal == 0) {
-		res = await communityList(params)
-		list.value = [...list.value, ...res.data.results]
-		total.value = res.data.pagination.total
-
-	} else if (newVal == 3 || newVal == 2) {
-		delete params.user_id
-		params.currentUserId = userinfo.id
-		res = await getLatestList(params)
-		list.value = [...list.value, ...res.data.records]
-		total.value = res.data.pagination.total
-	} else if (newVal == 1) {
-		// res = await getFollwingList(params)
-		res = await followList({ userId: userinfo.id })
-		list.value = [...list.value, ...res.data.records]
-		total.value = res.data.pagination.total
-	} else if (newVal == 4) {
+	if (newVal == 4) {
 		res = await getDetails({
 			dynamic_id: props.detailId,
 			userId: userinfo.id,
 			currentUserId: userinfo.id
 		})
 		list.value = [res.data]
-	} else if (newVal == 6) {
-		res = await dynamicsList(params)
+	} else {
+		res = await communityList(params)
 		list.value = [...list.value, ...res.data.results]
 		total.value = res.data.pagination.total
 	}
