@@ -62,10 +62,11 @@
 	const modelValue = ref(false) //是否显示弹窗
 	const save = () => {
 		addlist({
-			senderId: uni.getStorageSync('user_info').id,
-			receiverId: receiverId.value,
+			sender_id: uni.getStorageSync('user_info').user_id,
+			receiver_id: receiverId.value,
 			content:con.value
 		}).then(res => {
+			con.value = ''
 			getdetails()
 		})
 	}
@@ -73,12 +74,12 @@
 		show.value = true
 	}
 	const getdetails = () => {
-		details({
-			senderId: uni.getStorageSync('user_info').id,
-			receiverId: receiverId.value
-		}).then(res => {
-			list.value = res.data
-		})
+		// details({
+		// 	senderId: uni.getStorageSync('user_info').id,
+		// 	receiverId: receiverId.value
+		// }).then(res => {
+		// 	list.value = res.data
+		// })
 	}
 	onMounted(() => {
 		getdetails()
