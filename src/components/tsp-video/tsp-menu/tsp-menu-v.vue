@@ -8,14 +8,14 @@
 				</view>
 				<text class="footTitle-commodity-name text_one">商品商品商品商品商品商品商品商品商品商品商品商品商品</text>
 			</view> -->
-			<view><text class="foot-name">@卧槽无情</text></view>
+			<view><text class="foot-name">@{{ item.author }}</text></view>
 			<view style="width: 450rpx;position: relative;" v-if="item.desc">
 				<text class="foot-cont" :class="[(item.desc.length > 33 && !expandDesc) ?'text_two':'']">{{item.desc}}</text>
 				<text class="foot-expand" v-if="item.desc.length > 33" @click="expandDesc = !expandDesc">
 					{{expandDesc?'...收起':'展开'}}
 				</text>
 			</view>
-			<view><text class="foot-primary">卧槽无情的原声</text></view>
+			<!-- <view><text class="foot-primary">卧槽无情的原声</text></view> -->
 		</view>
 		<!-- 右侧操作栏 -->
 		<view class="menuBox">
@@ -35,14 +35,14 @@
 						<image src="/static/tsp-icon/taoxin.png" mode="" class="fabulous-image" v-else></image>
 						<view class="like-pellet" :class="[likeeffect?'like-pellet-active':'']"></view>
 					</view>
-					<view class="fabulous-num">{{vodCurIndex}}</view>
+					<view class="fabulous-num">{{item.likeCount || vodCurIndex}}</view>
 				</view>
 				<!-- 评论 -->
 				<view class="fabulous" style="margin-top: 30rpx;" @click="JumpBtn(2)">
 					<view class="fabulous-image">
 						<image src="/static/tsp-icon/pinlun.png" mode="" class="fabulous-image"></image>
 					</view>
-					<view class="fabulous-num">{{discussNum}}</view>
+					<view class="fabulous-num">{{item.commentCount ||  discussNum}}</view>
 				</view>
 				<!-- 收藏 -->
 				<view class="fabulous" :class="collectionMeans" style="margin-top: 30rpx;" @click="collectionBtn(index)">
@@ -51,7 +51,7 @@
 						<up-icon name="star-fill" color="#fff" size="45" class="fabulous-image" v-else></up-icon>
 						<view class="collection-pellet" :class="[collectionShow ?'collection-pellet-active':'']"></view>
 					</view>
-					<text class="fabulous-num" style="font-size: 26rpx;">20</text>
+					<text class="fabulous-num" style="font-size: 26rpx;">{{ item.favoriteCount }}</text>
 				</view>
 				<!-- 转发 -->
 				<view class="fabulous" style="margin-top: 30rpx;" @click="JumpBtn(3)">

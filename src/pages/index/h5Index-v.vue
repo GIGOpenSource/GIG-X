@@ -1,252 +1,303 @@
 <template>
-	<view class="pageBox">
-		<tw-videov ref="videoGroup" @lodData="loadingData" @refreshData="refreshData" :autoplay="autoplay" :nextPlay="nextPlay" :loopPlay="loopPlay"
-		:swId="swId" @doubleClick="doubleClick" @longpress="longpress" @swiperChange="swiperChange" :totalvod="totalvod" @removeAllData="removeAllData"></tw-videov>
-		<!-- <view class="automatic">
+  <view class="pageBox">
+    <tw-videov
+      ref="videoGroup"
+      @lodData="loadingData"
+      @refreshData="refreshData"
+      :autoplay="autoplay"
+      :nextPlay="nextPlay"
+      :loopPlay="loopPlay"
+      :swId="swId"
+      @doubleClick="doubleClick"
+      @longpress="longpress"
+      @swiperChange="swiperChange"
+      :totalvod="totalvod"
+      @removeAllData="removeAllData"
+    ></tw-videov>
+    <!-- <view class="automatic">
 			<view class="automatic-item" @click="openAutomatic">点击{{nextPlay?'关闭自动播放':'开启自动播放'}}</view>
 			<view class="automatic-item" @click="addVodData">点击在当前视频下标{{currIndex}}后插入视频</view>
 			<view class="automatic-item" @click="removeVodData">点击删除视频</view>
 			<view class="automatic-item" @click="specifyPlay(currIndex + 1)">点击指定第{{currIndex + 1}}个视频播放</view>
 		</view> -->
-	</view>
+  </view>
 </template>
 
 <script>
-	/* 
-	 * vue页面引用 H5、小程序引用示例
-	 */
-	import twVideov from '@/components/tsp-video/tsp-video-list/video-v.vue'
-	import { getVodData } from '@/static/js/vodData.js' //假数据
-	export default{
-		components:{
-			twVideov
-		},
-		props: {
-			/* 多个tab视频时需传入不同的类型id */
-			swId:{
-				type: String,
-				default:''
-			},
-			/* 当前tabsPage的下标 */
-			pageIndex:{
-				type: Number,
-				default:0
-			},
-			/* 当前tab栏下标 */
-			tabIndex:{
-				type: Number,
-				default:0
-			},
-			/* 当前tab栏数据 */
-			tabItem:{
-				type: Object,
-				default:()=>{}
-			},
-		},
-		data(){
-			return {
-				videoData: [],
-				autoplay:true,
-				nextPlay:false,
-				loopPlay:true,
-				tNum:0,
-				currIndex:0,
-				totalvod:0, //视频总数量，有值才能滑动加载到最后一个视频并禁止循环滑动（仅H5、小程序支持）
-			}
-		},
-		created() {
-			this.videoData = getVodData()
-			this.initVod()
-		},
-		onShow() {
-			/* 播放视频 */
-			if(this.$refs.videoGroup){
-				this.$refs.videoGroup.showPlay()
-				this.$refs.videoGroup.muteVideo(false) //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
-			}
-		},
-		onHide() {
-			/* 暂停视频 */
-			if(this.$refs.videoGroup){
-				this.$refs.videoGroup.hidePause()
-				this.$refs.videoGroup.muteVideo(true) //视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
-			}
-		},
-		watch:{
-			tabIndex(val){ //tab栏切换监听操作
-				this.$nextTick(()=>{
-					if(this.$refs.videoGroup){
-						if(val != this.pageIndex){ //tab视频并不在当前视频页
-							this.$refs.videoGroup.muteVideo(true) //视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
-						}else{
-							this.$refs.videoGroup.muteVideo(false) //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
-						}
-					}
-				})
-			}
-		},
-		methods:{
-			startData(){
-				let list = []
-				/* 模拟请求 */
-				return new Promise((resolve, reject)=>{
-					setTimeout(()=>{
-						let dataList = JSON.parse(JSON.stringify(this.videoData))
-						dataList.filter((item,index)=>{
-							/** 参数数据自行拼接  */
-							item.tsId = 'tsId' + (this.tNum * 15 + index) //视频id，用于删除视频, 需要改成自己的视频id
-							item.vodUrl = item.src
-							item.coverImg = item.coverImg //视频封面
-							item.coverShow = false //是否显示视频封面，vue 小程序端不播放会显示视频，可以不用显示封面，App不播放不会显示视频，就需要封面了
-							item.object_fit = item.object_fit //视频的显示类型
-							item.fullScreenShow = item.fullScreenShow //是否有全屏观看按钮
-							item.sliderShow = true //是否显示进度条
-							item.rotateImgShow = true //是否显示旋转头像
-							item.fabulousShow = false//是否点赞
-							item.followReally = false //是否已经关注
-						})
-						this.tNum += 1
-						resolve(dataList)
-					},500)
-				})
-			},
-			/* 初始加载视频数据 */
-			initVod(){
-				this.startData().then((res)=>{
-					if(res.length > 0){
-						/* 调用视频的初始方法 */
-						if(this.swId && this.tabIndex != this.pageIndex){ //tab视频加载后并不在当前视频页，关闭自动播放
-							this.autoplay = false
-						}else{
-							this.autoplay = true
-						}
-						// #ifdef H5
-						this.autoplay = false
-						// #endif
-						this.$nextTick(()=>{
-							this.$refs.videoGroup.initVod(res,0); //0是播放的下标（默认播放下标是0）不需要指定视频播放可不传
-						})
-					}
-				})
-			},
-			/* 下拉刷新 */
-			refreshData(){
-				this.tNum = 1
-				this.startData().then((res)=>{
-					if(res.length > 0){
-						/* 调用视频的重新加载方法 */
-						setTimeout(()=>{ 
-							if(this.swId && this.tabIndex != this.pageIndex){ //tab视频刷新后并不在当前视频页，关闭自动播放
-								this.autoplay = false
-							}else{
-								this.autoplay = true
-							}
-							this.$nextTick(()=>{
-								this.$refs.videoGroup.refreshSquare(res); //0是播放的下标（默认播放下标是0）下标是从0开始
-							})
-						},2000)
-					}
-				})
-			},
-			/* 上拉加载 */
-			loadingData(){
-				this.startData().then((res)=>{
-					if(res.length > 0){
-						/* 调用视频的到底加载方法方法 */
-						this.$refs.videoGroup.lodingData(res);
-					}
-				})
-			},
-			/* 双击回调 */
-			doubleClick(event){
-				// console.log('双击当前视频回调',event)
-			},
-			/* 长按当前视频回调 */
-			longpress(event,list){
-				// console.log('长按当前视频回调',event)
-			},
-			/* swiper切换当前视频回调 */
-			swiperChange(event){
-				// console.log('swiper切换当前视频回调',event)
-				this.currIndex = event.videoIndex
-			},
-			/* 是否开启自动播放 */
-			openAutomatic(){
-				this.nextPlay = !this.nextPlay
-				this.loopPlay = this.nextPlay ? false : true
-			},
-			/* 添加、指定位置插入视频*/
-			addVodData(){
-				this.startData().then((res)=>{
-					if(res.length > 0){
-						/* 调用添加视频方法 */
-						this.$refs.videoGroup.addVodData(res,this.currIndex);
-					}
-				})
-			},
-			/* 删除视频 */
-			removeVodData(){
-				/* 调用删除视频方法 */
-				// this.totalvod = 7 //删除视频后如果没有分页加载数据了，需设定总数量才能滑动加载到最后一个视频并禁止循环滑动
-				this.$refs.videoGroup.removeVodData(['tsId0','tsId1','tsId2','tsId3','tsId4','tsId5','tsId6','tsId7','tsId8','tsId9','tsId10','tsId11','tsId12','tsId13','tsId14']);
-			},
-			/* 视频已被全部删除回调 */
-			removeAllData(){
-				// console.log('视频已被全部删除')
-			},
-			/* 选择指定视频下标播放 下标是从0开始*/
-			specifyPlay(playIndex){
-				/* 调用选择指定视频下标播放 */
-				this.$refs.videoGroup.scrollToVod(playIndex);
-			},
-			/* tabVideo onShow 播放视频 */
-			assemblyOnShow(){
-				if(this.$refs.videoGroup){
-					this.$refs.videoGroup.showPlay()
-					this.$refs.videoGroup.muteVideo(false) //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
-				}
-			},
-			/* tabVideo onHide 暂停视频 */
-			assemblyOnHide(){
-				if(this.$refs.videoGroup){
-					this.$refs.videoGroup.hidePause()
-					this.$refs.videoGroup.muteVideo(true) //视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
-				}
-			},
-			/* tabVideo进度条滑动事件 */
-			appVodTouchmoveSlider(event){
-				this.$refs.videoGroup.touchmoveSlider(event);
-			},
-			/* tabVideo进度条滑动结束事件 */
-			appVodTouchendSlider(event){
-				this.$refs.videoGroup.touchendSlider(event);
-			},
-		}
-	}
+/*
+ * vue页面引用 H5、小程序引用示例
+ */
+import twVideov from "@/components/tsp-video/tsp-video-list/video-v.vue";
+import { contentList } from "@/api/common";
+
+export default {
+  components: {
+    twVideov,
+  },
+  props: {
+    /* 多个tab视频时需传入不同的类型id */
+    swId: {
+      type: String,
+      default: "",
+    },
+    /* 当前tabsPage的下标 */
+    pageIndex: {
+      type: Number,
+      default: 0,
+    },
+    /* 当前tab栏下标 */
+    tabIndex: {
+      type: Number,
+      default: 0,
+    },
+    /* 当前tab栏数据 */
+    tabItem: {
+      type: Object,
+      default: () => {},
+    },
+  },
+  data() {
+    return {
+      videoData: [],
+      autoplay: true,
+      nextPlay: false,
+      loopPlay: true,
+      tNum: 0,
+      currIndex: 0,
+      totalvod: 0, //视频总数量，有值才能滑动加载到最后一个视频并禁止循环滑动（仅H5、小程序支持）
+    };
+  },
+  created() {
+    // this.videoData = getVodData()
+    this.initVod();
+  },
+  onShow() {
+    /* 播放视频 */
+    if (this.$refs.videoGroup) {
+      this.$refs.videoGroup.showPlay();
+      this.$refs.videoGroup.muteVideo(false); //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
+    }
+  },
+  onHide() {
+    /* 暂停视频 */
+    if (this.$refs.videoGroup) {
+      this.$refs.videoGroup.hidePause();
+      this.$refs.videoGroup.muteVideo(true); //视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
+    }
+  },
+  watch: {
+    tabIndex(val) {
+      //tab栏切换监听操作
+      this.$nextTick(() => {
+        if (this.$refs.videoGroup) {
+          if (val != this.pageIndex) {
+            //tab视频并不在当前视频页
+            this.$refs.videoGroup.muteVideo(true); //视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
+          } else {
+            this.$refs.videoGroup.muteVideo(false); //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
+          }
+        }
+      });
+    },
+  },
+  methods: {
+    startData() {
+      let params = {
+        type: "short",
+        tabs: this.tabItem.key,
+        currentPage: this.tNum + 1,
+      };
+      return new Promise((resolve, reject) => {
+        contentList(params)
+          .then((res) => {
+            console.log("🚀 ~ startData ~ res:", res);
+            if (res.code === 200) {
+              this.tNum += 1;
+              this.totalvod = res.data.pagination.total; //视频总数量，有值才能滑动加载到最后一个视频并禁止循环滑动（仅H5、小程序支持）
+              let dataList = res.data.results
+			  dataList.filter((item, index) => {
+                /** 参数数据自行拼接  */
+                item.tsId = "tsId" + (this.tNum * 15 + index); //视频id，用于删除视频, 需要改成自己的视频id
+                item.vodUrl = item.data;
+                item.coverImg = item.cover_url; //视频封面
+                item.coverShow = false; //是否显示视频封面，vue 小程序端不播放会显示视频，可以不用显示封面，App不播放不会显示视频，就需要封面了
+                item.object_fit = item.object_fit; //视频的显示类型
+                item.fullScreenShow = item.fullScreenShow; //是否有全屏观看按钮
+                item.sliderShow = true; //是否显示进度条
+                item.rotateImgShow = false; //是否显示旋转头像
+                item.fabulousShow = false; //是否点赞
+                item.followReally = false; //是否已经关注
+				item.desc = item.description; //视频描述
+				item.author = item.author_nickname; //作者名称
+				item.likeCount = item.like_count; //点赞数量
+				item.commentCount = item.comment_count; //评论数量
+				item.favoriteCount = item.favorite_count; //收藏数量
+              });
+              resolve(dataList);
+            } else {
+              resolve([]);
+            }
+          })
+          .catch((err) => {
+            resolve([]);
+          });
+      });
+    },
+    /* 初始加载视频数据 */
+    initVod() {
+      this.startData().then((res) => {
+        if (res.length > 0) {
+          /* 调用视频的初始方法 */
+          if (this.swId && this.tabIndex != this.pageIndex) {
+            //tab视频加载后并不在当前视频页，关闭自动播放
+            this.autoplay = false;
+          } else {
+            this.autoplay = true;
+          }
+          // #ifdef H5
+          this.autoplay = false;
+          // #endif
+          this.$nextTick(() => {
+            this.$refs.videoGroup.initVod(res, 0); //0是播放的下标（默认播放下标是0）不需要指定视频播放可不传
+          });
+        }
+      });
+    },
+    /* 下拉刷新 */
+    refreshData() {
+      this.tNum = 1;
+      this.startData().then((res) => {
+        if (res.length > 0) {
+          /* 调用视频的重新加载方法 */
+          setTimeout(() => {
+            if (this.swId && this.tabIndex != this.pageIndex) {
+              //tab视频刷新后并不在当前视频页，关闭自动播放
+              this.autoplay = false;
+            } else {
+              this.autoplay = true;
+            }
+            this.$nextTick(() => {
+              this.$refs.videoGroup.refreshSquare(res); //0是播放的下标（默认播放下标是0）下标是从0开始
+            });
+          }, 2000);
+        }
+      });
+    },
+    /* 上拉加载 */
+    loadingData() {
+      this.startData().then((res) => {
+        if (res.length > 0) {
+          /* 调用视频的到底加载方法方法 */
+          this.$refs.videoGroup.lodingData(res);
+        }
+      });
+    },
+    /* 双击回调 */
+    doubleClick(event) {
+      // console.log('双击当前视频回调',event)
+    },
+    /* 长按当前视频回调 */
+    longpress(event, list) {
+      // console.log('长按当前视频回调',event)
+    },
+    /* swiper切换当前视频回调 */
+    swiperChange(event) {
+      // console.log('swiper切换当前视频回调',event)
+      this.currIndex = event.videoIndex;
+    },
+    /* 是否开启自动播放 */
+    openAutomatic() {
+      this.nextPlay = !this.nextPlay;
+      this.loopPlay = this.nextPlay ? false : true;
+    },
+    /* 添加、指定位置插入视频*/
+    addVodData() {
+      this.startData().then((res) => {
+        if (res.length > 0) {
+          /* 调用添加视频方法 */
+          this.$refs.videoGroup.addVodData(res, this.currIndex);
+        }
+      });
+    },
+    /* 删除视频 */
+    removeVodData() {
+      /* 调用删除视频方法 */
+      // this.totalvod = 7 //删除视频后如果没有分页加载数据了，需设定总数量才能滑动加载到最后一个视频并禁止循环滑动
+      this.$refs.videoGroup.removeVodData([
+        "tsId0",
+        "tsId1",
+        "tsId2",
+        "tsId3",
+        "tsId4",
+        "tsId5",
+        "tsId6",
+        "tsId7",
+        "tsId8",
+        "tsId9",
+        "tsId10",
+        "tsId11",
+        "tsId12",
+        "tsId13",
+        "tsId14",
+      ]);
+    },
+    /* 视频已被全部删除回调 */
+    removeAllData() {
+      // console.log('视频已被全部删除')
+    },
+    /* 选择指定视频下标播放 下标是从0开始*/
+    specifyPlay(playIndex) {
+      /* 调用选择指定视频下标播放 */
+      this.$refs.videoGroup.scrollToVod(playIndex);
+    },
+    /* tabVideo onShow 播放视频 */
+    assemblyOnShow() {
+      if (this.$refs.videoGroup) {
+        this.$refs.videoGroup.showPlay();
+        this.$refs.videoGroup.muteVideo(false); //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
+      }
+    },
+    /* tabVideo onHide 暂停视频 */
+    assemblyOnHide() {
+      if (this.$refs.videoGroup) {
+        this.$refs.videoGroup.hidePause();
+        this.$refs.videoGroup.muteVideo(true); //视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
+      }
+    },
+    /* tabVideo进度条滑动事件 */
+    appVodTouchmoveSlider(event) {
+      this.$refs.videoGroup.touchmoveSlider(event);
+    },
+    /* tabVideo进度条滑动结束事件 */
+    appVodTouchendSlider(event) {
+      this.$refs.videoGroup.touchendSlider(event);
+    },
+  },
+};
 </script>
 
 <style>
-	.pageBox{
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: #000;
-	}
-	.automatic{
-		position: absolute;
-		z-index: 20;
-		top: 160rpx;
-		left: 50rpx;
-	}
-	.automatic-item{
-		margin-top: 15rpx;
-		font-size: 32rpx;
-		color: blue;
-	}
-	.automatic-item:active{
-		transform: scale(0.8);
-		transition: all 0.3s linear;
-	}
+.pageBox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+}
+.automatic {
+  position: absolute;
+  z-index: 20;
+  top: 160rpx;
+  left: 50rpx;
+}
+.automatic-item {
+  margin-top: 15rpx;
+  font-size: 32rpx;
+  color: blue;
+}
+.automatic-item:active {
+  transform: scale(0.8);
+  transition: all 0.3s linear;
+}
 </style>

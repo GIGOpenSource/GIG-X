@@ -1,7 +1,7 @@
 <template>
 	<!-- 视频 -->
 	<view>
-		<video-player :video="detail?.contentData?.videoUrl"></video-player>
+		<video-player :video="detail?.data"></video-player>
 
 		<!-- 视频price -->
 		<!-- <view class="price-line">
