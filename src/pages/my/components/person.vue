@@ -10,7 +10,7 @@
 			</template>
 		</up-navbar>
 		<view class="content">
-			<userinfo :isFollow="isBack" :userId="isBack ? uni.getStorageSync('otherId'):uni.getStorageSync('user_info').id"/>
+			<userinfo :isFollow="isBack" :userId="isBack ? uni.getStorageSync('otherId'):uni.getStorageSync('user_info').user_id"/>
 			<vip v-if="!isBack && uni.getStorageSync('user_info').isVip == 'Y'"/>
 			<!-- 动态，视频，互动 -->
 			<view class="tabs">

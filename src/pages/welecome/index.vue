@@ -9,11 +9,11 @@
 				:src="item.imageUrl"
 			/>
 		</scroll-view> -->
-		<up-image :src="bannerlist[0]?.imageUrl" width="100%" height="80vh"
-			@click="handleOpenPage(bannerlist[0].clickUrl)"></up-image>
+		<up-image :src="bannerlist[0]?.image_url" width="100%" height="80vh"
+			@click="handleOpenPage(bannerlist[0].click_url)"></up-image>
 		<up-count-down :time="5 * 1000" format="ss" class="count-down" @finish="countDownFinsh"></up-count-down>
 		<view class="logo">
-			<image src="/static/images/logo2.png" mode=""></image>
+			<image :src="iconlist[0]?.image_url" mode=""></image>
 		</view>
 	</view>
 </template>
@@ -29,12 +29,12 @@ import {
 
 
 let bannerlist = ref([]);
-
+let iconlist = ref([])
 const total = ref(0);
 const page = ref(1);
 const isFirst = ref(false)
 
-onLoad(async () => {
+onLoad(() => {
 	isFirst.value = uni.getStorageSync('isFirst');
 	const params = {
 		username: 'wyz1',
@@ -44,26 +44,29 @@ onLoad(async () => {
 		uni.setStorageSync('user_info', res.data)
 		uni.setStorageSync('token', res.data.token)
 		store.getUserinfo({ id: res.data.user_id })
+		list()
 	})
-	
+
 });
 onHide(() => {
 	uni.setStorageSync('isFirst', false);
 });
 const list = () => {
-	getAdsList({
-		type: 'ads',
+	let params = {
 		page: page.value,
 		pageSize: 20
+	}
+	getAdsList({
+		type: 'welcome',
+		...params
 	}).then((res) => {
-		console.log(res,'resres');
-		
-		bannerlist.value = res.data.records;
-		total.value = res.data.total;
+		bannerlist.value = res.data.results
 	})
-	.catch(err => {
-		console.log(err,'err');
-		
+	getAdsList({
+		type: 'welcome_icon',
+		...params
+	}).then((res) => {
+		iconlist.value = res.data.results
 	})
 };
 const lower = () => {
