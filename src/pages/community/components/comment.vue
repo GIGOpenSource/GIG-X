@@ -100,7 +100,7 @@
 				tabs:current.value?'latest':'recommend'
 			})
 			.then(res => {
-				list.value = res.data
+				list.value = res.data.results
 				total.value = res.data.total
 			})
 	}

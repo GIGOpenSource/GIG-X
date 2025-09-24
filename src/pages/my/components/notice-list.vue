@@ -3,9 +3,9 @@
 		<view v-for="(item, index) in list" :key="index" class="con">
 			<view class="top">
 				<view class="left">
-					<up-avatar :src="src" size="40"></up-avatar>
+					<up-avatar :src="item.user.avatar" size="40"></up-avatar>
 					<view class="message">
-						<text>mask</text>
+						<text>{{ item.user.user_nickname }}</text>
 					</view>
 				</view>
 
@@ -35,10 +35,10 @@ onMounted(() => {
 })
 const getlist = () => {
 	getNotice({
-		page: 1,
+		currentPage: 1,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data
+		list.value = res.data.results
 		
 	})
 }

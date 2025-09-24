@@ -21,4 +21,14 @@ export const userinfoStore = defineStore('userinfos', {
 			this.personInfo = res.data
 		},
 	},
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        key: 'userinfos',  
+        storage: localStorage,     // 也可以换成 sessionStorage
+        paths: ['userinfo', 'personInfo']
+      }
+    ]
+  }
 });

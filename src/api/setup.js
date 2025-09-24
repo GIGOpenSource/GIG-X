@@ -30,7 +30,7 @@ export const dynamicsList = (params) => {
 
 //互动列表
 export const allList = (params) => {
-	return getRequest('/user-interactions/all',params)
+	return getRequest('/social/interaction_message/',params)
 }
 
 

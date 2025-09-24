@@ -89,17 +89,15 @@ const follow = (index) => {
 	})
 }
 const oparea = () => {
-	console.log('ZOULEMA ')
 	show.value = true
 }
 const getlist = () => {
 	allList({
-		userId: uni.getStorageSync('user_info').id,
 		currentPage: 1,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data.records
-		total.value = res.data.total
+		list.value = res.data.results
+		total.value = res.data.pagination.total
 	})
 }
 const topath = (id) => {

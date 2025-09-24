@@ -25,7 +25,7 @@ export const getDetails = (params) => {
 
 //点赞切换
 export const liketoggle = (params) => {
-	return postRequest('/likes/toggle/', params)
+	return postRequest('/likes/v2/dynamic/toggle/', params)
 }
 
 
