@@ -28,3 +28,13 @@ export const contentDetail= (id) => {
 export const guessLike= (params) => {
 	return getRequest('/contents/guesslike/', params)
 }
+
+// 内容点赞
+export const contentLike= (id) => {
+	return postRequest('/likes/v1/content/toggle/', { target_id: id })
+}
+
+// 内容收藏
+export const contentCollect= (id) => {
+	return postRequest('/favourites/v1/toggle/', { target_id: id })
+}

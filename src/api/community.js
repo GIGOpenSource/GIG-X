@@ -48,7 +48,7 @@ export const getCommentList = (params) => {
 
 //关注切换
 export const followtoggle = (params) => {
-	return postRequest('/follows/toggle/', params)
+	return postRequest('/follows/v2/toggle/', params)
 }
 
 

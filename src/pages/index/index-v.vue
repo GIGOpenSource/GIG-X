@@ -145,15 +145,15 @@
 				screenHeight:deviceInfo.screenHeight, //屏幕的高度
 				tabList: [
 					{
-						id: 'tab01',
+						id: 'recommend',
 						name: '推荐'
 					},
 					{
-						id: 'tab02',
+						id: 'follow',
 						name: '关注'
 					},
 					{
-						id: 'tab03',
+						id: 'latest',
 						name: '最新'
 					}
 				],
@@ -254,7 +254,7 @@
 			const res = await addComment(params);
 			console.log('res', res);
 			if (res.code === 200) {
-				
+
 			}
 			},
 			onswiperscroll(e){
