@@ -90,11 +90,11 @@ export default {
 		tabBarHeight: {
 			type: Number,
 			// #ifdef APP-PLUS || H5
-			default: 49
+			default: 60
 			// #endif
 
 			// #ifndef APP-PLUS || H5
-			default: 44
+			default: 60
 			// #endif
 		},
 		forwardInfo: {

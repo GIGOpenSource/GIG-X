@@ -17,7 +17,7 @@ export default {
 		/* 自定义底部栏的高度 */
 		tabBarHeight: {
 			type: Number,
-			default: 50
+			default: 60
 		},
 		/* 进度条离底部的距离 px*/
 		speedBottom: {

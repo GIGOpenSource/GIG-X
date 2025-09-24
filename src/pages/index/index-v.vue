@@ -1,63 +1,117 @@
 <template>
-	<view class="tabs">
-		<!-- #ifndef MP-WEIXIN -->
-		<swiper class="tab-box" ref="swiper1" :duration="300" :current="tabIndex"
-			@transition="onswiperscroll" @animationfinish="animationfinish" @onAnimationEnd="animationfinish" @change="onswiperchange">
-			<swiper-item class="swiper-item" v-for="(page, index) in tabList" :key="index">
-				<view style="flex: 1;position: relative;">
-					<tabsPage :ref="'page' + index" :pageIndex="index" :tabIndex="tabIndex" :tabItem="page" :screenHeight="screenHeight"
-					 :statusBarHeight="statusBarHeight"></tabsPage>
-				</view>
-			</swiper-item>
-		</swiper>
-		<!-- #endif -->
-		
-		<!-- 使用自定义swiper解决  官方的swiper嵌套swiper在微信小程序上ios手机切换会隐藏界面元素的问题 -->
-		<!-- #ifdef MP-WEIXIN -->
-		<esc-swiper
-			:autoplay="false"
-			:current.sync="tabIndex"
-			:width="screenWidth"
-			:height="screenHeight"
-			:itemWidth="750"
-			:itemHeight="screenHeight"
-			:size="tabList.length"
-			@change="escChange"
-			ref="escRef"
-		>
-			<esc-swiper-item v-for="(page, index) in tabList" :index="index" :key="index">
-				<view style="flex: 1;position: relative;">
-					<tabsPage :ref="'page' + index" :pageIndex="index" :tabIndex="tabIndex" :tabItem="page" :screenHeight="screenHeight"
-					 :statusBarHeight="statusBarHeight"></tabsPage>
-				</view>
-			</esc-swiper-item>
-		</esc-swiper>
-		<!-- #endif -->
-		
-		<!-- 解决app端视频滑动进度条和swiper冲突滑动遮罩图层 -->
-		<!-- #ifdef APP-PLUS -->
-		<view class="vodProgress" @touchmove="touchmoveSlider" @touchstart="touchmoveSlider" @touchend="touchendSlider" v-if="tabIndex != 0"></view>
-		<!-- #endif -->
-		
-		<view class="head" :style="{top:statusBarHeight+'px',width:screenWidth+'px'}">
-			<view class="head-item" @click="tabChange(index)" v-for="(item,index) in tabList" :key="index">
-				<text class="head-item-text" :class="tabIndex == index ?'head-item-textActive':''">{{item.name}}</text>
-				<view class="head-item-sign" v-if="tabIndex == index"></view>
-			</view>
-			<view class="head-operate">
-				<!-- <image src="/static/tsp-icon/home-menu.png" class="head-operate-icon"></image> -->
-				 <span></span>
-				<image src="/static/tsp-icon/home-search.png" class="head-operate-icon" @click="handleJump2Search"></image>
-			</view>
-		</view>
-		
-		<!-- 评论弹窗 -->
-		<comment-popup ref="commentRef" v-model="commentVisible" :commentInfo="commentInfo" @submitComment="submitComment"/>
-		
-		<!-- 转发弹窗 -->
-		<forwardMenu v-model="showForward" :forwardInfo="commentInfo"></forwardMenu>
-		
-	</view>
+  <view class="tabs">
+    <!-- #ifndef MP-WEIXIN -->
+    <swiper
+      class="tab-box"
+      ref="swiper1"
+      :duration="300"
+      :current="tabIndex"
+      @transition="onswiperscroll"
+      @animationfinish="animationfinish"
+      @onAnimationEnd="animationfinish"
+      @change="onswiperchange"
+    >
+      <swiper-item
+        class="swiper-item"
+        v-for="(page, index) in tabList"
+        :key="index"
+      >
+        <view style="flex: 1; position: relative">
+          <tabsPage
+            :ref="'page' + index"
+            :pageIndex="index"
+            :tabIndex="tabIndex"
+            :tabItem="page"
+            :screenHeight="screenHeight"
+            :statusBarHeight="statusBarHeight"
+          ></tabsPage>
+        </view>
+      </swiper-item>
+    </swiper>
+    <!-- #endif -->
+
+    <!-- 使用自定义swiper解决  官方的swiper嵌套swiper在微信小程序上ios手机切换会隐藏界面元素的问题 -->
+    <!-- #ifdef MP-WEIXIN -->
+    <esc-swiper
+      :autoplay="false"
+      :current.sync="tabIndex"
+      :width="screenWidth"
+      :height="screenHeight"
+      :itemWidth="750"
+      :itemHeight="screenHeight"
+      :size="tabList.length"
+      @change="escChange"
+      ref="escRef"
+    >
+      <esc-swiper-item
+        v-for="(page, index) in tabList"
+        :index="index"
+        :key="index"
+      >
+        <view style="flex: 1; position: relative">
+          <tabsPage
+            :ref="'page' + index"
+            :pageIndex="index"
+            :tabIndex="tabIndex"
+            :tabItem="page"
+            :screenHeight="screenHeight"
+            :statusBarHeight="statusBarHeight"
+          ></tabsPage>
+        </view>
+      </esc-swiper-item>
+    </esc-swiper>
+    <!-- #endif -->
+
+    <!-- 解决app端视频滑动进度条和swiper冲突滑动遮罩图层 -->
+    <!-- #ifdef APP-PLUS -->
+    <view
+      class="vodProgress"
+      @touchmove="touchmoveSlider"
+      @touchstart="touchmoveSlider"
+      @touchend="touchendSlider"
+      v-if="tabIndex != 0"
+    ></view>
+    <!-- #endif -->
+
+    <view
+      class="head"
+      :style="{ top: statusBarHeight + 'px', width: screenWidth + 'px' }"
+    >
+      <view
+        class="head-item"
+        @click="tabChange(index)"
+        v-for="(item, index) in tabList"
+        :key="index"
+      >
+        <text
+          class="head-item-text"
+          :class="tabIndex == index ? 'head-item-textActive' : ''"
+          >{{ item.name }}</text
+        >
+        <view class="head-item-sign" v-if="tabIndex == index"></view>
+      </view>
+      <view class="head-operate">
+        <!-- <image src="/static/tsp-icon/home-menu.png" class="head-operate-icon"></image> -->
+        <span></span>
+        <image
+          src="/static/tsp-icon/home-search.png"
+          class="head-operate-icon"
+          @click="handleJump2Search"
+        ></image>
+      </view>
+    </view>
+
+    <!-- 评论弹窗 -->
+    <comment-popup
+      ref="commentRef"
+      v-model="commentVisible"
+      :commentInfo="commentInfo"
+      @submitComment="submitComment"
+    />
+
+    <!-- 转发弹窗 -->
+    <forwardMenu v-model="showForward" :forwardInfo="commentInfo"></forwardMenu>
+  </view>
 </template>
 <script>
 	/*
@@ -71,6 +125,9 @@
 	import escSwiper from '@/components/tsp-video/esc-ui/components/esc-swiper/index.vue'
 	import escSwiperItem from '@/components/tsp-video/esc-ui/components/esc-swiper-item/index.vue'
 	// #endif
+	import { addComment } from '@/api/community';
+
+
 	export default {
 		components: {
 			tabsPage,
@@ -86,7 +143,7 @@
 				statusBarHeight:deviceInfo.statusBarHeight,
 				screenWidth:deviceInfo.screenWidth || 0, //屏幕的宽度
 				screenHeight:deviceInfo.screenHeight, //屏幕的高度
-				tabList: [ 
+				tabList: [
 					{
 						id: 'tab01',
 						name: '推荐'
@@ -119,19 +176,19 @@
 				}
 			}
 			this.changeSwitchTab(this.tabIndex)
-			
+
 			/* 监听打开评论*/
 			uni.$on('updateOpenComment',(data)=>{
 				this.commentInfo = data.item
 				this.commentVisible = true
 				this.$nextTick(()=>{
-					if(this.openVodCommentIndex != data.vodCurIndex){ 
+					if(this.openVodCommentIndex != data.vodCurIndex){
 						this.openVodCommentIndex = data.vodCurIndex
 						this.$refs.commentRef.loadData() //调用评论组件的加载方法
 					}
 				})
 			})
-			
+
 			/* 监听打开转发*/
 			uni.$on('updateOpenForward',(data)=>{
 				this.commentInfo = data.item
@@ -187,8 +244,18 @@
 				}
 			},
 			/* 评论组件内容回调 */
-			submitComment(val){
+			async submitComment(val){
 				console.log(val)
+				const params = {
+				target_id: this.commentInfo.id,
+				content: val.text,
+				userId: uni.getStorageSync('user_info').id
+			};
+			const res = await addComment(params);
+			console.log('res', res);
+			if (res.code === 200) {
+				
+			}
 			},
 			onswiperscroll(e){
 				// this.$refs.tabRef.onswiperscroll(e)
@@ -212,92 +279,92 @@
 	}
 </script>
 <style scoped lang="scss">
-	.tabs {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: #000000;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-	}
-	
-	.head{
-		position: absolute;
-		top: 0;
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		.head-operate{
-			position: absolute;
-			width: 750rpx;
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
-			height: 75rpx;
-			padding: 0 30rpx;
-			z-index: 2;
-			box-sizing: border-box;
-			.head-operate-icon{
-				margin-top: 13rpx;
-				width: 45rpx;
-				height: 45rpx;
-			}
-		}
-		&-item{
-			position: relative;
-			z-index: 3;
-			height: 75rpx;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			&-text{
-				color: #eee;
-				font-size: 32rpx;
-				margin: 0 20rpx;
-				font-weight: bold;
-			}
-			&-textActive{
-				color: #ffffff;
-				font-size: 34rpx;
-			}
-			&-sign{
-				position: absolute;
-				bottom: 0;
-				left: 30rpx;
-				width: 50rpx;
-				height: 5rpx;
-				background-color: #ffffff;
-			}
-		}
-	}
-	
-	.tab-box {
-		flex: 1;
-	}
+.tabs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-	.swiper-item {
-		display: flex;
-		flex: 1;
-		flex-direction: column;
-	}
-	.page-item {
-		flex: 1;
-		flex-direction: row;
-		position: absolute;
-		left: 0;
-		top: 0;
-		right: 0;
-		bottom: 0;
-	}
-	.vodProgress{
-		position: absolute;
-		bottom: 0;
-		height: 18px;
-		width: 750rpx;
-	}
+.head {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  .head-operate {
+    position: absolute;
+    width: 750rpx;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 75rpx;
+    padding: 0 30rpx;
+    z-index: 2;
+    box-sizing: border-box;
+    .head-operate-icon {
+      margin-top: 13rpx;
+      width: 45rpx;
+      height: 45rpx;
+    }
+  }
+  &-item {
+    position: relative;
+    z-index: 3;
+    height: 75rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    &-text {
+      color: #eee;
+      font-size: 32rpx;
+      margin: 0 20rpx;
+      font-weight: bold;
+    }
+    &-textActive {
+      color: #ffffff;
+      font-size: 34rpx;
+    }
+    &-sign {
+      position: absolute;
+      bottom: 0;
+      left: 30rpx;
+      width: 50rpx;
+      height: 5rpx;
+      background-color: #ffffff;
+    }
+  }
+}
+
+.tab-box {
+  flex: 1;
+}
+
+.swiper-item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.page-item {
+  flex: 1;
+  flex-direction: row;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+.vodProgress {
+  position: absolute;
+  bottom: 0;
+  height: 18px;
+  width: 750rpx;
+}
 </style>

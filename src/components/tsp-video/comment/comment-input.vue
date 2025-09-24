@@ -146,7 +146,7 @@ export default {
 		/* 底部栏的高度 */
 		tabBarHeight: {
 			type: Number,
-			default: 49
+			default: 60
 		},
 		/* 评论内容 */
 		contentInfo: {
@@ -285,7 +285,7 @@ export default {
 
 				/* 回复他人 */
 				if (this.currReplyInfo.replyType) {
-					this.placeholderText = '回复 @' + this.currReplyInfo.username;
+					this.placeholderText = '回复 @' + this.currReplyInfo.user_nickname;
 				} else {
 					this.placeholderText = '输入评论内容';
 				}

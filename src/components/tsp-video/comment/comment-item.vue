@@ -10,11 +10,11 @@
 			:class="[item.selectedRow ? 'list-item-active' : '']"
 		>
 			<view>
-				<image class="comment-list-item-avatar" :src="item.userAvatar" mode="aspectFill"></image>
+				<image class="comment-list-item-avatar" :src="item.user_avatar" mode="aspectFill"></image>
 			</view>
 			<view class="comment-list-item-right" :style="{ width: screenWidth - 80 + 'px' }">
 				<view class="f f-v-c" @click="openPlReply('pl', item, index)">
-					<text class="comment-list-item-title">{{ item.userNickname }}</text>
+					<text class="comment-list-item-title">{{ item.user_nickname }}</text>
 					<text class="comment-list-item-author boxSizing" v-if="item.author">作者</text>
 				</view>
 				<!-- foldShow  折叠评论 -->

@@ -205,11 +205,11 @@ export default {
 		tabBarHeight: {
 			type: Number,
 			// #ifdef APP-PLUS || H5
-			default: 49
+			default: 60
 			// #endif
 
 			// #ifndef APP-PLUS || H5
-			default: 44
+			default: 60
 			// #endif
 		},
 		commentInfo: {
@@ -251,7 +251,7 @@ export default {
 			scrollAnimation: false, //scroll-view 滚动是否有动画效果
 			showOperate: false, //是否显示弹出评论操作
 			reviewInfo: {}, //选中某行弹出评论操作的对象
-			total: -1
+			total: 0
 		}
 	},
 	computed: {
@@ -298,9 +298,8 @@ export default {
 			console.log('this.commentInfo',this.commentInfo);
 			const params = {
 				currentPage:1,
-				pageSize:9999,
-				targetId: this.commentInfo.id,
-				commentType: 'CONTENT'
+				pageSize:998,
+				target_id: this.commentInfo.id,
 
 			}
 			return getCommentList(params)
@@ -407,10 +406,11 @@ export default {
 			let valueIdNum = parseInt(uni.getStorageSync('commentIdsNum') || 1)
 			this.openReq = true
 			this.startData().then((res)=>{
-				this.total = res.data.total
+				console.log("🚀 ~ getList ~ res:", res)
+				this.total = res.data.pagination.total
 				this.openReq = false
 				if(res.code == 200){
-					let list = res.data.records
+					let list = res.data.results
 					list.forEach((item,index)=>{
 						/** 必要参数数据必须拼接  */
 						item.imgList = index % 2 == 0 ? []:[] //图片或者图集
