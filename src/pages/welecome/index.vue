@@ -37,11 +37,7 @@ const isFirst = ref(false)
 onLoad(() => {
 	isFirst.value = uni.getStorageSync('isFirst');
 	const params = {
-<<<<<<< Updated upstream
 		username: 'wyz1',
-=======
-		username: 'wyz',
->>>>>>> Stashed changes
 		password: '123456'
 	};
 	login(params).then((res) => {
