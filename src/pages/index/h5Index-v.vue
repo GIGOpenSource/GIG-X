@@ -106,7 +106,7 @@ export default {
 		
       let params = {
         type: "short",
-        // tabs: this.tabItem.id,
+        tabs: this.tabItem.id,
         currentPage: this.tNum + 1,
       };
       return new Promise((resolve, reject) => {
@@ -172,7 +172,7 @@ export default {
     },
     /* 下拉刷新 */
     refreshData() {
-      this.tNum = 1;
+      this.tNum = 0;
       this.startData().then((res) => {
         if (res.length > 0) {
           /* 调用视频的重新加载方法 */

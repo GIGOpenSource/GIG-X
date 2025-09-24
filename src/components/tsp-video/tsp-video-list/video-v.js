@@ -539,7 +539,7 @@ export default {
 				this.$emit('swiperChange',this.vodList[this.vodIndex])
 			}
 			/* 到底加载数据 */
-			if ((this.vodCurIndex + 1) >= this.totalPlayList.length - this.totalPlayList.length % this.vodPageNum && !this.loadStart) {
+			if ((this.vodCurIndex + 1) >= this.totalPlayList.length - this.totalPlayList.length % this.vodPageNum && !this.loadStart && this.totalPlayList.length >= this.vodPageNum) {
 				clearTimeout(this.loadTime)
 				this.loadTime = setTimeout(() => {
 					this.$emit('lodData')

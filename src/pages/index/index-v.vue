@@ -198,7 +198,7 @@
 		onShow() {
 			/* 播放视频 */
 			this.$nextTick(()=>{
-				if(this.pageList.length > 0 && this.pageList[this.tabIndex].firstLoaded && this.tabIndex != 0){
+				if(this.pageList.length > 0 && this.pageList[this.tabIndex].firstLoaded){
 					this.pageList[this.tabIndex].showPlay()
 				}
 			})
@@ -206,7 +206,7 @@
 		onHide() {
 			/* 暂停视频 */
 			this.$nextTick(()=>{
-				if(this.pageList.length > 0 && this.pageList[this.tabIndex].firstLoaded && this.tabIndex != 0){
+				if(this.pageList.length > 0 && this.pageList[this.tabIndex].firstLoaded){
 					this.pageList[this.tabIndex].hidePause()
 				}
 			})
