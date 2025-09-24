@@ -106,7 +106,7 @@ export default {
 		
       let params = {
         type: "short",
-        tabs: this.tabItem.id,
+        // tabs: this.tabItem.id,
         currentPage: this.tNum + 1,
       };
       return new Promise((resolve, reject) => {
