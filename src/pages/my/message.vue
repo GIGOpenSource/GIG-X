@@ -28,6 +28,7 @@
 	} from 'vue';
 	import noticeList from './components/notice-list.vue'
 	import messageList from './components/message-list.vue'
+	import { onPullDownRefresh } from '@dcloudio/uni-app';
 	const tabs = reactive([{
 		name: '消息'
 	}, {
@@ -39,6 +40,9 @@
 	const click = (item) => {
 		current.value = item.index
 	}
+	onPullDownRefresh(() => {
+		uni.stopPullDownRefresh();
+	})
 </script>
 
 <style lang="scss" scoped>

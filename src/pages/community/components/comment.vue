@@ -92,16 +92,16 @@
 	}
 	const getlist = () => {
 		getCommentList({
-		    	parent_comment_id:0,
+		    	// parent_comment_id:0,
 				target_id: props.detailId,
-				type: 'dynamic',
+				// type: 'dynamic',
 				currentPage: page.value,
 				pageSize: 20,
 				tabs:current.value?'latest':'recommend'
 			})
 			.then(res => {
 				list.value = res.data.results
-				total.value = res.data.total
+				total.value = res.data.pagination.total
 			})
 	}
 	const lower = () => {

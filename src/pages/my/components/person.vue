@@ -25,7 +25,7 @@
 		<view style="height: 80rpx;" v-if="isBack"></view>
 	</z-paging>
 	
-	<view class="private-message" v-if="isBack && uni.getStorageSync('user_info').user_id !== uni.getStorageSync('otherId')" @click="toPath('/pages/my/dialogue?id='+uni.getStorageSync('otherId'))">私信</view>
+	<view class="private-message" v-if="isBack && uni.getStorageSync('user_info').user_id !== uni.getStorageSync('otherId')" @click="toPath('/pages/my/dialogue')">私信</view>
 </template>
 
 <script setup>
@@ -54,8 +54,6 @@
 	const tarbar = ref(['动态', '视频', '互动'])
 	const current = ref(0)
 	const clicks = (index) => {
-		console.log(index,'111');
-		
 		current.value = index
 	}
 	const onTabChange = (tab) => {

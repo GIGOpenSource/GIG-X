@@ -36,12 +36,12 @@ export const addShare = (params) => {
 
 //创建评论
 export const addComment = (params) => {
-	return postRequest('/comments/', params)
+	return postRequest('/comments/v2/dynamic/', params)
 }
 
 //获取评论
 export const getCommentList = (params) => {
-	return getRequest('/comments/', params)
+	return getRequest('/comments/v2/dynamic/', params)
 }
 
 

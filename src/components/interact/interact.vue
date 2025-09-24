@@ -1,16 +1,16 @@
 <template>
 	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 90vh">
 		<view v-for="(item, index) in list" :key="index" class="con"
-			@click="uni.navigateTo({ url: '/pages/community/details?id=' + item.targetId })">
-			<view class="desc" v-if="!item.commentContent">{{ item.userNickname }}点赞了你的动态</view>
-			<view class="desc" v-if="item.commentContent">@{{ item.userNickname }}了你：{{ item.commentContent }}</view>
+			@click="uni.navigateTo({ url: '/pages/community/details?id=' + item.dynamic.id })">
+			<view class="desc" v-if="item.type == 'like'">{{ item.user.nickname }}点赞了你的动态</view>
+			<view class="desc" v-if="item.type == 'comment'">@{{ item.user.nickname }}了你：{{item.target.content }}</view>
 			<view class="bg">
 				<view class="top">
 					<view class="left">
-						<view @click.stop="topath(item.authorId)"><up-avatar :src="item.authorAvatar"
+						<view @click.stop="topath(item.dynamic.user_id)"><up-avatar :src="item.dynamic.user_avatar"
 								size="40"></up-avatar></view>
 						<view class="message">
-							<text>{{ item.authorNickname }}</text>
+							<text>{{ item.dynamic.user_nickname }}</text>
 						</view>
 					</view>
 					<view class="follow">
@@ -21,20 +21,20 @@
 						</view>
 					</view>
 				</view>
-				<view class="title">{{ item.title }}</view>
-				<!-- <view class="images">
-					<image src="/static/tsp-icon/touxiang.jpg" mode=""></image>
-				</view> -->
+				<view class="title">{{ item.dynamic.title }}</view>
+				<view class="images">
+					<image mode="" v-for="(images,indexs) in item.dynamic.images" :key="indexs"  :src="images"></image>
+				</view>
 			</view>
 			<view class="bottom">
 				<view class="">
-					{{ item.createTime }}
+					{{ item.create_time }}
 				</view>
 				<view class="right">
 					<view class="" @click.stop="give(index)">
 						<up-icon :name="item.is_liked ? 'thumb-up-fill' : 'thumb-up'"
 							:color="item.is_liked ? '#ff0000' : '#ffffff'" size="26"></up-icon>
-						<text>{{ item.likeCount || 0 }}</text>
+						<text>{{ item.dynamic.like_count || 0 }}</text>
 					</view>
 				</view>
 			</view>
@@ -184,7 +184,7 @@ onMounted(() => {
 	flex-wrap: wrap;
 
 	image {
-		width: 48%;
+		width: 46%;
 		height: 300rpx;
 		margin: 0 13rpx 30rpx 0;
 		border-radius: 15rpx;
