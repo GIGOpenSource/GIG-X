@@ -24,6 +24,15 @@ export const contentDetail= (id) => {
 	return getRequest('/contents/' + id)
 }
 
+// 内容评论
+export const contentCommentList= (params) => {
+	return getRequest('/comments/v1/content/', params)
+}
+
+// 内容评论
+export const addContentComment= (params) => {
+	return postRequest('/comments/v1/content/', params)
+}
 // 猜你喜欢
 export const guessLike= (params) => {
 	return getRequest('/contents/guesslike/', params)
