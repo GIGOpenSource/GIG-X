@@ -1,4 +1,5 @@
 <template>
+  <!-- vip 可以自动请求 auto 为 true 否则为false -->
   <z-paging ref="paging" v-model="dataList" @query="queryList">
     <view class="container">
       <!-- 签到 -->
