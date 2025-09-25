@@ -37,7 +37,7 @@ const isFirst = ref(false)
 onLoad(() => {
 	isFirst.value = uni.getStorageSync('isFirst');
 	const params = {
-		username: 'wyz2',
+		username: 'djy',
 		password: '123456'
 	};
 	login(params).then((res) => {
@@ -70,8 +70,8 @@ const list = () => {
 	})
 };
 const lower = () => {
-	if (total.value > bannerlist.length) {
-		total.value++;
+	if (total.value > bannerlist.value.length) {
+		page.value++;
 		list();
 	}
 };

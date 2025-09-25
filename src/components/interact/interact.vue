@@ -61,6 +61,7 @@ const src = ref('http://pic2.sc.chinaz.com/Files/pic/pic9/202002/hpic2119_s.jpg'
 const show = ref(false)
 const total = ref(0)
 const list = ref([])
+const page = ref(1)
 const give = (index) => {
 	let params = {
 		target_id: list.value[index].targetId
@@ -87,7 +88,7 @@ const oparea = () => {
 }
 const getlist = () => {
 	allList({
-		currentPage: 1,
+		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
 		list.value = res.data.results
@@ -101,13 +102,16 @@ const topath = (id) => {
 	});
 }
 const lower = () => {
-	if (total.value > list.length) {
-		total.value++
+	if (total.value > list.value.length) {
+		page.value++
 		getlist()
 	}
 }
 onMounted(() => {
 	getlist()
+})
+defineExpose({
+	getlist
 })
 </script>
 

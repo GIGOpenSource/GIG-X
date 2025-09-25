@@ -24,7 +24,7 @@
 
 						<up-icon :name="item.isLiked?'heart-fill':'heart'" :color="item.isLiked?'#ff0000':'#D9D9D9'"
 							size="22"></up-icon>
-						<text>{{item.likeCount}}</text>
+						<text>{{item.like_count}}</text>
 					</view>
 				</view>
 				<view class="" @click="commentCon">
@@ -44,7 +44,7 @@
 	} from 'vue'
 	import {
 		getCommentList,
-		// commentlike
+		commentlike
 	} from '@/api/community.js'
 	import {
 		userinfoStore
@@ -66,22 +66,16 @@
 	})
 	//点赞
 	const give = (index) => {
-		// commentlike({
-		// 	userId: userinfo.id,
-		// 	likeType: "COMMENT",
-		// 	targetId: list.value[index].id,
-		// 	targetTitle: list.value[index].content,
-		// 	targetAuthorId: list.value[index].userId,
-		// 	userNickname: list.value[index].userNickname,
-		// 	userAvatar: list.value[index].userAvatar
-		// }).then(res => {
-		// 	list.value[index].isLiked = !list.value[index].isLiked
-		// 	if (list.value[index].isLiked) {
-		// 		list.value[index].likeCount += 1
-		// 	} else {
-		// 		list.value[index].likeCount -= 1
-		// 	}
-		// })
+		commentlike({
+			target_id: list.value[index].id,
+		}).then(res => {
+			list.value[index].isLiked = !list.value[index].isLiked
+			if (list.value[index].isLiked) {
+				list.value[index].likeCount += 1
+			} else {
+				list.value[index].likeCount -= 1
+			}
+		})
 	}
 	const commentCon = () => {
 		emits('onfocus')
@@ -97,7 +91,7 @@
 				// type: 'dynamic',
 				currentPage: page.value,
 				pageSize: 20,
-				tabs:current.value?'latest':'recommend'
+				ordering:current.value?'create_time':'like_count'
 			})
 			.then(res => {
 				list.value = res.data.results
@@ -105,8 +99,8 @@
 			})
 	}
 	const lower = () => {
-		if (total.value > list.length) {
-			total.value++;
+		if (total.value > list.value.length) {
+			page.value++;
 			getlist()
 		}
 	}
