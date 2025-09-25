@@ -50,15 +50,20 @@
       </swiper-item>
     </swiper>
   </z-paging-swiper>
+
+  <Dialog v-model="dialogVisible" @confirm="handleConfirm" @cancel="handleCancel" @close="handleClose" />
 </template>
 
 <script setup>
 import { ref } from "vue";
-
+import Dialog from '@/components/Dialog.vue';
 import tabsPage from "../../discover/TabsPage.vue";
 
 const currentCategory = ref(0);
 const currentTab = ref("follow");
+
+const dialogVisible = ref(true);
+
 const categoryList = ref([
   {
     name: "关注",
@@ -108,6 +113,24 @@ const handleClickCategory = (tab) => {
 const onTabChange = (tab) => {
   console.log(tab);
 };
+
+const handleConfirm = ()=>{
+	dialogVisible.value = false;
+	// 不是vip应去付费， 打开注释
+	// uni.redirectTo({
+	// 	url: '/pages/my/recharge'
+	// })
+}
+
+const handleCancel = ()=>{
+	dialogVisible.value = false;
+	uni.navigateBack()
+
+}
+
+const handleClose = ()=>{
+	uni.navigateBack()
+}
 
 // swiper滑动结束
 const swiperAnimationfinish = (e) => {
