@@ -48,7 +48,7 @@ const getlist = () => {
 }
 onReachBottom(() => {
 	if (total.value > list.value.length) {
-		total.value++
+		page.value++
 		getlist()
 	}
 })

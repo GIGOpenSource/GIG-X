@@ -1,5 +1,5 @@
 <template>
-	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 90vh">
+	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 86vh">
 		<view v-for="(item, index) in isList ? list : list.slice(0, 1)" :key="index" class="con"
 			@click="todetails(item.id)">
 			<view class="top">

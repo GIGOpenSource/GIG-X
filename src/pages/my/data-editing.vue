@@ -124,6 +124,6 @@
 
 <style>
 	.u-textarea__count {
-		background-color: #212028 !important;
+		background-color: transparent !important;
 	}
 </style>

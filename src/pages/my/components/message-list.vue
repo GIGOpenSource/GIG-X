@@ -5,7 +5,7 @@
 				<up-avatar :src="uni.getStorageSync('user_info').user_id == item.user_id ? item.other_user_avatar : item.user_avatar" size="40"></up-avatar>
 				<view style="margin-left: 20rpx;">
 					<view class="">{{ uni.getStorageSync('user_info').user_id == item.user_id ? item.other_user_nickname : item.user_nickname }}</view>
-					<view class="">{{ item.content }}</view>
+					<view class="">{{ item.last_message.content }}</view>
 				</view>
 			</view>
 			<view class="right">
@@ -33,7 +33,7 @@ const getMessage = () => {
 		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data
+		list.value = res.data.results
 		total.value = res.data.pagination.total
 	})
 }
@@ -51,7 +51,7 @@ onMounted(() => {
 })
 onReachBottom(() => {
 	if (total.value > list.value.length) {
-		total.value++
+		page.value++
 		getlist()
 	}
 })
