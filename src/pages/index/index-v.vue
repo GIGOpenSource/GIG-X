@@ -189,12 +189,13 @@ export default {
 			}
 		},
 		/* 评论组件内容回调 */
-		async submitComment(val) {
-			console.log(val);
+		async submitComment(val, item) {
+			console.log(val, item);
 			const params = {
 				type: "short",
 				tabs: "recommend",
 				target_id: this.commentInfo.id,
+				parent_comment_id: item.id || 0,
 				content: val.text,
 			};
 			const res = await addContentComment(params);

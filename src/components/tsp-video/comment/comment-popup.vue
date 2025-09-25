@@ -746,7 +746,7 @@ export default {
 			// 	})
 			// }
 			uni.setStorageSync('commentIdsNum', wbId )
-			this.$emit('submitComment', this.contentInfo)
+			this.$emit('submitComment', this.contentInfo, this.currReplyInfo)
 			this.$nextTick(()=>{
 				this.resetData()
 			})
