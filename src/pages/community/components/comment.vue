@@ -92,7 +92,7 @@
 	}
 	const getlist = () => {
 		getCommentList({
-		    	// parent_comment_id:0,
+		    	parent_comment_id:0,
 				target_id: props.detailId,
 				// type: 'dynamic',
 				currentPage: page.value,
@@ -127,14 +127,13 @@
 	.page {
 		background: #212028;
 		width: 95vw;
-		// min-height: 20vh;
-		max-height: 55vh;
+		max-height: 46vh;
 		margin: 20rpx;
-		padding: 20rpx;
+		margin-bottom: 0;
+		padding:0 20rpx;
 		font-size: 28rpx;
 		border-radius: 20rpx;
 		box-sizing: border-box;
-
 		.tabs {
 			color: rgb(255, 255, 255, .5);
 
@@ -146,11 +145,12 @@
 		.top {
 			display: flex;
 			justify-content: space-between;
+			padding-top: 20rpx;
 		}
-
+       
 		.center {
 			display: flex;
-			margin-top: 20rpx;
+			padding-top: 20rpx;
 
 			.right {
 				width: 600rpx;

@@ -132,11 +132,15 @@
 		show.value = false
 	}
 	const pubilsh = () => {
+		console.log(params.title.length,'tot;e');
+		
 		params.user_id = uni.getStorageSync('user_info').user_id
 		if (!params.type) return toast('请选择发布类型')
 		if (!params.title) return toast('请输入发布标题')
+		if (params.title.length > 20) return toast('发布标题不能超过20字')
 		if (!params.title) return toast('请输入发布内容')
 		if (params.isFree == '') return toast('请选择是否免费')
+
 		params.isFree = params.isFree == '是' ? true : false
 		params.type = params.type == '视频' ? 'video' : 'dynamic'
 		createCommunity(params)

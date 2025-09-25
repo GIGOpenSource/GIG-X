@@ -3,7 +3,7 @@
 		<view v-for="(item, index) in list" :key="index" class="con"
 			@click="uni.navigateTo({ url: '/pages/community/details?id=' + item.dynamic.id })">
 			<view class="desc" v-if="item.type == 'like'">{{ item.user.nickname }}点赞了你的动态</view>
-			<view class="desc" v-if="item.type == 'comment'">@{{ item.user.nickname }}了你：{{item.target.content }}</view>
+			<view class="desc" v-if="item.type == 'comment'">@{{ item.user.nickname }}了你：{{ item.target.content }}</view>
 			<view class="bg">
 				<view class="top">
 					<view class="left">
@@ -23,7 +23,7 @@
 				</view>
 				<view class="title">{{ item.dynamic.title }}</view>
 				<view class="images">
-					<image mode="" v-for="(images,indexs) in item.dynamic.images" :key="indexs"  :src="images"></image>
+					<image mode="" v-for="(images, indexs) in item.dynamic.images" :key="indexs" :src="images"></image>
 				</view>
 			</view>
 			<view class="bottom">
@@ -62,23 +62,17 @@ const show = ref(false)
 const total = ref(0)
 const list = ref([])
 const give = (index) => {
-
 	let params = {
 		target_id: list.value[index].targetId
 	}
 	if (list.value[index].is_liked) {
 		list.value[index].likeCount -= 1;
-		liketoggle(params).then(res => {
-
-		})
 	} else {
 		list.value[index].likeCount += 1;
-
 	}
 	liketoggle(params).then(res => {
 		list.value[index].is_liked = !list.value[index].is_liked
 	})
-
 }
 const follow = (index) => {
 	let params = {

@@ -61,7 +61,7 @@
 		addComment({
 	        // type:'dynamic',
 			target_id:detailId.value,
-			// parent_comment_id:0,
+			parent_comment_id:0,
 			content: con.value,	
 		}).then(res => {
 			commentList.value.getlist()

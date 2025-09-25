@@ -1,15 +1,21 @@
 <template>
 	<view class="operate-popup" :style="{ height: screenHeight + 'px' }" v-if="modelValue">
 		<!-- 遮罩层 -->
-		<view class="operate-mask" @click="close" :style="{ width: screenWidth + 'px', height: screenHeight + 'px' }"></view>
-
+		<view class="operate-mask" @click="close" :style="{ width: screenWidth + 'px', height: screenHeight + 'px' }">
+		</view>
+		<!-- 二维码 -->
+		<up-popup :show="flag" @close="close" @open="open" mode="center" round="10">
+			<view class="pruop">
+				<image :src="imageUrl" style="width: 200rpx; height: 200rpx;" @longpress="saveimage" />
+				<view class="text">长按保存图片</view>
+			</view>
+		</up-popup>
 		<!-- 内容区域 -->
-		<view
-			class="operate-content"
+		<view class="operate-content"
 			:style="{ width: screenWidth + 'px', height: commentHeight + 'px', transform: `translateY(${showPopup ? 0 : commentHeight}px)` }"
-			@click="clickStop"
-		>
-			<scroll-view class="operate-content-box" scroll-y :show-scrollbar="false" :style="{ width: screenWidth + 'px', height: commentHeight - 15 + 'px' }">
+			@click="clickStop">
+			<scroll-view class="operate-content-box" scroll-y :show-scrollbar="false"
+				:style="{ width: screenWidth + 'px', height: commentHeight - 15 + 'px' }">
 				<view class="content-top f f-lv-s">
 					<text class="content-top-title">分享给</text>
 					<view class="f f-v-c">
@@ -50,7 +56,8 @@
 					</view>
 				</scroll-view> -->
 
-				<scroll-view class="user-tool f" scroll-x :style="{ width: screenWidth + 'px' }" :show-scrollbar="false">
+				<scroll-view class="user-tool f" scroll-x :style="{ width: screenWidth + 'px' }"
+					:show-scrollbar="false">
 					<view class="f">
 						<!-- <view class="user-tool-item f fw-c" v-for="(item, index) in 10" :key="index"> -->
 						<view class="user-tool-item f fw-c">
@@ -64,17 +71,25 @@
 								<text class="user-tool-item-text text_one">链接</text>
 							</view>
 						</view>
-						<view>
-							<view style="width: 10px; height: 15px"></view>
+						<view class="user-tool-item f fw-c" @click="shareQe">
+							<view class="user-tool-item-avatar f f-lv-c">
+								<up-icon name="grid" size="30 " />
+							</view>
+							<view>
+
+								<text class="user-tool-item-text text_one">分享二维码</text>
+							</view>
 						</view>
 					</view>
 				</scroll-view>
 			</scroll-view>
+
 		</view>
 	</view>
 </template>
 
 <script>
+import * as QRCode from 'qrcode';
 export default {
 	props: {
 		modelValue: {
@@ -89,12 +104,12 @@ export default {
 		/* 底部栏的高度 */
 		tabBarHeight: {
 			type: Number,
-			// #ifdef APP-PLUS || H5
-			default: 60
-			// #endif
+		// #ifdef APP-PLUS || H5
+		default: 60,
+		// #endif
 
 			// #ifndef APP-PLUS || H5
-			default: 60
+			default: 60,
 			// #endif
 		},
 		forwardInfo: {
@@ -109,8 +124,12 @@ export default {
 			showPopup: false,
 			screenWidth: 0, //屏幕的宽度
 			screenHeight: 0, //屏幕的高度
-			commentHeight: 155 ,//内容区域的高度
+			commentHeight: 155,//内容区域的高度
 			// commentHeight: 275 //内容区域的高度
+			qrcodeData: "https://baidu.com", // 二维码数据
+			imageUrl: '',
+			flag: false
+
 		}
 	},
 	watch: {
@@ -132,26 +151,67 @@ export default {
 		} else {
 			this.screenHeight = deviceInfo.windowHeight
 		}
+		this.getQrcode()
 		// this.commentHeight = this.screenHeight / 1.68 //评论内容区域的高度
 	},
 	methods: {
-		clickStop(event) {
-			event.stopPropagation()
+		shareQe() {
+			this.flag = true
 		},
-		close() {
-			this.showPopup = false
-			setTimeout(() => {
-				this.$emit('update:modelValue', false)
-			}, 250)
+		saveimage() {
+				uni.showLoading({ title: '保存中...' });
+				const link = document.createElement('a');
+				link.download = `qrcode_${Date.now()}.png`;
+				link.href = this.imageUrl;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				uni.hideLoading();
 		},
-		onCopySuccess(){
-			this.close()
-		}
+	clickStop(event) {
+		event.stopPropagation()
+	},
+	close() {
+		this.showPopup = false
+		setTimeout(() => {
+			this.$emit('update:modelValue', false)
+		}, 250)
+	},
+	onCopySuccess() {
+		this.close()
+	},
+	async getQrcode() {
+		const qrDataURL = await QRCode.toDataURL(this.qrcodeData, {
+			width: 300,
+			height: 300,
+			color: {
+				dark: "#000000",
+				light: "#ffffff"
+			}
+		});
+		this.imageUrl = qrDataURL
+
 	}
+}
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.pruop {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	width: 250rpx;
+	height: 250rpx;
+	color: #000;
+	font-size: 24rpx;
+
+	.text {
+		margin-bottom: 10rpx;
+	}
+}
+
 .f {
 	/* #ifndef APP-NVUE */
 	display: flex;
