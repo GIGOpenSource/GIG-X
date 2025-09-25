@@ -1,5 +1,5 @@
 <template>
-	<z-paging ref="pagingRef" v-model="dataList" @query="queryList" >
+	<z-paging ref="pagingRef" v-model="dataList" @query="queryList" :auto="false">
 		<view class="content">
 			<!-- <BannerSwiper /> -->
 

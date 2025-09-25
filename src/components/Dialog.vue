@@ -16,7 +16,9 @@
 				
 			</view>
 			<view class="dialog-content">
-				<slot>4363474574568659</slot>
+				<slot>
+					<image src="https://fpoimg.com/221x76" mode="widthFix" style="width: 100%;"></image>
+				</slot>
 			</view>
 			
 			<view class="dialog-footer">
@@ -43,7 +45,7 @@
 	const props = defineProps({
 		modelValue: {
 			type: Boolean,
-			default: true,
+			default: false,
 			required: true
 		},
 		/* 是否可以点击蒙版关闭 **/
@@ -86,6 +88,8 @@
 	const handleClickClose = ()=>{
 		console.log('handleClickClose');
 		emits('update:modelValue', false)
+		emits('close')
+
 	}
 </script>
 
@@ -148,6 +152,7 @@
 			
 			.dialog-content{
 				padding: 25rpx 45rpx;
+				height: 165rpx;
 			}
 			
 			.dialog-footer{
