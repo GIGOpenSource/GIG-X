@@ -137,10 +137,9 @@ const follow = (index) => {
 };
 const share = (index, id) => {
 	addShare({
-		userId: userinfo.id,
 		id: id
 	}).then(res => {
-		list.value[index].shareCount++
+		list.value[index].share_count = res.data.share_count
 	})
 }
 const oparea = () => {
@@ -164,7 +163,7 @@ const getlist = async (newVal) => {
 	let params = {
 		currentPage: page.value,
 		pageSize: 20,
-		user_id: props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id,
+		// user_id: props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id,
 		type: 'dynamic',
 		tabs: newVal == 0 || newVal == 3 ? 'recommend' : newVal == 1 ? 'follow' : 'latest'
 	}
@@ -184,6 +183,10 @@ const getlist = async (newVal) => {
 		list.value = [...list.value, ...res.data.results]
 		total.value = res.data.pagination.total
 	} else {
+	    if(newVal == 6){
+			params.user_id =  props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id
+			delete params.type
+		}
 		res = await communityList(params)
 		list.value = [...list.value, ...res.data.results]
 		total.value = res.data.pagination.total
@@ -204,8 +207,8 @@ const refreshData = async () => {
 }
 
 const lower = () => {
-	if (total.value > list.length) {
-		total.value++
+	if (total.value > list.value.length) {
+		page.value++
 		getlist()
 	}
 

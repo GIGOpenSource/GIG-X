@@ -2,9 +2,9 @@
 	<view class="">
 		<view class="list" v-for="(item, index) in list" :key="index" @click="details(item)">
 			<view class="left">
-				<up-avatar :src="item.receiverAvatar" size="40"></up-avatar>
+				<up-avatar :src="uni.getStorageSync('user_info').user_id == item.user_id ? item.other_user_avatar : item.user_avatar" size="40"></up-avatar>
 				<view style="margin-left: 20rpx;">
-					<view class="">{{ item.other_user_nickname || '暂无' }}</view>
+					<view class="">{{ uni.getStorageSync('user_info').user_id == item.user_id ? item.other_user_nickname : item.user_nickname }}</view>
 					<view class="">{{ item.content }}</view>
 				</view>
 			</view>
@@ -20,28 +20,27 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { getlist } from '@/api/message.js'
-import {
-	storeToRefs
-} from 'pinia'
+import { onReachBottom } from '@dcloudio/uni-app';
 import {
 	userinfoStore
 } from '@/store/userinfos.js'
 const store = userinfoStore()
 const list = ref([])
-
-
-
+const total = ref(0)
+const page = ref(1)
 const getMessage = () => {
 	getlist({
-		currentPage: 1,
+		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
 		list.value = res.data
+		total.value = res.data.pagination.total
 	})
 }
 const details = (item) => {
+	
 	store.getPersonInfo({
-		id: item.other_user_id
+		id: uni.getStorageSync('user_info').user_id == item.user_id ? item.other_user_id : item.user_id
 	}).then(res => {
       uni.navigateTo({ url: '/pages/my/dialogue'})
 	})
@@ -49,6 +48,16 @@ const details = (item) => {
 }
 onMounted(() => {
 	getMessage()
+})
+onReachBottom(() => {
+	if (total.value > list.value.length) {
+		total.value++
+		getlist()
+	}
+})
+//暴露
+defineExpose({
+	getMessage
 })
 
 </script>

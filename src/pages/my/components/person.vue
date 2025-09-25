@@ -5,8 +5,10 @@
 				<up-icon name="arrow-left" color="#ffffff" size="20" v-if="isBack"></up-icon>
 			</template>
 			<template #right>
-				<text class="" @click="toPath('/pages/my/message')">消息中心</text>
+				<view v-if="!isBack">
+				   <text class="" @click="toPath('/pages/my/message')">消息中心</text>
 				<text class="setup" @click="toPath('/pages/my/setup')">设置</text>
+				</view>
 			</template>
 		</up-navbar>
 		<view class="content">
@@ -17,9 +19,9 @@
 				<view v-for="(item,index) in tarbar" :key="index" :class="current == index ? 'current':''"
 					@click="clicks(index)">{{item}}</view>
 			</view>
-			<active v-if="current == 0" :isfollow="isBack" :more="true" :tabs="6"/>
-			<myvideo v-if="current == 1" :isfollow="isBack"/>
-			<interact v-if="current == 2" :isfollow="isBack"/>
+			<active v-if="current == 0" :isfollow="isBack" :more="true" :tabs="6" ref="act"/>
+			<myvideo v-if="current == 1" :isfollow="isBack" ref="video"/>
+			<interact v-if="current == 2" :isfollow="isBack" ref="hudong"/>
 			
 		</view>
 		<view style="height: 80rpx;" v-if="isBack"></view>
@@ -39,6 +41,7 @@
 	import {
 		userinfoStore
 	} from '@/store/userinfos'
+	import { onPullDownRefresh } from '@dcloudio/uni-app';
 	const { userInfo } = userinfoStore()
 	const props = defineProps({
 		isBack:{ 
@@ -53,6 +56,9 @@
 	}])
 	const tarbar = ref(['动态', '视频', '互动'])
 	const current = ref(0)
+	const act = ref(null)
+	const video = ref(null)
+	const hudong = ref(null)
 	const clicks = (index) => {
 		current.value = index
 	}
@@ -70,6 +76,24 @@
 		}else{
 			 tarbar.value = ['动态', '视频']
 		}
+	})
+	onPullDownRefresh(() => {
+         if(current.value == 0){
+			act.value.page = 1
+			// act.value.list = []
+			act.value.refreshData()
+			
+		}else if(current.value == 1){
+			 video.value.page = 1
+			 video.value.list = []
+			video.value.getlist()
+		}else if(current.value == 2){
+			hudong.value.page = 1
+			hudong.value.list = []
+			hudong.value.getlist()
+		}
+
+		uni.stopPullDownRefresh();
 	})
 </script>
 

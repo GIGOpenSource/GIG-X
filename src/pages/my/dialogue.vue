@@ -105,8 +105,8 @@ const oparea = () => {
 const getdetails = () => {
 	details({
 		receiver_id: personInfo.value.session_id,
-		reply_to_id: personInfo.value.id,
-		sender_id: uni.getStorageSync('user_info').user_id
+		// reply_to_id: personInfo.value.id,
+		// sender_id: uni.getStorageSync('user_info').user_id
 	}).then(res => {
 		list.value = res.data
 	})
