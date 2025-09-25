@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<up-picker :show="show" :columns="columns" @confirm="onConfirm" @cancel="onCancel" @close="onClose"></up-picker>
+		<up-picker :show="show" :columns="columns" @confirm="onConfirm" @cancel="onCancel" @close="onClose" round="10" confirmColor="#000"></up-picker>
 	</view>
 </template>
 
