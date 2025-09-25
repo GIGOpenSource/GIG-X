@@ -90,6 +90,7 @@
 
 <script>
 import * as QRCode from 'qrcode';
+import { shareContent } from '@/api/content'
 export default {
 	props: {
 		modelValue: {
@@ -144,6 +145,8 @@ export default {
 		}
 	},
 	created() {
+		
+		
 		const deviceInfo = uni.getSystemInfoSync()
 		this.screenWidth = deviceInfo.screenWidth //屏幕的宽度
 		if (this.tabBarShow == 1) { //减去自定义底部栏的高度
@@ -166,7 +169,11 @@ export default {
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
-				uni.hideLoading();
+				shareContent({id:this.forwardInfo.id}).then(res => {
+					this.forwardInfo.share_count = res.data.share_count
+					uni.hideLoading();
+				})
+				
 		},
 	clickStop(event) {
 		event.stopPropagation()

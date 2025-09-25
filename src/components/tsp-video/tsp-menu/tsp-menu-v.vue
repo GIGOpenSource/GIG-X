@@ -85,7 +85,7 @@
 					<view class="fabulous-image">
 						<image src="/static/tsp-icon/ward.png" mode="" class="fabulous-image"></image>
 					</view>
-					<view class="fabulous-num">转发</view>
+					<view class="fabulous-num">{{ item.share_count }}</view>
 				</view>
 			</view>
 		</view>
