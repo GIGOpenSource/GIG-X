@@ -47,3 +47,8 @@ export const contentLike= (id) => {
 export const contentCollect= (id) => {
 	return postRequest('/favourites/v1/toggle/', { target_id: id })
 }
+
+// 任务列表
+export const taskList = (params) =>{
+	return getRequest('/tasks/template/', params)
+}

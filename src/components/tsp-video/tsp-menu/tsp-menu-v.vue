@@ -214,7 +214,7 @@ export default {
 						this.followOpen = false;
 						this.followShow = null;
 						
-						followtoggle({followee_id:this.item.id}).then((res) => {
+						followtoggle({followee_id:this.item.author_id}).then((res) => {
 							console.log("关注成功");
 							this.$emit("handleInfo", obj); //关注成功
 
