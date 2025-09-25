@@ -62,7 +62,8 @@
 		content: '',
 		images: ['https://fpoimg.com/375x580', 'https://fpoimg.com/375x580'],
 		isFree: '',
-		price: ''
+		price: '',
+		video_url:'https://partyanimals.cn/media/videos/1.mp4'
 	})
 	const fileList1 = ref([]);
 	const show = ref(false);
@@ -140,7 +141,9 @@
 		if (params.title.length > 20) return toast('发布标题不能超过20字')
 		if (!params.title) return toast('请输入发布内容')
 		if (params.isFree == '') return toast('请选择是否免费')
-
+        if(params.type !== '视频'){
+			delete params.video_url
+		}
 		params.isFree = params.isFree == '是' ? true : false
 		params.type = params.type == '视频' ? 'video' : 'dynamic'
 		createCommunity(params)

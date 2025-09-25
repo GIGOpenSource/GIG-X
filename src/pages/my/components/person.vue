@@ -13,7 +13,7 @@
 		</up-navbar>
 		<view class="content">
 			<userinfo :isFollow="isBack" :userId="isBack ? uni.getStorageSync('otherId'):uni.getStorageSync('user_info').user_id"/>
-			<vip v-if="!isBack && uni.getStorageSync('user_info').isVip == 'Y'"/>
+			<vip v-if="!isBack && personInfo.is_vip"/>
 			<!-- 动态，视频，互动 -->
 			<view class="tabs">
 				<view v-for="(item,index) in tarbar" :key="index" :class="current == index ? 'current':''"
@@ -42,7 +42,7 @@
 		userinfoStore
 	} from '@/store/userinfos'
 	import { onPullDownRefresh } from '@dcloudio/uni-app';
-	const { userInfo } = userinfoStore()
+	const { personInfo } = userinfoStore()
 	const props = defineProps({
 		isBack:{ 
 			type:Boolean,

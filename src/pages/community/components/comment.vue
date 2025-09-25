@@ -22,7 +22,7 @@
 					</view>
 					<view class="give" @click.stop="give(index)">
 
-						<up-icon :name="item.isLiked?'heart-fill':'heart'" :color="item.isLiked?'#ff0000':'#D9D9D9'"
+						<up-icon :name="item.is_liked?'heart-fill':'heart'" :color="item.is_liked?'#ff0000':'#D9D9D9'"
 							size="22"></up-icon>
 						<text>{{item.like_count}}</text>
 					</view>
@@ -69,8 +69,8 @@
 		commentlike({
 			target_id: list.value[index].id,
 		}).then(res => {
-			list.value[index].isLiked = !list.value[index].isLiked
-			if (list.value[index].isLiked) {
+			list.value[index].is_liked = !list.value[index].is_liked
+			if (list.value[index].is_liked) {
 				list.value[index].likeCount += 1
 			} else {
 				list.value[index].likeCount -= 1
