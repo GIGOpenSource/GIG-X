@@ -12,9 +12,9 @@
 		<swiper class="swiper" :current="currentSwiper" :disable-touch="true">
 			<swiper-item>
 				<view class="swiper-item">
-					<scroll-view scroll-x="true">
-						<view class="labels">
-							<view class="label" v-for="label in labels" :key="label.tagId">{{ label.tagName }}</view>
+					<scroll-view scroll-x="true" >
+						<view class="labels" style="width: 700px;">
+							<view class="label" :style="{ background: label.selected ? '#5c4b8a' : '#ffffff80', color: label.selected ? '#fff' : '#000' }" v-for="label in labels" :key="label.id" @click="handleSelectLabel(label)">{{ label.name }}</view>
 						</view>
 					</scroll-view>
 
@@ -66,7 +66,7 @@ import {
 } from '@dcloudio/uni-app'
 
 import {
-	userInterestLabel
+	tagList
 } from '@/api/public.js'
 
 
@@ -75,8 +75,8 @@ const labels = ref([])
 onLoad(() => {
 	uni.setStorageSync('isFirst', false)
 
-	userInterestLabel().then(res => {
-		labels.value = res.data.records
+	tagList().then(res => {
+		labels.value = res.data
 	})
 })
 
@@ -116,6 +116,16 @@ const blogList = ref([{
 		watch: 0
 	}
 ])
+
+// 选中标签
+const handleSelectLabel = (label) => {
+	const index = labels.value.findIndex(item => item.id === label.id)
+	if (index !== -1) {
+		labels.value[index].selected = !labels.value[index].selected
+	}
+	// todo:保存标签信息
+}
+
 const handleClickNext = () => {
 	if (currentSwiper.value == 1) {
 		// todo:保存业务逻辑
@@ -128,7 +138,6 @@ const handleClickNext = () => {
 			// #endif
 		})
 	}
-	// todo：保存标签信息
 	currentSwiper.value = 1
 
 }
@@ -182,29 +191,30 @@ page {
 
 .labels {
 	display: flex;
+	flex-wrap: wrap;
 
 	.label {
 		min-width: 80rpx;
 		text-align: center;
 		padding: 20rpx 40rpx;
-		background-color: #404040;
 		border-radius: 100rpx;
 		margin-left: 20rpx;
-		right: 20rpx;
+		margin-right: 20rpx;
 		margin-bottom: 40rpx;
-		background-color: rgba(255, 255, 255, 0.5);
+		white-space: nowrap;
+		background-color: #ffffff80;
 		color: #000;
 		box-shadow: 2px 3.5px 0.5px -3px #ffffff inset;
 
 		box-shadow: -2px -3.5px 0.5px -3px #ffffff inset;
 
-		&:first-child {
-			margin-left: 0;
-		}
+		// &:first-child {
+		// 	margin-left: 0;
+		// }
 
-		&:first-child {
-			margin-right: 0;
-		}
+		// &:first-child {
+		// 	margin-right: 0;
+		// }
 	}
 }
 

@@ -1,5 +1,5 @@
 <template>
-	<z-paging ref="paging" v-model="dataList" @query="queryList">
+	<z-paging ref="paging" v-model="dataList" @query="queryList" style="bottom:0;">
 		<view class="container">
 			<!-- 签到 -->
 			<view class="sign">
