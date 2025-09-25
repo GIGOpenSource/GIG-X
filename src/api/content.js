@@ -32,3 +32,9 @@ export const favoriteAdd = (pararms) => {
 export const favoriteRemove = (pararms) => {
 	return postRequest('/favorite/remove', pararms)
 }
+
+//分享
+export const shareContent = (pararms) => {
+	return postRequest('/contents/share/', pararms)
+}
+

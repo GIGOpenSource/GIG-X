@@ -17,7 +17,7 @@
 				<up-upload :fileList="fileList1" @afterRead="afterRead" @delete="deletePic" name="1" multiple
 					:maxCount="10" uploadIcon="plus"></up-upload>
 			</view>
-			<view v-else class="back" @click="choose(index,item.key)">
+			<view v-else class="back"  @click="choose(index,item.key)">
 				<input type="text"  :placeholder="item.name" 
 					:disabled="index == 0 || index == 4" v-model="params[item.key]" />
 				<up-icon v-if="index == 0 || index == 4" name="arrow-right" color="#ffffff" size="20"></up-icon>
@@ -119,6 +119,8 @@
 		});
 	};
 	const choose = (index, key) => {
+		console.log(111);
+		
 		keyIndex.value = key
 		if (index == 0) {
 			columns[0] = ['视频', '动态']
@@ -133,8 +135,6 @@
 		show.value = false
 	}
 	const pubilsh = () => {
-		console.log(params.title.length,'tot;e');
-		
 		params.user_id = uni.getStorageSync('user_info').user_id
 		if (!params.type) return toast('请选择发布类型')
 		if (!params.title) return toast('请输入发布标题')
@@ -177,7 +177,6 @@
 			width: 95%;
 		}
 	}
-
 	.images {
 		margin: 0 20rpx;
 	}
