@@ -24,5 +24,5 @@ export const adsDetail = (id, params) => {
 
 // 搜索
 export const search = (params) => {
-	return postRequest('/search/videos', params)
+	return getRequest('/contents/', params)
 }

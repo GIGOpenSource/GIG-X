@@ -4,7 +4,7 @@
 		<view class="operate-mask" @click="close" :style="{ width: screenWidth + 'px', height: screenHeight + 'px' }">
 		</view>
 		<!-- 二维码 -->
-		<up-popup :show="flag" @close="close" @open="open" mode="center" round="10">
+		<up-popup :show="flag" @close="close"  mode="center" round="10">
 			<view class="pruop">
 				<image :src="imageUrl" style="width: 200rpx; height: 200rpx;" @longpress="saveimage" />
 				<view class="text">长按保存图片</view>
