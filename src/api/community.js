@@ -41,7 +41,7 @@ export const addComment = (params) => {
 
 //获取评论
 export const getCommentList = (params) => {
-	return getRequest('/comments/', params)
+	return getRequest('/comments/v1/', params)
 }
 
 
@@ -53,6 +53,10 @@ export const followtoggle = (params) => {
 
 
 
+//创建评论内容
+export const addCommentContent = (params) => {
+	return postRequest('/comments/v1/', params)
+}
 
 
 

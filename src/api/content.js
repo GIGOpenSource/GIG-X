@@ -32,3 +32,24 @@ export const favoriteAdd = (pararms) => {
 export const favoriteRemove = (pararms) => {
 	return postRequest('/favorite/remove', pararms)
 }
+
+/** 点赞/取消点赞 */
+export const contentToggle = (pararms) => {
+	return postRequest('/likes/v1/content/toggle/', pararms)
+}
+
+
+/** 点踩/取消点踩 */
+export const downvoteToggle = (pararms) => {
+	return postRequest('/favourites/v1/downvote/toggle/', pararms)
+}
+
+/** 点赞/取消收藏 */
+export const favouritesV1Toggle = (pararms) => {
+	return postRequest('/favourites/v1/toggle/', pararms)
+}
+
+/** 点赞/取消评论 */
+export const likesCommentToggle = (pararms) => {
+	return postRequest('/likes/v1/comment/toggle/', pararms)
+}
