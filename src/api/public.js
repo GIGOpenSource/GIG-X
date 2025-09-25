@@ -13,8 +13,8 @@ export const getUserinfo = (params) => {
 }
 
 // 用户兴趣标签
-export const userInterestLabel = params => {
-	return getRequest('/user-interest-tags/list', params)
+export const tagList = params => {
+	return getRequest('/tags/', params)
 }
 
 // 广告（游戏）详情
@@ -24,5 +24,5 @@ export const adsDetail = (id, params) => {
 
 // 搜索
 export const search = (params) => {
-	return postRequest('/search/videos', params)
+	return getRequest('/contents/', params)
 }

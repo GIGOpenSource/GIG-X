@@ -180,7 +180,7 @@ import commentItem from './comment-item.vue'
 import commentInput from './comment-input.vue'
 import commentOperate from './comment-operate.vue'
 import { getCommentData, getReplyData } from './commentData.js' //假数据
-import { getCommentList } from '@/api/community.js'
+import { contentCommentList } from '@/api/common.js'
 export default {
 	components: {
 		tspLoading,
@@ -302,7 +302,7 @@ export default {
 				target_id: this.commentInfo.id,
 
 			}
-			return getCommentList(params)
+			return contentCommentList(params)
 
 
 			// new Promise((resolve, reject)=>{
@@ -746,7 +746,7 @@ export default {
 			// 	})
 			// }
 			uni.setStorageSync('commentIdsNum', wbId )
-			this.$emit('submitComment', this.contentInfo)
+			this.$emit('submitComment', this.contentInfo, this.currReplyInfo)
 			this.$nextTick(()=>{
 				this.resetData()
 			})

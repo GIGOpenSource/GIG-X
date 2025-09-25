@@ -5,7 +5,7 @@
 				<text>VIP状态</text>
 				<BadgeIcon/>
 			</view>
-			<view class="date">VIP到期：2025-8-2</view>
+			<view class="date">VIP到期：{{ formatDate(Date.now()) }}</view>
 		</view>
 		<view class="btn">续费</view>
 	</view>
@@ -13,6 +13,14 @@
 
 <script setup>
 	import BadgeIcon from '../icon/badgeIcon.vue'
+	const formatDate = (timestamp) =>{
+         const d = new Date(timestamp)
+    const yyyy = d.getFullYear()
+    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    return `${yyyy}-${mm}-${dd}`
+	}
+	
 </script>
 
 <style lang="scss" scoped>

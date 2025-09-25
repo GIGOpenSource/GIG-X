@@ -17,7 +17,7 @@
 				<up-upload :fileList="fileList1" @afterRead="afterRead" @delete="deletePic" name="1" multiple
 					:maxCount="10" uploadIcon="plus"></up-upload>
 			</view>
-			<view v-else class="back" @click="choose(index,item.key)">
+			<view v-else class="back"  @click="choose(index,item.key)">
 				<input type="text"  :placeholder="item.name" 
 					:disabled="index == 0 || index == 4" v-model="params[item.key]" />
 				<up-icon v-if="index == 0 || index == 4" name="arrow-right" color="#ffffff" size="20"></up-icon>
@@ -62,7 +62,8 @@
 		content: '',
 		images: ['https://fpoimg.com/375x580', 'https://fpoimg.com/375x580'],
 		isFree: '',
-		price: ''
+		price: '',
+		video_url:'https://partyanimals.cn/media/videos/1.mp4'
 	})
 	const fileList1 = ref([]);
 	const show = ref(false);
@@ -118,6 +119,8 @@
 		});
 	};
 	const choose = (index, key) => {
+		console.log(111);
+		
 		keyIndex.value = key
 		if (index == 0) {
 			columns[0] = ['视频', '动态']
@@ -135,8 +138,12 @@
 		params.user_id = uni.getStorageSync('user_info').user_id
 		if (!params.type) return toast('请选择发布类型')
 		if (!params.title) return toast('请输入发布标题')
+		if (params.title.length > 20) return toast('发布标题不能超过20字')
 		if (!params.title) return toast('请输入发布内容')
 		if (params.isFree == '') return toast('请选择是否免费')
+        if(params.type !== '视频'){
+			delete params.video_url
+		}
 		params.isFree = params.isFree == '是' ? true : false
 		params.type = params.type == '视频' ? 'video' : 'dynamic'
 		createCommunity(params)
@@ -170,7 +177,6 @@
 			width: 95%;
 		}
 	}
-
 	.images {
 		margin: 0 20rpx;
 	}

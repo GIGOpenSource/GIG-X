@@ -6,28 +6,28 @@
 			<view class="right">
 				<view class="name">
 					<text>{{ personInfo.user_nickname }}</text>
-					<text class="vip">VIP</text>
+					<text class="vip" v-if="personInfo.is_vip">VIP</text>
 				</view>
 				<!-- <view class="phone">{{ personInfo.phone }}</view> -->
 				<view class="phone">{{ personInfo.user_bio || '暂无' }}</view>
 			</view>
 			<view class="" v-if="isFollow && uni.getStorageSync('user_info').user_id !== userId" @click="follow">
-				{{ status ? '取消关注' : '关注' }}
+				{{ personInfo.is_follower ? '取消关注' : '关注' }}
 			</view>
 		</view>
 		<!-- 数量 -->
 		<view class="num">
 			<view class="">
 				<text>关注 :</text>
-				<text>{{ personInfo.followingCount || 0 }}</text>
+				<text>{{ personInfo.following_count || 0 }}</text>
 			</view>
 			<view class="">
 				<text>粉丝 :</text>
-				<text>{{ personInfo.followersCount || 0 }}</text>
+				<text>{{ personInfo.followers_count || 0 }}</text>
 			</view>
 			<view class="">
 				<text>点赞 :</text>
-				<text>{{ personInfo.likeCount || 0 }}</text>
+				<text>{{ personInfo.likes_count || 0 }}</text>
 			</view>
 		</view>
 	</view>
@@ -45,9 +45,6 @@ import {
 import {
 	userinfoStore
 } from '@/store/userinfos.js'
-import {
-	followCheck
-} from '@/api/setup.js'
 import {
 	followtoggle
 } from '@/api/community.js'
@@ -69,34 +66,22 @@ const props = defineProps({
 		default: 0
 	}
 })
-//检查关注状态
-const check = () => {
-	// followCheck({
-	// 		followerId: uni.getStorageSync('user_info').id,
-	// 		followedId: props.userId
-	// 	})
-	// 	.then(res => {
-	// 		status.value = res.data
-	// 	})
-}
-onShow(() => {
-	console.log(props, 'paoajdb');
 
+onShow(() => {
 	store.getPersonInfo({
 		id: props.userId
 	})
-	if (props.isFollow && uni.getStorageSync('user_info').id !== props.userId) {
-		console.log(1111);
-		check()
-	}
+
 })
 
 const follow = () => {
 	let params = {
-		followeeId: uni.getStorageSync('otherId')
+		followee_id: uni.getStorageSync('otherId')
 	}
 	followtoggle(params).then(res => {
-		status.value = !status.value
+		store.getPersonInfo({
+			id: props.userId
+		})
 	})
 
 };

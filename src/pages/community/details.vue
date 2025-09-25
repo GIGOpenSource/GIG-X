@@ -59,7 +59,7 @@
 	const publish = () => {
 		if(!con.value) return uni.showToast({title:'内容不能为空',icon:'none'})
 		addComment({
-	        type:'dynamic',
+	        // type:'dynamic',
 			target_id:detailId.value,
 			parent_comment_id:0,
 			content: con.value,	
@@ -68,8 +68,6 @@
 			activelist.value.getlist(4)
 			con.value = ''
 		})
-	
-		
 	}
 	const oparea = () => {
 		show.value = true

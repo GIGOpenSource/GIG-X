@@ -102,9 +102,11 @@ export default {
   },
   methods: {
     startData() {
+		console.log(this.tabItem);
+		
       let params = {
         type: "short",
-        tabs: this.tabItem.key,
+        tabs: this.tabItem.id,
         currentPage: this.tNum + 1,
       };
       return new Promise((resolve, reject) => {
@@ -125,15 +127,20 @@ export default {
                 item.fullScreenShow = item.fullScreenShow; //是否有全屏观看按钮
                 item.sliderShow = true; //是否显示进度条
                 item.rotateImgShow = false; //是否显示旋转头像
-                item.fabulousShow = false; //是否点赞
-                item.followReally = false; //是否已经关注
+                item.fabulousShow = item.is_liked; //是否点赞
+				item.collectionShow = item.is_favourites; //是否收藏
+                item.followReally = item.is_follower; //是否已经关注
 				item.desc = item.description; //视频描述
 				item.author = item.author_nickname; //作者名称
 				item.likeCount = item.like_count; //点赞数量
 				item.commentCount = item.comment_count; //评论数量
 				item.favoriteCount = item.favorite_count; //收藏数量
               });
-              resolve(dataList);
+              if( dataList.length>0){
+				resolve(dataList);
+			  } else {
+				resolve([]);
+			  }
             } else {
               resolve([]);
             }
@@ -165,7 +172,7 @@ export default {
     },
     /* 下拉刷新 */
     refreshData() {
-      this.tNum = 1;
+      this.tNum = 0;
       this.startData().then((res) => {
         if (res.length > 0) {
           /* 调用视频的重新加载方法 */

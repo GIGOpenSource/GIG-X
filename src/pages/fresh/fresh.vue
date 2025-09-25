@@ -53,10 +53,10 @@ const currentPage = ref(0);
 const list = ref([
 	{
 		name: '推荐'
+	},
+	{
+		name: '任务中心'
 	}
-	// {
-	// 	name: '任务中心'
-	// }
 ]);
 
 const onTabChange = (tab) => {

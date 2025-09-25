@@ -60,7 +60,7 @@
 			<view class="all_video">
 				<view class="title">全部视频列表</view>
 				<view class="card-list">
-					<card-view v-for="item in dataList" :item="item" @click="handleToLongVideo(item.contentId)"></card-view>
+					<card-view v-for="item in dataList" :item="item" @click="handleToLongVideo(item.id)"></card-view>
 				</view>
 			</view>
 		</view>
@@ -98,16 +98,16 @@ const tagsList = ref([
 		children: [
 			{
 				label: '热门影视',
-				value: 'hot',
+				value: 'like_count',
 				checked: true
 			},
 			{
 				label: '收藏最多',
-				value: 'favorite'
+				value: 'favorite_count'
 			},
 			{
 				label: '最新上架',
-				value: 'latest'
+				value: 'create_time'
 			}
 		]
 	},
@@ -145,16 +145,16 @@ const tagsList = ref([
 		children: [
 			{
 				label: '全类型',
-				value: 'ALL',
+				value: 'all',
 				checked: true
 			},
 			{
 				label: 'VIP免费',
-				value: 'VIP'
+				value: 'vip'
 			},
 			{
 				label: '付费解锁',
-				value: 'PAID'
+				value: 'pay'
 			}
 		]
 	},
@@ -163,25 +163,29 @@ const tagsList = ref([
 		children: [
 			{
 				label: '本周',
-				value: 'THIS_WEEK',
+				value: 'week',
 				checked: true
 			},
 			{
 				label: '本月',
-				value: 'THIS_MONTH'
+				value: 'month'
 			},
 			{
 				label: '半年',
-				value: 'HALF_YEAR'
+				value: 'half_year'
+			},
+			{
+				label: '更久',
+				value: 'longer'
 			}
 		]
 	}
 ]);
 
 const searchObj = reactive({
-	timerange: 'THIS_WEEK',
-	priceType: 'ALL',
-	sortBy: 'hot'
+	time_range: 'week',
+	price_type: 'all',
+	ordering: 'like_count'
 });
 
 // 搜索内容
@@ -199,9 +203,24 @@ const paging = ref(null);
 const dataList = ref([]);
 
 const queryList = (pageNo, pageSize) => {
+	if( searchObj.price_type === 'all' ) {
+		searchObj.is_vip = false
+		searchObj.paid_only = false
+		delete searchObj.price_type
+	}
+	if( searchObj.price_type === 'vip' ) {
+		searchObj.is_vip = true
+		searchObj.paid_only = false
+		delete searchObj.price_type
+	}
+	if( searchObj.price_type === 'pay' ) {
+		searchObj.paid_only = true
+		searchObj.is_vip = false
+		delete searchObj.price_type
+	}
+
 	const params = {
-		keyword: searchText.value,
-		userId: uni.getStorageSync('user_info')?.id,
+		search: searchText.value,
 		...searchObj,
 		currentPage: pageNo,
 		pageSize
@@ -209,7 +228,7 @@ const queryList = (pageNo, pageSize) => {
 	search(params).then((res) => {
 		console.log('searchRes', res);
 		if (res.code === 200) {
-			paging.value.complete(res.data.records);
+			paging.value.complete(res.data.results);
 		} else {
 			paging.value.complete(false);
 		}
@@ -225,9 +244,9 @@ const clearHistoryHandle = () => {
 const selectLabelHandle = (item, i, sub, j) => {
 	item.children.forEach((e) => (e.checked = false));
 	item.children[j].checked = !sub?.checked;
-	if (item.name == '价格') searchObj.priceType = item.children[j].value;
-	if (item.name == '排序') searchObj.sortBy = item.children[j].value;
-	if (item.name == '时间') searchObj.timeRange = item.children[j].value;
+	if (item.name == '价格') searchObj.price_type = item.children[j].value;
+	if (item.name == '排序') searchObj.ordering = item.children[j].value;
+	if (item.name == '时间') searchObj.time_range = item.children[j].value;
 };
 const handleToLongVideo = (id) => {
 	uni.navigateTo({

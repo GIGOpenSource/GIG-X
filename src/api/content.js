@@ -33,6 +33,13 @@ export const favoriteRemove = (pararms) => {
 	return postRequest('/favorite/remove', pararms)
 }
 
+//分享
+export const shareContent = (pararms) => {
+	return postRequest('/contents/share/', pararms)
+}
+
+
+
 /** 点赞/取消点赞 */
 export const contentToggle = (pararms) => {
 	return postRequest('/likes/v1/content/toggle/', pararms)

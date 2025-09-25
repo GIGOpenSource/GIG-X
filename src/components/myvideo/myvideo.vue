@@ -55,8 +55,8 @@
 		})
 	}
 	const lower = () => {
-		if (total.value > list.length) {
-			total.value++
+		if (total.value > list.value.length) {
+			page.value++
 			getlist()
 		}
 	}
@@ -66,6 +66,9 @@
 	}, {
 		immediate: true
 	});
+	defineExpose({
+		getlist
+	})
 </script>
 
 <style lang="scss" scoped>

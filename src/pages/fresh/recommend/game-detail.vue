@@ -19,7 +19,7 @@
 
 		<template #bottom>
 			<view class="bottom-btn">
-				<up-button :text="!dataDetail.isPaied ? '支付金币下载' : '立即下载'" class="custom-down" shape="circle" @click="handleClickDown"></up-button>
+				<up-button :text="downConditions" class="custom-down" shape="circle" @click="handleClickDown"></up-button>
 			</view>
 		</template>
 
@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
 import { adsDetail } from '@/api/public.js';
@@ -66,6 +66,18 @@ onLoad((options) => {
 	id.value = options.id;
 
 	queryList();
+});
+
+const downConditions = computed(() => {
+	if( !dataDetail.value.is_vip && !dataDetail.value.price ) {
+		return '免费下载'
+	}
+	if( dataDetail.value.is_vip && !dataDetail.value.price ) {
+		return 'VIP免费下载'
+	}
+	if(  dataDetail.value.price ) {
+		return `支付${dataDetail.value.price}金币下载`
+	}
 });
 
 const queryList = (pageNo, pageSize) => {

@@ -13,9 +13,9 @@
 		</up-navbar>
 
 		<view class="content">
-			<messageList v-if="current == 0" />
-			<interact v-if="current == 1" />
-			<noticeList v-if="current == 2" />
+			<messageList v-if="current == 0" ref="message"/>
+			<interact v-if="current == 1" ref="hudong"/>
+			<noticeList v-if="current == 2" ref="notice"/>
 		</view>
 
 	</z-paging>
@@ -28,6 +28,7 @@
 	} from 'vue';
 	import noticeList from './components/notice-list.vue'
 	import messageList from './components/message-list.vue'
+	import { onPullDownRefresh } from '@dcloudio/uni-app';
 	const tabs = reactive([{
 		name: '消息'
 	}, {
@@ -36,9 +37,29 @@
 		name: '通知'
 	}])
 	const current = ref(0)
+	const message = ref(null)
+	const hudong = ref(null)
+	const notice = ref(null)
 	const click = (item) => {
 		current.value = item.index
 	}
+	onPullDownRefresh(() => {
+		if(current.value == 0){
+			message.value.page = 1
+			message.value.list = []
+			message.value.getMessage()
+			
+		}else if(current.value == 1){
+			hudong.value.page = 1
+			hudong.value.list = []
+			hudong.value.getlist()
+		}else if(current.value == 2){
+			notice.value.page = 1
+			notice.value.list = []
+			notice.value.getlist()
+		}
+		uni.stopPullDownRefresh();
+	})
 </script>
 
 <style lang="scss" scoped>

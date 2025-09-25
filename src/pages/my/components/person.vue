@@ -5,27 +5,29 @@
 				<up-icon name="arrow-left" color="#ffffff" size="20" v-if="isBack"></up-icon>
 			</template>
 			<template #right>
-				<text class="" @click="toPath('/pages/my/message')">消息中心</text>
+				<view v-if="!isBack">
+				   <text class="" @click="toPath('/pages/my/message')">消息中心</text>
 				<text class="setup" @click="toPath('/pages/my/setup')">设置</text>
+				</view>
 			</template>
 		</up-navbar>
 		<view class="content">
 			<userinfo :isFollow="isBack" :userId="isBack ? uni.getStorageSync('otherId'):uni.getStorageSync('user_info').user_id"/>
-			<vip v-if="!isBack && uni.getStorageSync('user_info').isVip == 'Y'"/>
+			<vip v-if="!isBack && personInfo.is_vip"/>
 			<!-- 动态，视频，互动 -->
 			<view class="tabs">
 				<view v-for="(item,index) in tarbar" :key="index" :class="current == index ? 'current':''"
 					@click="clicks(index)">{{item}}</view>
 			</view>
-			<active v-if="current == 0" :isfollow="isBack" :more="true" :tabs="6"/>
-			<myvideo v-if="current == 1" :isfollow="isBack"/>
-			<interact v-if="current == 2" :isfollow="isBack"/>
+			<active v-if="current == 0" :isfollow="isBack" :more="true" :tabs="6" ref="act"/>
+			<myvideo v-if="current == 1" :isfollow="isBack" ref="video"/>
+			<interact v-if="current == 2" :isfollow="isBack" ref="hudong"/>
 			
 		</view>
 		<view style="height: 80rpx;" v-if="isBack"></view>
 	</z-paging>
 	
-	<view class="private-message" v-if="isBack && uni.getStorageSync('user_info').user_id !== uni.getStorageSync('otherId')" @click="toPath('/pages/my/dialogue?id='+uni.getStorageSync('otherId'))">私信</view>
+	<view class="private-message" v-if="isBack && uni.getStorageSync('user_info').user_id !== uni.getStorageSync('otherId')" @click="toPath('/pages/my/dialogue')">私信</view>
 </template>
 
 <script setup>
@@ -39,7 +41,8 @@
 	import {
 		userinfoStore
 	} from '@/store/userinfos'
-	const { userInfo } = userinfoStore()
+	import { onPullDownRefresh } from '@dcloudio/uni-app';
+	const { personInfo } = userinfoStore()
 	const props = defineProps({
 		isBack:{ 
 			type:Boolean,
@@ -53,9 +56,10 @@
 	}])
 	const tarbar = ref(['动态', '视频', '互动'])
 	const current = ref(0)
+	const act = ref(null)
+	const video = ref(null)
+	const hudong = ref(null)
 	const clicks = (index) => {
-		console.log(index,'111');
-		
 		current.value = index
 	}
 	const onTabChange = (tab) => {
@@ -72,6 +76,24 @@
 		}else{
 			 tarbar.value = ['动态', '视频']
 		}
+	})
+	onPullDownRefresh(() => {
+         if(current.value == 0){
+			act.value.page = 1
+			// act.value.list = []
+			act.value.refreshData()
+			
+		}else if(current.value == 1){
+			 video.value.page = 1
+			 video.value.list = []
+			video.value.getlist()
+		}else if(current.value == 2){
+			hudong.value.page = 1
+			hudong.value.list = []
+			hudong.value.getlist()
+		}
+
+		uni.stopPullDownRefresh();
 	})
 </script>
 

@@ -25,23 +25,36 @@
 
 <script setup>
 import {
-	ref,onMounted
+	ref, onMounted
 } from 'vue'
 import { getNotice } from '@/api/message.js'
 const src = ref('http://pic2.sc.chinaz.com/Files/pic/pic9/202002/hpic2119_s.jpg')
+import { onReachBottom } from '@dcloudio/uni-app';
 const list = ref([])
+const page = ref(1)
+const total = ref(0)
 onMounted(() => {
 	getlist()
 })
 const getlist = () => {
 	getNotice({
-		currentPage: 1,
+		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
 		list.value = res.data.results
-		
+		total.value = res.data.pagination.total
+
 	})
 }
+onReachBottom(() => {
+	if (total.value > list.value.length) {
+		page.value++
+		getlist()
+	}
+})
+defineExpose({
+	getlist
+})
 </script>
 
 <style lang="scss" scoped>

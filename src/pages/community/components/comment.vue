@@ -22,9 +22,9 @@
 					</view>
 					<view class="give" @click.stop="give(index)">
 
-						<up-icon :name="item.isLiked?'heart-fill':'heart'" :color="item.isLiked?'#ff0000':'#D9D9D9'"
+						<up-icon :name="item.is_liked?'heart-fill':'heart'" :color="item.is_liked?'#ff0000':'#D9D9D9'"
 							size="22"></up-icon>
-						<text>{{item.likeCount}}</text>
+						<text>{{item.like_count}}</text>
 					</view>
 				</view>
 				<view class="" @click="commentCon">
@@ -44,7 +44,7 @@
 	} from 'vue'
 	import {
 		getCommentList,
-		// commentlike
+		commentlike
 	} from '@/api/community.js'
 	import {
 		userinfoStore
@@ -66,22 +66,16 @@
 	})
 	//点赞
 	const give = (index) => {
-		// commentlike({
-		// 	userId: userinfo.id,
-		// 	likeType: "COMMENT",
-		// 	targetId: list.value[index].id,
-		// 	targetTitle: list.value[index].content,
-		// 	targetAuthorId: list.value[index].userId,
-		// 	userNickname: list.value[index].userNickname,
-		// 	userAvatar: list.value[index].userAvatar
-		// }).then(res => {
-		// 	list.value[index].isLiked = !list.value[index].isLiked
-		// 	if (list.value[index].isLiked) {
-		// 		list.value[index].likeCount += 1
-		// 	} else {
-		// 		list.value[index].likeCount -= 1
-		// 	}
-		// })
+		commentlike({
+			target_id: list.value[index].id,
+		}).then(res => {
+			list.value[index].is_liked = !list.value[index].is_liked
+			if (list.value[index].is_liked) {
+				list.value[index].likeCount += 1
+			} else {
+				list.value[index].likeCount -= 1
+			}
+		})
 	}
 	const commentCon = () => {
 		emits('onfocus')
@@ -94,19 +88,19 @@
 		getCommentList({
 		    	parent_comment_id:0,
 				target_id: props.detailId,
-				type: 'dynamic',
+				// type: 'dynamic',
 				currentPage: page.value,
 				pageSize: 20,
-				tabs:current.value?'latest':'recommend'
+				ordering:current.value?'create_time':'like_count'
 			})
 			.then(res => {
 				list.value = res.data.results
-				total.value = res.data.total
+				total.value = res.data.pagination.total
 			})
 	}
 	const lower = () => {
-		if (total.value > list.length) {
-			total.value++;
+		if (total.value > list.value.length) {
+			page.value++;
 			getlist()
 		}
 	}
@@ -127,14 +121,13 @@
 	.page {
 		background: #212028;
 		width: 95vw;
-		// min-height: 20vh;
-		max-height: 55vh;
+		max-height: 46vh;
 		margin: 20rpx;
-		padding: 20rpx;
+		margin-bottom: 0;
+		padding:0 20rpx;
 		font-size: 28rpx;
 		border-radius: 20rpx;
 		box-sizing: border-box;
-
 		.tabs {
 			color: rgb(255, 255, 255, .5);
 
@@ -146,11 +139,12 @@
 		.top {
 			display: flex;
 			justify-content: space-between;
+			padding-top: 20rpx;
 		}
-
+       
 		.center {
 			display: flex;
-			margin-top: 20rpx;
+			padding-top: 20rpx;
 
 			.right {
 				width: 600rpx;
