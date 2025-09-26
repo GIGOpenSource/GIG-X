@@ -31,7 +31,7 @@
 					{{ item.create_time }}
 				</view>
 				<view class="right">
-					<view class="" @click.stop="give(index)">
+					<view class="" @click.stop="give(index)" v-if="item.type == 'comment'">
 						<up-icon :name="item.is_liked ? 'thumb-up-fill' : 'thumb-up'"
 							:color="item.is_liked ? '#ff0000' : '#ffffff'" size="26"></up-icon>
 						<text>{{ item.dynamic.like_count || 0 }}</text>
@@ -51,7 +51,7 @@ import {
 	onMounted
 } from 'vue'
 import {
-	liketoggle,
+	commentlike,
 	followtoggle
 } from '@/api/community.js'
 import {
@@ -71,7 +71,7 @@ const give = (index) => {
 	} else {
 		list.value[index].dynamic.like_count += 1;
 	}
-	liketoggle(params).then(res => {
+	commentlike(params).then(res => {
 		list.value[index].is_liked = !list.value[index].is_liked
 	})
 }
