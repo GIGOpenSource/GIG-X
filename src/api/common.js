@@ -19,6 +19,11 @@ export const contentList= (params) => {
 	return getRequest('/contents/', params)
 }
 
+// 关注内容列表
+export const contentFollowList= (params) => {
+	return getRequest('/contents/content_follow/', params)
+}
+
 // 内容详情
 export const contentDetail= (id) => {
 	return getRequest('/contents/' + id)

@@ -28,7 +28,7 @@
  * vue页面引用 H5、小程序引用示例
  */
 import twVideov from "@/components/tsp-video/tsp-video-list/video-v.vue";
-import { contentList } from "@/api/common";
+import { contentList, contentFollowList } from "@/api/common";
 
 export default {
   components: {
@@ -103,14 +103,19 @@ export default {
   methods: {
     startData() {
 		console.log(this.tabItem);
-		
+      
+      let fn = this.tabItem.id === 'follow' ?  contentFollowList : contentList
       let params = {
         type: "short",
-        tabs: this.tabItem.id,
+        // tabs: this.tabItem.id,
+        ordering: this.tabItem.id === 'recommend' ? '-like_count' : this.tabItem.id === 'latest' ? '-create_time' : '-like_count',
         currentPage: this.tNum + 1,
       };
+      
+      this.tabItem.id === 'follow' && delete params.ordering
+
       return new Promise((resolve, reject) => {
-        contentList(params)
+        fn(params)
           .then((res) => {
             console.log("🚀 ~ startData ~ res:", res);
             if (res.code === 200) {
