@@ -52,3 +52,8 @@ export const contentCollect= (id) => {
 export const taskList = (params) =>{
 	return getRequest('/tasks/template/', params)
 }
+
+// 推荐博主列表
+export const bloggerList = (params) => {
+	return getRequest('/tags/recommend-users/', params)
+}
