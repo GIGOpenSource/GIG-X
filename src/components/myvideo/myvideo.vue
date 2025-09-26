@@ -1,10 +1,10 @@
 <template>
 	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 90vh">
-		<!-- <view class="tabs">
-			<view v-for="(item,index) in tabs" :class="current == index ? 'current':''" @click="current = index">
+		<view class="tabs">
+			<view v-for="(item,index) in tabs" :class="current == index ? 'current':''" @click="clicks(index)">
 				{{item}}
 			</view>
-		</view> -->
+		</view>
 		<view class="con">
 			<view class="list" v-for="(item,index) in list" :key="index"
 				@click="uni.navigateTo({url:'/pages/video/video?id='+item.id})">
@@ -27,7 +27,7 @@
 		watch
 	} from 'vue'
 	import { 
-		dynamicsList
+		dynamicsList,getVideo
 	} from '@/api/setup.js'
 	const current = ref(0)
 	const page = ref(1)
@@ -41,16 +41,20 @@
 			default: true
 		}
 	});
+	const clicks = (index) => {
+		current.value = index
+		getlist()
+	}
 	const getlist = () => {
-
 		let params = {
 			currentPage: page.value,
 			pageSize: 20,
 			user_id:props.isfollow?uni.getStorageSync('otherId'):uni.getStorageSync('user_info').user_id,
-			type:'video'
+			type:current.value ? 'long':'short',
+			tabs:'latest'
 		}
-		dynamicsList(params).then(res => {
-			list.value = res.data.results
+		getVideo(params).then(res => {
+			list.value = [...list.value,...res.data.results]
 			total.value = res.data.total
 		})
 	}
@@ -82,7 +86,7 @@
 
 		.current {
 			color: #ffffff;
-			font-size: 34rpx;
+			font-size: 32rpx;
 		}
 	}
 
