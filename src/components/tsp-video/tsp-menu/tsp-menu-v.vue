@@ -58,7 +58,7 @@
 						<image src="/static/tsp-icon/taoxin.png" mode="" class="fabulous-image" v-else></image>
 						<view class="like-pellet" :class="[likeeffect ? 'like-pellet-active' : '']"></view>
 					</view>
-					<view class="fabulous-num">{{ item.likeCount || vodCurIndex }}</view>
+					<view class="fabulous-num">{{ item.likeCount }}</view>
 				</view>
 				<!-- 评论 -->
 				<view class="fabulous" style="margin-top: 30rpx" @click="JumpBtn(2)">
@@ -66,7 +66,7 @@
 						<image src="/static/tsp-icon/pinlun.png" mode="" class="fabulous-image"></image>
 					</view>
 					<view class="fabulous-num">{{
-						item.commentCount || discussNum
+						item.commentCount 
 					}}</view>
 				</view>
 				<!-- 收藏 -->
