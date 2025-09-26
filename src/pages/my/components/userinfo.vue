@@ -8,7 +8,7 @@
 					<text>{{ personInfo.user_nickname }}</text>
 					<text class="vip" v-if="personInfo.is_vip">VIP</text>
 				</view>
-				<!-- <view class="phone">{{ personInfo.phone }}</view> -->
+				<view class="phone">{{ personInfo.username }}</view>
 				<view class="phone">{{ personInfo.user_bio || '暂无' }}</view>
 			</view>
 			<view class="" v-if="isFollow && uni.getStorageSync('user_info').user_id !== userId" @click="follow">

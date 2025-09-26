@@ -33,7 +33,7 @@ const getMessage = () => {
 		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data.results
+		list.value = [...list.value,...res.data.results]
 		total.value = res.data.pagination.total
 	})
 }

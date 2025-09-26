@@ -33,6 +33,12 @@ export const allList = (params) => {
 	return getRequest('/social/interaction_message/',params)
 }
 
+//获取视频
+export const getVideo = (params) => {
+	return getRequest('/contents/', params)
+}
+
+
 
 
 

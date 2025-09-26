@@ -7,15 +7,15 @@
 			<view class="bg">
 				<view class="top">
 					<view class="left">
-						<view @click.stop="topath(item.dynamic.user_id)"><up-avatar :src="item.dynamic.user_avatar"
+						<view @click.stop="topath(item.user.id)"><up-avatar :src="item.user.avatar"
 								size="40"></up-avatar></view>
 						<view class="message">
-							<text>{{ item.dynamic.user_nickname }}</text>
+							<text>{{ item.user.nickname }}</text>
 						</view>
 					</view>
 					<view class="follow">
-						<text v-if="!item.is_follower && item.targetId !== item.userId"
-							@click.stop="follow(index)">关注</text>
+						<!-- <text v-if="!item.is_follower && item.targetId !== item.userId"
+							@click.stop="follow(index)">关注</text> -->
 						<view class="" @click.stop="oparea">
 							<up-icon name="more-dot-fill" color="#ffffff" size="28"></up-icon>
 						</view>
@@ -64,12 +64,12 @@ const list = ref([])
 const page = ref(1)
 const give = (index) => {
 	let params = {
-		target_id: list.value[index].targetId
+		target_id: list.value[index].dynamic.id
 	}
 	if (list.value[index].is_liked) {
-		list.value[index].likeCount -= 1;
+		list.value[index].dynamic.like_count -= 1;
 	} else {
-		list.value[index].likeCount += 1;
+		list.value[index].dynamic.like_count += 1;
 	}
 	liketoggle(params).then(res => {
 		list.value[index].is_liked = !list.value[index].is_liked
@@ -91,7 +91,7 @@ const getlist = () => {
 		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data.results
+		list.value = [...list.value,...res.data.results]
 		total.value = res.data.pagination.total
 	})
 }

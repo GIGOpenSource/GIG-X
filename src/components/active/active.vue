@@ -4,16 +4,16 @@
 			@click="todetails(item.id)">
 			<view class="top">
 				<view class="left">
-					<view class="" @click.stop="topath(item.user_id)"><up-avatar :src="item.user_avatar"
+					<view class="" @click.stop="topath(item.user.id)"><up-avatar :src="item.user_avatar"
 							size="40"></up-avatar></view>
 					<view class="message">
-						<text>{{ item.user_nickname || item.followeeNickname || '用户已注销' }}</text>
+						<text>{{ item.user.user_nickname || item.followeeNickname || '用户已注销' }}</text>
 						<text class="time">{{ item.create_time }}</text>
 					</view>
 				</view>
 				<view class="follow">
 					<text
-						v-if="!isfollow && !item.is_follower && item.user_id !== uni.getStorageSync('user_info').user_id"
+						v-if="!isfollow && !item.is_follower && item.user.id !== uni.getStorageSync('user_info').user_id"
 						@click.stop="follow(index)">关注</text>
 					<view class="" @click.stop="oparea">
 						<up-icon name="more-dot-fill" color="#ffffff" size="28" v-if="more"></up-icon>
@@ -129,7 +129,7 @@ const give = (index, id) => {
 //关注
 const follow = (index) => {
 	let params = {
-		followee_id: list.value[index].user_id
+		followee_id: list.value[index].user.id
 	}
 	followtoggle(params).then(res => {
 		list.value[index].is_follower = !list.value[index].is_follower
@@ -163,9 +163,8 @@ const getlist = async (newVal) => {
 	let params = {
 		currentPage: page.value,
 		pageSize: 20,
-		// user_id: props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id,
 		type: 'dynamic',
-		tabs: newVal == 0 || newVal == 3 ? 'recommend' : newVal == 1 ? 'follow' : 'latest'
+		ordering: newVal == 0 || newVal == 3 ? '-like_count' : newVal == 1 ? 'follow' : '-create_time'
 	}
 	let res = {}
 	if (newVal == 4) {
@@ -185,7 +184,6 @@ const getlist = async (newVal) => {
 	} else {
 	    if(newVal == 6){
 			params.user_id =  props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id
-			delete params.type
 		}
 		res = await communityList(params)
 		list.value = [...list.value, ...res.data.results]
