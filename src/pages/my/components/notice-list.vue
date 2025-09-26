@@ -52,8 +52,14 @@ onReachBottom(() => {
 		getlist()
 	}
 })
+const resetData = () => {
+	list.value = [];
+	page.value = 1;
+	total.value = 0;
+	getlist()
+}
 defineExpose({
-	getlist
+	resetData
 })
 </script>
 

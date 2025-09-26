@@ -17,7 +17,15 @@
 				<up-upload :fileList="fileList1" @afterRead="afterRead" @delete="deletePic" name="1" multiple
 					:maxCount="10" uploadIcon="plus"></up-upload>
 			</view>
-			<view v-else class="back" @click="choose(index, item.key)">
+			<!-- 价格设置字段：只有在非免费时才显示 -->
+			<view v-else-if="item.key === 'price' && params.isFree !== '是'" class="back" @click="choose(index, item.key)">
+				<input type="text" :placeholder="item.name" :disabled="index == 0 || index == 4 || index == 6"
+					v-model="params[item.key]" />
+				<up-icon v-if="index == 0 || index == 4 || index == 6" name="arrow-right" color="#ffffff"
+					size="20"></up-icon>
+			</view>
+			<!-- 其他字段正常显示 -->
+			<view v-else-if="item.key !== 'price'" class="back" @click="choose(index, item.key)">
 				<input type="text" :placeholder="item.name" :disabled="index == 0 || index == 4 || index == 6"
 					v-model="params[item.key]" />
 				<up-icon v-if="index == 0 || index == 4 || index == 6" name="arrow-right" color="#ffffff"
@@ -136,6 +144,12 @@ const choose = (index, key) => {
 const confirm = (e) => {
 	params[keyIndex.value] = e.value[0]
 	show.value = false
+	
+	// 如果选择免费，将价格设置为0
+	if (keyIndex.value === 'isFree' && e.value[0] === '是') {
+		params.price = '0'
+	}
+	
 	const arr = [{
 		name: '选择发布类型',
 		key: 'type'
@@ -168,6 +182,12 @@ const pubilsh = () => {
 	if (params.title.length > 20) return toast('发布标题不能超过20字')
 	if (!params.content) return toast('请输入发布内容')
 	if (params.isFree == '') return toast('请选择是否免费')
+	if (params.isFree === '否' && (!params.price || params.price.trim() === '' || params.price === '0')) {
+		return toast('请设置价格')
+	}
+	if (params.isFree === '否' && params.price && isNaN(parseFloat(params.price))) {
+		return toast('价格必须是数字')
+	}
 	if (params.type !== '视频') {
 		delete params.video_url
 	}
@@ -232,7 +252,7 @@ textarea {
 }
 </style>
 <style>
-/deep/ .u-upload__button {
+:deep(.u-upload__button) {
 	background: #212028 !important;
 }
 </style>

@@ -47,16 +47,16 @@
 		if(current.value == 0){
 			message.value.page = 1
 			message.value.list = []
-			message.value.getMessage()
+			message.value.resetData()
 			
 		}else if(current.value == 1){
 			hudong.value.page = 1
 			hudong.value.list = []
-			hudong.value.getlist()
+			hudong.value.resetData()
 		}else if(current.value == 2){
 			notice.value.page = 1
 			notice.value.list = []
-			notice.value.getlist()
+			notice.value.resetData()
 		}
 		uni.stopPullDownRefresh();
 	})

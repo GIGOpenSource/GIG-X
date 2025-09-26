@@ -58,7 +58,7 @@
 	const current = ref(0)
 	const act = ref(null)
 	const video = ref(null)
-	const hudong = ref(null)
+	const hudong = ref()
 	const clicks = (index) => {
 		current.value = index
 	}
@@ -80,17 +80,14 @@
 	onPullDownRefresh(() => {
          if(current.value == 0){
 			act.value.page = 1
-			// act.value.list = []
 			act.value.refreshData()
 			
 		}else if(current.value == 1){
 			 video.value.page = 1
 			 video.value.list = []
-			video.value.getlist()
+			video.value.resetData()
 		}else if(current.value == 2){
-			hudong.value.page = 1
-			hudong.value.list = []
-			hudong.value.getlist()
+			hudong.value.resetData()
 		}
 
 		uni.stopPullDownRefresh();

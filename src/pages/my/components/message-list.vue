@@ -52,12 +52,18 @@ onMounted(() => {
 onReachBottom(() => {
 	if (total.value > list.value.length) {
 		page.value++
-		getlist()
+		getMessage()
 	}
 })
+const resetData = () => {
+	list.value = [];
+	page.value = 1;
+	total.value = 0;
+	getMessage()
+}
 //暴露
 defineExpose({
-	getMessage
+	resetData
 })
 
 </script>

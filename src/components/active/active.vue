@@ -183,7 +183,7 @@ const getlist = async (newVal) => {
 		total.value = res.data.pagination.total
 	} else {
 	    if(newVal == 6){
-			params.user_id =  props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id
+			params.user =  props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id
 		}
 		res = await communityList(params)
 		list.value = [...list.value, ...res.data.results]
