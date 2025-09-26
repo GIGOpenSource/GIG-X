@@ -16,7 +16,7 @@
 				</view>
 				<text class="footTitle-commodity-name text_one">商品商品商品商品商品商品商品商品商品商品商品商品商品</text>
 			</view> -->
-			<view><text class="foot-name">@{{ item.author }}</text></view>
+			<view><text class="foot-name">@{{ item.author.user_nickname }}</text></view>
 			<view style="width: 450rpx; position: relative" v-if="item.desc">
 				<text class="foot-cont" :class="[item.desc.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.desc
 					}}</text>
@@ -39,7 +39,7 @@
 			]">
 				<!-- 头像 -->
 				<view class="menu-avatar">
-					<image src="/static/tsp-icon/touxiang.jpg" mode="" class="avatar-image" @click="JumpBtn(1)"></image>
+					<image :src="item.author.avatar" mode="" class="avatar-image" @click="JumpBtn(1)"></image>
 					<view class="follow" @click="followBtn(index)" v-if="!item.followReally"
 						:class="{ followHide: followShow == 2 }">
 						<image src="/static/tsp-icon/gou.png" mode="" class="follow-guanzhu guanzhu-gou"
@@ -248,7 +248,7 @@ export default {
 			switch (index) {
 				case 1:
 					console.log("点击头像",  this.item);
-					uni.setStorageSync('otherId', this.item.author_id)
+					uni.setStorageSync('otherId', this.item.author.id)
 					uni.navigateTo({ url: "/pages/my/person" });
 					break;
 				case 2:

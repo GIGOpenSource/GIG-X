@@ -64,7 +64,7 @@
 			parent_comment_id:0,
 			content: con.value,	
 		}).then(res => {
-			commentList.value.getlist()
+			commentList.value.resetData()
 			activelist.value.getlist(4)
 			con.value = ''
 		})
