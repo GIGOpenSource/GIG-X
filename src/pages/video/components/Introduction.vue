@@ -8,11 +8,19 @@
           class=""
           @click.stop="uni.navigateTo({ url: '/pages/my/person' })"
         >
-          <up-avatar :src="detail.author_avatar"></up-avatar>
+          <up-avatar
+            :src="
+              detail.author && detail.author.avatar ? detail.author.avatar : ''
+            "
+          ></up-avatar>
         </view>
         <view class="info">
-          <view class="name">{{ detail.author_nickname }}</view>
-          <view class="nums">{{ detail.favorite_count }}粉丝</view>
+          <view class="name">{{
+            detail.author && detail.author.user_nickname
+              ? detail.author.user_nickname
+              : ""
+          }}</view>
+          <view class="nums">{{ detail.followers_count }}粉丝</view>
         </view>
       </view>
       <!-- <view class="now">2355人正在看</view> -->

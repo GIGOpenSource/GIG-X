@@ -1,22 +1,32 @@
 <template>
-	<z-paging-swiper ref="paging" :loading-more-enabled="false" :swiper-style="{ bottom: '0 !important'}">
-		<template #top>
-			<!-- 导航栏 -->
-			<up-navbar bgColor="transparent" placeholder :autoBack="false" :fixed="false" @rightClick="rightClick">
-				<template #left>
-					<tabs :list="list" @change="onTabChange"></tabs>
-				</template>
+  <z-paging-swiper
+    ref="paging"
+    :loading-more-enabled="false"
+    :swiper-style="{ bottom: '0 !important' }"
+  >
+    <template #top>
+      <!-- 导航栏 -->
+      <up-navbar
+        bgColor="transparent"
+        placeholder
+        :autoBack="false"
+        :fixed="false"
+        @rightClick="rightClick"
+      >
+        <template #left>
+          <tabs :list="list" @change="onTabChange"></tabs>
+        </template>
 
-				<template #right>
-					<view class="search">
-						<up-icon name="search" color="#fff" size="22"></up-icon>
-						<text>搜索</text>
-					</view>
-				</template>
-			</up-navbar>
+        <template #right>
+          <view class="search">
+            <up-icon name="search" color="#fff" size="22"></up-icon>
+            <text>搜索</text>
+          </view>
+        </template>
+      </up-navbar>
 
-			<!-- tab分类 -->
-			<!-- 			<up-tabs
+      <!-- tab分类 -->
+      <!-- 			<up-tabs
 				:list="categoryList"
 				:current="currentCategory"
 				@click="handleClickCategory"
@@ -33,113 +43,121 @@
 				}"
 				itemStyle="padding-left: 15px; padding-right: 5px; height: 34px;"
 			/> -->
-		</template>
+    </template>
 
-		<swiper :current="currentTab" style="height: 100%" @animationfinish="swiperAnimationfinish">
-			<swiper-item v-for="(item, index) in list">
-				<tabs-page :current="currentTab" :tabsIndex="index" v-if="currentTab == item.tab"></tabs-page>
-			</swiper-item>
-		</swiper>
-	</z-paging-swiper>
+    <swiper
+      :current="currentTab"
+      style="height: 100%"
+      @animationfinish="swiperAnimationfinish"
+    >
+      <swiper-item v-for="(item, index) in list">
+        <tabs-page
+          :current="currentTab"
+          :tabsIndex="index"
+          v-if="currentTab == item.tab"
+        ></tabs-page>
+      </swiper-item>
+    </swiper>
+  </z-paging-swiper>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import tabs from '@/components/tabs/tabs.vue';
-import TabsPage from './TabsPage.vue';
+import { ref, onMounted } from "vue";
+import tabs from "@/components/tabs/tabs.vue";
+import TabsPage from "./TabsPage.vue";
 
-import { getAdsList } from '@/api/public.js';
+import { getAdsList } from "@/api/public.js";
 
 onMounted(() => {
-	console.log('reresresresresresress');
-	const params = {
-		currentPage: 1,
-		pageSize: 20
-	};
-	// getAdsList(params).then(res => {
-	// 	console.log('res', res);
-	// }).catch(err => {
-	// 	console.log('err', err);
-	// })
+  console.log("reresresresresresress");
+  const params = {
+    currentPage: 1,
+    pageSize: 20,
+  };
+  // getAdsList(params).then(res => {
+  // 	console.log('res', res);
+  // }).catch(err => {
+  // 	console.log('err', err);
+  // })
 });
 
 const list = ref([
-	{
-		name: '发现',
-		tab:'recommend'
-	},
-	{
-		name: '精选',
-		tab: 'selected'
-	}
+  {
+    name: "发现",
+    tab: "recommend",
+  },
+  {
+    name: "精选",
+    tab: "selected",
+  },
 ]);
 
 const currentCategory = ref(0);
 // 当前tab
-const currentTab  = ref('recommend');
+const currentTab = ref("recommend");
 
 const categoryList = ref([
-	{
-		name: '关注'
-	},
-	{
-		name: '推荐'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	},
-	{
-		name: '最新'
-	}
+  {
+    name: "关注",
+  },
+  {
+    name: "推荐",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
+  {
+    name: "最新",
+  },
 ]);
 // 切换分类
 const handleClickCategory = (tab) => {
-	currentCategory.value = tab.index;
+  currentCategory.value = tab.index;
 };
 const onTabChange = (tab) => {
-	// currentCategory.value = tab.index;
-	currentTab.value = tab.tab
+  // currentCategory.value = tab.index;
+  currentTab.value = tab.tab;
 };
 
 // 定义方法
 const rightClick = () => {
-	console.log('rightClick');
-	uni.navigateTo({
-		url: '/pages/search/search'
-	});
+  console.log("rightClick");
+  uni.navigateTo({
+    url: "/pages/search/search",
+  });
 };
 
 const leftClick = () => {
-	console.log('leftClick');
+  console.log("leftClick");
 };
 
 // swiper滑动结束
 const swiperAnimationfinish = (e) => {
-	currentCategory.value = e.detail.current;
+  currentCategory.value = e.detail.current;
 };
 </script>
 
