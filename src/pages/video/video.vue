@@ -13,7 +13,10 @@
 				<up-icon name="arrow-left" size="18" color="#fff"></up-icon>
 			</view> -->
       <!-- 视频 -->
-      <video-player :detail="detail"></video-player>
+      <video-player
+        :detail="detail"
+        @dataChanged="handleDataChanged"
+      ></video-player>
 
       <!-- 广告 -->
       <advertisement></advertisement>
@@ -135,6 +138,12 @@ const queryList = () => {
       detail.value = res.data;
     }
   });
+};
+
+// 处理子组件数据变化事件
+const handleDataChanged = () => {
+  // 重新获取数据
+  queryList();
 };
 
 const publish = async () => {

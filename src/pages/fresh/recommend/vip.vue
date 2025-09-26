@@ -44,6 +44,7 @@
         <tabs-page
           :tab-index="index"
           :vip="true"
+          :isAuto="!dialogVisible"
           :current="currentTab"
           v-if="currentCategory === index"
         ></tabs-page>
@@ -60,14 +61,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Dialog from "@/components/Dialog.vue";
 import tabsPage from "../../discover/TabsPage.vue";
-
+import { userinfoStore } from "@/store/userinfos";
+const store = userinfoStore();
 const currentCategory = ref(0);
 const currentTab = ref("follow");
 
 const dialogVisible = ref(false);
+
+// 如果不是vip 顯示充值弹窗
+const is_vip = computed(() => store.userinfo.is_vip);
+dialogVisible.value = !is_vip.value;
 
 const categoryList = ref([
   {

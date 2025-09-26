@@ -32,10 +32,13 @@
       <up-rate
         :count="rateCount"
         v-model="countValue"
-        :readonly="countValue > 0"
         active-color=" #FFDA70"
         size="24"
+        :readonly="countValue > 0"
+        @change="handleChange"
+        @click="onRateClick"
       ></up-rate>
+
       <text
         style="
           margin-left: 10rpx;
@@ -53,24 +56,66 @@
 
 <script setup>
 import { ref, watch } from "vue";
-
+import { ratingRate, ratingGet } from "@/api/content";
 import GuessLike from "./GuessLike.vue";
-
+import { onLoad, onShow } from "@dcloudio/uni-app";
 const props = defineProps({
   detail: {
     type: Object,
     default: () => {},
   },
 });
+const rateCount = ref(5);
+const countValue = ref(0);
+const isUserRating = ref(false); // 添加标志位来区分用户操作和程序设置
+
 watch(
   () => props.detail,
   (val) => {
     console.log(val, "val");
-  }
+    if (val && val.id) {
+      getRating();
+    }
+  },
+  { immediate: true } // 立即执行一次
 );
 
-const rateCount = ref(5);
-const countValue = ref(0);
+const getRating = () => {
+  ratingGet({ content_id: props.detail.id }).then((res) => {
+    // 通过 content_id 筛选出匹配的评分对象
+    const rating = res.data;
+    if (rating) {
+      isUserRating.value = false; // 设置标志位为false，表示这是程序设置
+      countValue.value = rating.score;
+    }
+  });
+};
+
+const onRateClick = () => {
+  // 标记这是用户操作
+  isUserRating.value = true;
+};
+
+const handleChange = (value) => {
+  // 只有在用户操作时才执行评分逻辑
+  if (isUserRating.value) {
+    ratingRate({ content_id: props.detail.id, score: value.toFixed(1) }).then(
+      (res) => {
+        console.log(res, "res");
+      }
+    );
+  }
+  // 重置标志位
+  isUserRating.value = false;
+};
+onLoad((e) => {
+  console.log("+++++++++++++onLoad", e);
+  // getRating(); // 已通过 watch 处理
+});
+
+onShow(() => {
+  console.log("Introduction组件 onShow - detail:", props.detail);
+});
 </script>
 
 <style lang="scss" scoped>

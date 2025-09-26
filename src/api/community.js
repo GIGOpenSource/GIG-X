@@ -46,6 +46,11 @@ export const getCommentList = (params) => {
 	return getRequest('/comments/v2/', params)
 }
 
+//获取评论
+export const getCommentListV1 = (params) => {
+	return getRequest('/comments/v1/', params)
+}
+
 //评论点赞
 export const commentlike = (params) => {
 	return postRequest('/likes/v1/comment/toggle/', params)

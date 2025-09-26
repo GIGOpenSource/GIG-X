@@ -4,10 +4,7 @@
       <view class="comment-item" v-for="(item, index) in list" :key="index">
         <view class="user-line">
           <view class="user">
-            <view
-              class=""
-              @click.stop="uni.navigateTo({ url: '/pages/my/person' })"
-            >
+            <view class="" @click.stop="gopage(item)">
               <up-avatar :src="item.user_avatar"></up-avatar>
             </view>
             <view class="info">
@@ -17,8 +14,8 @@
           </view>
           <view class="now" @click="give(item)">
             <up-icon
-              :name="item.flag ? 'heart-fill' : 'heart'"
-              :color="item.flag ? '#ff0000' : '#D9D9D9'"
+              :name="item.is_liked ? 'heart-fill' : 'heart'"
+              :color="item.is_liked ? '#ff0000' : '#D9D9D9'"
               size="22"
             ></up-icon>
             <text style="margin-left: 10rpx">{{ item.like_count }}</text>
@@ -36,7 +33,7 @@
 <script setup>
 import { ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
-import { getCommentList } from "@/api/community";
+import { getCommentListV1 } from "@/api/community";
 import { likesCommentToggle } from "@/api/content";
 const props = defineProps({
   id: {
@@ -53,7 +50,7 @@ const reload = () => {
     currentPage: 1,
     pageSize: 9999,
   };
-  getCommentList(params).then((res) => {
+  getCommentListV1(params).then((res) => {
     console.log(res.data);
     if (res.code === 200) {
       list.value = res.data.results;
@@ -65,6 +62,11 @@ const give = (item) => {
   likesCommentToggle({ target_id: item.id }).then((res) => {
     reload();
   });
+};
+
+const gopage = (item) => {
+  uni.setStorageSync("otherId", item.user_id);
+  uni.navigateTo({ url: "/pages/my/person" });
 };
 
 onLoad(() => {

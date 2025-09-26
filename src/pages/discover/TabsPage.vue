@@ -1,13 +1,17 @@
 <template>
-  <z-paging ref="pagingRef" v-model="dataList" @query="queryList">
+  <z-paging
+    ref="pagingRef"
+    v-model="dataList"
+    @query="queryList"
+    :auto="isAuto"
+  >
     <view class="content">
       <!-- <BannerSwiper /> -->
-
       <view class="card-list">
         <card-view
-            :item="item"
-            v-for="item in dataList"
-            @click="handleToLongVideo(item.id)"
+          :item="item"
+          v-for="item in dataList"
+          @click="handleToLongVideo(item.id)"
         ></card-view>
       </view>
     </view>
@@ -30,6 +34,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isAuto: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 import BannerSwiper from "./components/BannerSwiper/BannerSwiper.vue";
@@ -41,11 +49,11 @@ const pagingRef = ref();
 const dataList = ref([]);
 
 watch(
-    () => props.current,
-    (val, oldVal) => {
-      console.log("🚀 ~ val:", val);
-      pagingRef.value.reload();
-    }
+  () => props.current,
+  (val, oldVal) => {
+    console.log("🚀 ~ val:", val);
+    pagingRef.value.reload();
+  }
 );
 
 const queryList = (pageNo, pageSize) => {

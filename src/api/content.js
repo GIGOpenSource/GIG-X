@@ -60,3 +60,13 @@ export const favouritesV1Toggle = (pararms) => {
 export const likesCommentToggle = (pararms) => {
 	return postRequest('/likes/v1/comment/toggle/', pararms)
 }
+
+/** 评分 */
+export const ratingRate = (pararms) => {
+	return postRequest('/ratings/rate/', pararms)
+}
+
+/** 获取评分 */
+export const ratingGet = (pararms) => {
+	return postRequest('/ratings/get-rating/', pararms)
+}

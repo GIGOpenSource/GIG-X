@@ -64,6 +64,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["dataChanged"]);
+
 const videoErrorCallback = () => {};
 
 const give = ref(false);
@@ -125,7 +127,9 @@ const handleClickPiece = (item) => {
 // 接口成功之后在进行状态变化
 function itemfunction(item) {
   item.isActive = !item.isActive;
-  item.isActive ? item.num++ : item.num--;
+  // item.isActive ? item.num++ : item.num--;
+  // 通知父组件数据已变化，需要重新获取数据
+  emit("dataChanged");
 }
 
 const clickContentToggle = (item) => {
@@ -167,7 +171,7 @@ watch(
     pieceList.value[0].num = props.detail.like_count;
     pieceList.value[0].isActive = props.detail.is_liked;
     pieceList.value[1].num = props.detail.downvote_total;
-    // pieceList.value[1].isActive = props.detail.is_follower; 接口没做
+    pieceList.value[1].isActive = props.detail.is_downvoted;
     pieceList.value[2].num = props.detail.favorite_count;
     pieceList.value[2].isActive = props.detail.is_favourites;
     pieceList.value[3].num = props.detail.share_count;
