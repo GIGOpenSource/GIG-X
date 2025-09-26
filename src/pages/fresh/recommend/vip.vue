@@ -82,11 +82,11 @@ const categoryList = ref([
   },
   {
     name: "推荐",
-    tab: "recommend",
+    tab: "-like_count",
   },
   {
     name: "最新",
-    tab: "latest",
+    tab: "-create_time",
   },
   // {
   // 	name: '视频'

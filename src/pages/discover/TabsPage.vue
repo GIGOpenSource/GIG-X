@@ -43,7 +43,7 @@ const props = defineProps({
 import BannerSwiper from "./components/BannerSwiper/BannerSwiper.vue";
 import CardView from "./components/CardView/CardView.vue";
 
-import { contentList } from "@/api/common.js";
+import { contentList, contentFollowList } from "@/api/common.js";
 
 const pagingRef = ref();
 const dataList = ref([]);
@@ -57,10 +57,22 @@ watch(
 );
 
 const queryList = (pageNo, pageSize) => {
+  if (props.current == "follow") {
+    const params = {
+      is_vip: true,
+    };
+    contentFollowList(params).then((res) => {
+      console.log("resresres", res);
+      if (res.code === 200) {
+        pagingRef.value.complete(res.data.results);
+      }
+    });
+    return;
+  }
   const params = {
     type: "long",
     is_vip: props.vip,
-    tabs: props.current,
+    ordering: props.current,
     currentPage: pageNo,
     pageSize,
   };

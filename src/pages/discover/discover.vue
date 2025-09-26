@@ -84,17 +84,17 @@ onMounted(() => {
 const list = ref([
   {
     name: "发现",
-    tab: "recommend",
+    tab: "-create_time",
   },
   {
     name: "精选",
-    tab: "selected",
+    tab: "-like_count",
   },
 ]);
 
 const currentCategory = ref(0);
 // 当前tab
-const currentTab = ref("recommend");
+const currentTab = ref("-create_time");
 
 const categoryList = ref([
   {
