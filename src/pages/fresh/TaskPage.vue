@@ -231,16 +231,6 @@ const btn = (id) => {
       }
     }
 
-<<<<<<< Updated upstream
-    .custom-btn {
-      width: 190rpx;
-      background: linear-gradient(180deg, #5662e1 0%, #614793 100%);
-      border: none;
-      color: #fff;
-      font-size: 15px;
-    }
-  }
-=======
 		.custom-btn {
 			width: 190rpx;
 			border: none;
@@ -256,6 +246,5 @@ const btn = (id) => {
 			background: #9b9b9b;
 		}
 	}
->>>>>>> Stashed changes
 }
 </style>
