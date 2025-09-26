@@ -9,7 +9,7 @@ export default defineConfig({
     uni(),
     VitePWA({
 			registerType: 'autoUpdate',
-      devOptions:{  // 想在开发环境看效果就打开
+      devOptions:{  // 想在开发环境看效果就打开（会导致开发环境缓存，看不到效果）
         enabled: false
       },
 			workbox: {
