@@ -17,7 +17,7 @@
 			<view class="right">
 				<view class="r-top">
 					<view class="info">
-						<text class="name">{{item.userNickname}}</text>
+						<text class="name">{{item.user_nickname}}</text>
 						<text class="time">{{item.create_time}}</text>
 					</view>
 					<view class="give" @click.stop="give(index)">
@@ -71,9 +71,9 @@
 		}).then(res => {
 			list.value[index].is_liked = !list.value[index].is_liked
 			if (list.value[index].is_liked) {
-				list.value[index].likeCount += 1
+				list.value[index].like_count += 1
 			} else {
-				list.value[index].likeCount -= 1
+				list.value[index].like_count -= 1
 			}
 		})
 	}
@@ -91,10 +91,10 @@
 				// type: 'dynamic',
 				currentPage: page.value,
 				pageSize: 20,
-				ordering:current.value?'create_time':'like_count'
+				ordering:current.value?'-create_time':'-like_count'
 			})
 			.then(res => {
-				list.value = res.data.results
+				list.value = [...list.value,...res.data.results]
 				total.value = res.data.pagination.total
 			})
 	}

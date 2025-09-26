@@ -33,7 +33,7 @@ const getMessage = () => {
 		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data.results
+		list.value = [...list.value,...res.data.results]
 		total.value = res.data.pagination.total
 	})
 }
@@ -52,12 +52,18 @@ onMounted(() => {
 onReachBottom(() => {
 	if (total.value > list.value.length) {
 		page.value++
-		getlist()
+		getMessage()
 	}
 })
+const resetData = () => {
+	list.value = [];
+	page.value = 1;
+	total.value = 0;
+	getMessage()
+}
 //暴露
 defineExpose({
-	getMessage
+	resetData
 })
 
 </script>

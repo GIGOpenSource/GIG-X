@@ -247,7 +247,8 @@ export default {
 			};
 			switch (index) {
 				case 1:
-					console.log("点击头像");
+					console.log("点击头像",  this.item);
+					uni.setStorageSync('otherId', this.item.author_id)
 					uni.navigateTo({ url: "/pages/my/person" });
 					break;
 				case 2:

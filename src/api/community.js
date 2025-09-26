@@ -69,6 +69,16 @@ export const addCommentContent = (params) => {
 }
 
 
+//创建视频
+export const createVideo = (params) => {
+	return postRequest('/contents/', params)
+}
+
+
+
+
+
+
 
 
 

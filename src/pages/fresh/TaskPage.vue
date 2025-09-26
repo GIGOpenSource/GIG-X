@@ -94,6 +94,10 @@ const queryList = (pageNo, pageSize) => {
     if (res.code === 200) {
       paging.value.complete(res.data.filter(item => item.task_template_type == activeTab.value));
       signlist.value = res.data.filter(item => item.task_template_type == 'checkin')[0]
+      if(!signlist.value.data.claimed_times.length){
+           generateDateList()
+           return
+      }
       getDate()
 
     } else {
@@ -110,8 +114,6 @@ const btn = (id) => {
 }
 
 const getDate = () => {
-  // const set = new Set(signlist.value.data.claimed_times.map(d => d.slice(0, 10)))
-
   const set = new Set(signlist.value.data.claimed_times.map(d => d.slice(0, 10)))
   const start = new Date([...set].sort()[0]) // 最早那天
   const list = []
@@ -134,6 +136,28 @@ const getDate = () => {
   }
   day.value = maxStreak
   step.value = list
+}
+
+const formatDate = (date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  const h = String(date.getHours()).padStart(2, '0')
+  const min = String(date.getMinutes()).padStart(2, '0')
+  const s = String(date.getSeconds()).padStart(2, '0')
+  return `${y}-${m}-${d} ${h}:${min}:${s}`
+}
+
+const generateDateList = () => {
+  const now = new Date()
+  for (let i = 0; i < 7; i++) {
+    const futureDate = new Date(now)
+    futureDate.setDate(now.getDate() + i)
+    step.value.push({
+      date:formatDate(futureDate),
+      status:false
+    })
+  }
 }
 
 

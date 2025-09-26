@@ -41,7 +41,7 @@ const getlist = () => {
 		currentPage: page.value,
 		pageSize: 20
 	}).then(res => {
-		list.value = res.data.results
+		list.value = [...list.value,...res.data.results]
 		total.value = res.data.pagination.total
 
 	})
@@ -52,8 +52,14 @@ onReachBottom(() => {
 		getlist()
 	}
 })
+const resetData = () => {
+	list.value = [];
+	page.value = 1;
+	total.value = 0;
+	getlist()
+}
 defineExpose({
-	getlist
+	resetData
 })
 </script>
 
