@@ -50,5 +50,10 @@ export const contentCollect= (id) => {
 
 // 任务列表
 export const taskList = (params) =>{
-	return getRequest('/tasks/template/', params)
+	return getRequest('/tasks/reward/', params)
+}
+
+//领取任务
+export const addtask = (id) =>{
+	return postRequest(`/tasks/reward/${id}/claim/`)
 }
