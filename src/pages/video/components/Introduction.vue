@@ -58,7 +58,6 @@
 import { ref, watch } from "vue";
 import { ratingRate, ratingGet } from "@/api/content";
 import GuessLike from "./GuessLike.vue";
-import { onLoad, onShow } from "@dcloudio/uni-app";
 const props = defineProps({
   detail: {
     type: Object,
@@ -68,6 +67,7 @@ const props = defineProps({
 const rateCount = ref(5);
 const countValue = ref(0);
 const isUserRating = ref(false); // 添加标志位来区分用户操作和程序设置
+const lastUserValue = ref(0); // 记录用户上次的评分值
 
 watch(
   () => props.detail,
@@ -81,41 +81,72 @@ watch(
 );
 
 const getRating = () => {
-  ratingGet({ content_id: props.detail.id }).then((res) => {
-    // 通过 content_id 筛选出匹配的评分对象
-    const rating = res.data;
-    if (rating) {
-      isUserRating.value = false; // 设置标志位为false，表示这是程序设置
-      countValue.value = rating.score;
-    }
-  });
+  ratingGet({ content_id: props.detail.id })
+    .then((res) => {
+      // 通过 content_id 筛选出匹配的评分对象
+      const rating = res.data;
+      console.log("rating+++++++++", rating);
+      // 检查rating是否存在且包含有效的score值
+      if (
+        rating &&
+        typeof rating === "object" &&
+        rating.score !== undefined &&
+        rating.score !== null
+      ) {
+        isUserRating.value = false; // 设置标志位为false，表示这是程序设置
+        countValue.value = rating.score;
+        lastUserValue.value = rating.score; // 同步更新用户评分值
+        console.log("countValue+++++++++", countValue.value);
+      } else {
+        // 如果没有评分数据，重置为0
+        isUserRating.value = false;
+        countValue.value = 0;
+        lastUserValue.value = 0; // 同步重置用户评分值
+        console.log("没有评分数据，重置为0");
+      }
+    })
+    .catch((error) => {
+      console.error("获取评分失败:", error);
+      // 出错时也重置为0
+      isUserRating.value = false;
+      countValue.value = 0;
+      lastUserValue.value = 0;
+    });
 };
 
 const onRateClick = () => {
   // 标记这是用户操作
   isUserRating.value = true;
+  console.log("用户点击评分，设置 isUserRating 为 true");
 };
 
 const handleChange = (value) => {
-  // 只有在用户操作时才执行评分逻辑
-  if (isUserRating.value) {
-    ratingRate({ content_id: props.detail.id, score: value.toFixed(1) }).then(
-      (res) => {
-        console.log(res, "res");
-      }
-    );
-  }
-  // 重置标志位
-  isUserRating.value = false;
-};
-onLoad((e) => {
-  console.log("+++++++++++++onLoad", e);
-  // getRating(); // 已通过 watch 处理
-});
+  // 判断是否为用户操作：要么是用户点击触发的，要么是值发生了变化且大于0
+  const isUserAction =
+    isUserRating.value || (value > 0 && value !== lastUserValue.value);
 
-onShow(() => {
-  console.log("Introduction组件 onShow - detail:", props.detail);
-});
+  if (isUserAction && value > 0) {
+    console.log("执行评分接口调用");
+    ratingRate({ content_id: props.detail.id, score: value.toFixed(1) })
+      .then((res) => {
+        console.log("评分成功:", res);
+        // 评分成功后，更新本地状态
+        countValue.value = value;
+        lastUserValue.value = value;
+        // 评分成功后重置标志位
+        isUserRating.value = false;
+      })
+      .catch((error) => {
+        console.error("评分失败:", error);
+        // 评分失败时也重置标志位
+        isUserRating.value = false;
+        // 这里可以考虑添加用户提示
+      });
+  } else {
+    // 如果不是用户操作或值为0，直接重置标志位
+    isUserRating.value = false;
+  }
+};
 </script>
 
 <style lang="scss" scoped>
