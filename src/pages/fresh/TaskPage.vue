@@ -1,41 +1,33 @@
 <template>
-  <z-paging ref="paging" v-model="dataList" @query="queryList">
+  <z-paging ref="paging" v-model="dataList" @query="queryList" style="bottom:0;">
     <view class="container">
       <!-- 签到 -->
       <view class="sign">
         <view class="tit">签到任务</view>
-
         <view class="task">
-          <up-image
-            radius="15rpx"
-            src="/static/images/2.png"
-            width="120rpx"
-            height="120rpx"
-          ></up-image>
-          <view class="name">毛绒搪胶玩具</view>
+          <up-image radius="15rpx" :src="signlist.task_template_image_url" width="120rpx" height="120rpx"></up-image>
+          <view class="name">{{ signlist.name }}</view>
         </view>
-
         <view class="steps">
-          <up-steps :current="currentStep" activeColor="#6370f7" dot>
-            <up-steps-item v-for="(item, index) in 7" :key="item">
+          <up-steps activeColor="#6370f7" dot>
+            <up-steps-item v-for="(item, index) in step" :key="index">
               <template #title>
-                <view style="font-size: 11px">{{ item }}</view>
+                <view style="font-size: 11px">{{ index + 1 }}</view>
               </template>
               <template #desc>
-                <view style="font-size: 11px">{{
-                  currentStep >= index ? "已签到" : "待签到"
-                }}</view>
+                <view style="font-size: 11px">{{ item.status ? '已签到' : '待签到' }}</view>
+              </template>
+              <template #icon>
+                <view style="width:20rpx;height:20rpx;border-radius:50%;"
+                  :style="{ background: item.status ? '#6370f7' : '#969799' }" />
               </template>
             </up-steps-item>
           </up-steps>
 
           <!-- 签到 -->
-          <up-button
-            text="立即签到"
-            shape="circle"
-            class="custom-style"
-          ></up-button>
-          <view class="sign-days">已连续签到{{ currentStep }}天</view>
+          <up-button :text="signlist.status == 'pending' ? '待签到' : '已签到'" shape="circle" class="custom-style"
+            @click="btn(signlist.id)" :class="signlist.status == 'pending' ? 'bg1' : 'bg2'"></up-button>
+          <view class="sign-days">已连续签到{{ day }}天</view>
         </view>
       </view>
 
@@ -44,18 +36,10 @@
         <!-- 任务分类标签 -->
         <view class="task-tabs">
           <view class="tab-list">
-            <view
-              class="tab-item"
-              :class="{ active: activeTab === 'daily' }"
-              @click="switchTab('daily')"
-            >
+            <view class="tab-item" :class="{ active: activeTab === 'daily' }" @click="switchTab('daily')">
               <text class="tab-text">每日任务</text>
             </view>
-            <view
-              class="tab-item"
-              :class="{ active: activeTab === 'newbie' }"
-              @click="switchTab('newbie')"
-            >
+            <view class="tab-item" :class="{ active: activeTab === 'novice' }" @click="switchTab('novice')">
               <text class="tab-text">新手任务</text>
             </view>
           </view>
@@ -63,25 +47,17 @@
 
         <!-- 任务 -->
         <view class="tasks">
-          <view class="task-item" v-for="item in 10">
+          <view class="task-item" v-for="(item, index) in dataList" :key="index">
             <view class="task">
-              <up-image
-                src="/static/images/5.png"
-                width="70rpx"
-                height="70rpx"
-                radius="50%"
-              ></up-image>
+              <up-image :src="item.task_template_image_url" width="70rpx" height="70rpx" radius="50%"></up-image>
               <view class="des">
-                <view class="title">任务标题</view>
-                <view class="exp">任务说明</view>
+                <view class="title">{{ item.name }}</view>
+                <view class="exp">{{ item.description }}</view>
               </view>
             </view>
 
-            <up-button
-              text="领取奖励"
-              class="custom-btn"
-              shape="circle"
-            ></up-button>
+            <up-button :text="statuslist[item.status]" class="custom-btn"
+              :class="item.status == 'pending' ? 'bg1' : 'bg2'" shape="circle" @click="btn(item.id)"></up-button>
           </view>
         </view>
       </view>
@@ -90,19 +66,77 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-
+import { ref } from 'vue';
+import { taskList, addtask } from '@/api/common'
 const dataList = ref([]);
-const currentStep = ref(5);
-
-const activeTab = ref("daily");
+const signlist = ref([])
+const currentStep = ref(1);
+const paging = ref(null)
+const cycleList = ref([])
+const activeTab = ref('daily');
 const switchTab = (tab) => {
   activeTab.value = tab;
+  paging.value.reload();
 };
+const day = ref(0)
+const step = ref([])
+const statuslist = ({
+  pending: '待领取',
+  claimed: '已领取',
+  completed: '已完成'
+})
+const queryList = (pageNo, pageSize) => {
+  const params = {
+    currentPage: pageNo,
+    pageSize
+  };
+  taskList(params).then(res => {
+    if (res.code === 200) {
+      paging.value.complete(res.data.filter(item => item.task_template_type == activeTab.value));
+      signlist.value = res.data.filter(item => item.task_template_type == 'checkin')[0]
+      getDate()
 
-const handleClickTaskTab = () => {};
+    } else {
+      paging.value.complete(false);
+    }
+  })
+}
+const btn = (id) => {
+  addtask(id)
+    .then(res => {
+      paging.value.reload();
 
-const queryList = () => {};
+    })
+}
+
+const getDate = () => {
+  // const set = new Set(signlist.value.data.claimed_times.map(d => d.slice(0, 10)))
+
+  const set = new Set(signlist.value.data.claimed_times.map(d => d.slice(0, 10)))
+  const start = new Date([...set].sort()[0]) // 最早那天
+  const list = []
+  let curStreak = 0
+  let maxStreak = 0
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    const date = d.toISOString().slice(0, 10)
+    const ok = set.has(date)
+    list.push({ date, status: ok })
+
+    if (ok) {
+      curStreak++
+      maxStreak = Math.max(maxStreak, curStreak)
+    } else {
+      curStreak = 0
+    }
+  }
+  day.value = maxStreak
+  step.value = list
+}
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -135,7 +169,7 @@ const queryList = () => {};
     }
 
     .custom-style {
-      background: linear-gradient(180deg, #5662e1 0%, #614793 100%) !important;
+      // background: linear-gradient(180deg, #5662e1 0%, #614793 100%) !important;
       border: none !important;
       width: 340rpx !important;
       font-size: 17px !important;
@@ -231,11 +265,20 @@ const queryList = () => {};
 
     .custom-btn {
       width: 190rpx;
-      background: linear-gradient(180deg, #5662e1 0%, #614793 100%);
       border: none;
       color: #fff;
       font-size: 15px;
     }
+
+
   }
+}
+
+.bg1 {
+  background: linear-gradient(180deg, #5662e1 0%, #614793 100%);
+}
+
+.bg2 {
+  background: #9b9b9b;
 }
 </style>
