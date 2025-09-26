@@ -116,8 +116,15 @@ const refreshData = async () => {
 	}
 };
 
-const onTabChange = (index) => {
+const onTabChange = async (index) => {
 	current.value = index.index;
+	const currentActive = activelist.value[current.value];
+	if (currentActive && currentActive.refreshData) {
+		await currentActive.refreshData();
+	} else if (currentActive && currentActive.getlist) {
+		await currentActive.resetData();
+		await currentActive.getlist(current.value);
+	}
 };
 
 const clicks = () => {

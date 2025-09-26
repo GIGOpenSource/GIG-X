@@ -91,7 +91,7 @@
 				// type: 'dynamic',
 				currentPage: page.value,
 				pageSize: 20,
-				ordering:current.value?'create_time':'like_count'
+				ordering:current.value?'-create_time':'-like_count'
 			})
 			.then(res => {
 				list.value = [...list.value,...res.data.results]
