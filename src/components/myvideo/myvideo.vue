@@ -11,7 +11,7 @@
 				<image :src="item.cover_url" mode="widthFix"></image>
 				<view class="play">
 					<text>播放：{{ item.view_count }}</text>
-					<!-- <text>01:01:01</text>   -->
+					<text>{{ formatDuration(item.duration) }}</text>  
 				</view>
 				<view class="title">{{ item.title }}</view>
 				<view class="time">{{ item.create_time }}</view>
@@ -52,7 +52,6 @@ const getlist = () => {
 		pageSize: 20,
 		author: props.isfollow ? uni.getStorageSync('otherId') : uni.getStorageSync('user_info').user_id,
 		type: current.value ? 'long' : 'short',
-		// tabs:'latest'
 	}
 	getVideo(params).then(res => {
 		list.value = [...list.value, ...res.data.results]
@@ -77,6 +76,19 @@ const resetData = () => {
 	total.value = 0;
 	getlist()
 }
+
+// 格式化时长：将毫秒转换为 HH:MM:SS 格式
+const formatDuration = (milliseconds) => {
+	if (!milliseconds || milliseconds === 0) return '00:00:00'
+	
+	const totalSeconds = Math.round(milliseconds / 1000)
+	const hours = Math.floor(totalSeconds / 3600)
+	const minutes = Math.floor((totalSeconds % 3600) / 60)
+	const seconds = totalSeconds % 60
+	const formatNumber = (num) => num.toString().padStart(2, '0')
+	return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`
+}
+
 defineExpose({
 	resetData
 })
@@ -104,7 +116,7 @@ defineExpose({
 }
 
 .list {
-	break-inside: avoid; //避免在主体框中插入任何中断（页面，列或区域）。
+	break-inside: avoid;
 	background: #212028;
 	margin-bottom: 20rpx;
 	width: 100%;
@@ -118,7 +130,7 @@ defineExpose({
 	.play {
 		position: relative;
 		font-size: 20rpx;
-		margin: -50rpx 0 20rpx 0;
+		margin: -50rpx 10rpx 20rpx 10rpx;
 		display: flex;
 		justify-content: space-between;
 	}

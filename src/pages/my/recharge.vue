@@ -18,9 +18,9 @@
 		<!-- 用户信息 -->
 		<rechargeUserinfo :current="current" />
 		<view class="content">
-			<vipTime v-if="current == 0" />
-			<vipInterests v-if="current == 0" />
-			<vipCoin v-if="current == 1" />
+			<vipTime v-if="current == 0" @getmoney="handmoney" />
+			<vipInterests v-if="current == 0" :selectedVipData="membership_benefits" />
+			<vipCoin v-if="current == 1" @getmoney="handmoney" />
 		</view>
 		<view style="height: 200rpx;"></view>
 		<view class="bottom">
@@ -28,11 +28,11 @@
 				<view class="zfb">支付宝</view>
 				<view class="wx">微信支付</view>
 			</view> -->
-			<view class="vip" @click="btn">{{ personInfo.is_vip ?'续费VIP':'立即开通VIP'}}</view>
+			<view class="vip" @click="btn">{{ current == 0?personInfo.is_vip ? '续费VIP' : '立即开通VIP':'金币充值' }}</view>
 		</view>
 		<up-popup :show="show" @close="close" @open="open" mode="center" round="10" :closeable="true">
 			<view class="popup">
-				<image :src="imagesurl"/>
+				<image :src="imagesurl" />
 			</view>
 		</up-popup>
 	</view>
@@ -63,6 +63,8 @@ const current = ref(0)
 const deviceId = ref('')
 const imagesurl = ref('')
 const show = ref(false);
+const money = ref(0)
+const membership_benefits = ref([])
 const click = (item) => {
 	current.value = item.index
 }
@@ -77,11 +79,15 @@ const open = () => {
 const close = () => {
 	show.value = false
 }
+const handmoney = (e, benefits) => {
+	money.value = e
+	membership_benefits.value = benefits
+}
 const btn = () => {
 	pay({
 		device_id: deviceId.value,
 		type: current == 0 ? 'vip' : 'gold',
-		money: 0.01
+		money: money.value
 	}).then(res => {
 		imagesurl.value = res.msg.payUrl
 		show.value = true
@@ -143,14 +149,16 @@ onMounted(() => {
 
 	}
 }
-.popup{
+
+.popup {
 	width: 400rpx;
 	height: 400rpx;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	image{
-		width:300rpx;
+
+	image {
+		width: 300rpx;
 		height: 80%;
 	}
 }
