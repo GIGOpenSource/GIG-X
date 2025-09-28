@@ -14,51 +14,12 @@
 - **构建工具**: HBuilderX / uni-app CLI
 - **目标平台**: App
 
-## 项目结构
-
-```
-GIG-Flash/
-├── api/                    # API接口配置
-├── components/            # 公共组件
-├── config/               # 项目配置
-├── pages/                # 页面文件
-├── static/               # 静态资源
-├── store/                # 状态管理
-├── uni_modules/          # uni-app插件
-├── utils/                # 工具函数
-├── App.vue              # 应用入口
-├── main.js              # 主入口文件
-├── manifest.json        # 应用配置
-├── pages.json           # 页面路由配置
-└── uni.scss             # 全局样式变量
-```
-
 ## 配置文件详解
-
-### 1. 环境配置 (config/config.js)
-
-```javascript
-// 开发环境配置
-const develop = true;
-
-// API服务器地址
-let host = '';
-if (develop) host = 'http://192.168.0.109:8080/collide-all/api/v1';
-else '';
-
-// 生产环境关闭console输出
-console.log = develop ? console.log : () => {};
-console.info = develop ? console.info : () => {};
-```
-
-**配置说明**:
-- `develop`: 开发环境标识，控制API地址和日志输出
-- `host`: API服务器地址，开发环境指向本地服务器
 
 ### 2. 应用配置 (manifest.json)
 
 **基本信息**:
-- 应用名称: appName
+- 应用名称: appName //使用HBuilderX修改
 - 应用ID: appId
 - 版本号: 1.0.0
 - 版本代码: 100
@@ -110,7 +71,7 @@ export function createApp() {
 ### 1. HTTP请求配置 (utils/http.js)
 
 **请求配置**:
-- 基础URL: 从config.js获取
+- 基础URL: 从.env获取
 - 请求头: 包含token认证、开发标识
 - 超时时间: 15秒
 - 加载提示: 800ms后显示loading
@@ -170,15 +131,15 @@ export function createApp() {
 
 ### 开发环境要求
 
-1. **Node.js**: 建议版本 16+
+1. **Node.js**: 建议版本 22+
 2. **HBuilderX**: 推荐使用HBuilderX进行开发
-3. **依赖安装**: `npm install`
+3. **依赖安装**: `yarn`
 
 ### 开发命令
 
 ```bash
 # 安装依赖
-npm install
+yarn
 
 # 开发模式 (HBuilderX中操作)
 # 1. 点击运行 -> 运行到浏览器
@@ -215,16 +176,14 @@ npm install
 
 ### 开发部署
 
-1. 修改 `config/config.js` 中的API地址
-2. 在HBuilderX中运行到目标平台
-3. 检查网络请求和功能正常性
+1. 在HBuilderX中运行到目标平台
+2. 检查网络请求和功能正常性
 
 ### 生产部署
 
-1. 修改 `config/config.js` 中的 `develop` 为 `false`
-2. 配置生产环境API地址
-3. 使用HBuilderX进行云打包
-4. 上传到各应用商店或平台
+1. 配置生产环境API地址
+2. 使用HBuilderX进行云打包
+3. 上传到各应用商店或平台
 
 ## 注意事项
 
@@ -253,30 +212,17 @@ npm install
 
 - 使用[工具](https://favicon.inbrowser.app/tools/favicon-generator)生成图标并放到项目中
 
-- 修改`vite.config.js`文件
+- 修改`.env`文件
 
 ```js
 
-VitePWA({
-  // ...,
-			manifest: {
-				name: 'X', // 应用名称
-				short_name: 'x',  // 应用短名称
-				description: 'A short-video app',  // 应用描述
-				theme_color: '#ffffff',
-				icons: [{
-						src: '/static/icon/pwa-192x192.png',      // 图标路径
-						sizes: '192x192',
-						type: 'image/png'
-					},
-					{
-						src: '/static/icon/pwa-512x512.png',      // 图标路径
-						sizes: '512x512',
-						type: 'image/png'
-					}
-				]
-			}
-})
+VITE_API_NAME = X //app名
+
+VITE_API_SHORT_NAME = x //app短名
+
+VITE_API_DESCRIPTION = A short-video app //app描述
+
+// 图标覆盖对应的路径文件，图片名称不变   /static/icon/pwa-192x192.png
 ```
 
 
