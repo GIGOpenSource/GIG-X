@@ -20,7 +20,7 @@
               ? detail.author.user_nickname
               : ""
           }}</view>
-          <view class="nums">{{ detail.followers_count }}粉丝</view>
+          <view class="nums">{{ detail.author.followers_count }}粉丝</view>
         </view>
       </view>
       <!-- <view class="now">2355人正在看</view> -->
