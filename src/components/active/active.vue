@@ -4,7 +4,7 @@
 			@click="todetails(item.id)">
 			<view class="top">
 				<view class="left">
-					<view class="" @click.stop="topath(item.user.id)"><up-avatar :src="item.user_avatar"
+					<view class="" @click.stop="topath(item.user.id)"><up-avatar :src="item.user.user_avatar"
 							size="40"></up-avatar></view>
 					<view class="message">
 						<text>{{ item.user.user_nickname || item.followeeNickname || '用户已注销' }}</text>
