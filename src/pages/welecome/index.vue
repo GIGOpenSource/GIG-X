@@ -45,16 +45,16 @@ const isFirst = ref(false)
 
 onLoad(() => {
 	isFirst.value = uni.getStorageSync('isFirst');
-	const params = {
-		username: 'admin',
-		password: '123456'
-	};
-	login(params).then((res) => {
-		uni.setStorageSync('user_info', res.data)
-		uni.setStorageSync('token', res.data.token)
-		store.getUserinfo({ id: res.data.user_id })
-		list()
-	})
+	// const params = {
+	// 	username: 'admin',
+	// 	password: '123456'
+	// };
+	// login(params).then((res) => {
+	// 	uni.setStorageSync('user_info', res.data)
+	// 	uni.setStorageSync('token', res.data.token)
+	// 	store.getUserinfo({ id: res.data.user_id })
+	list()
+	// })
 
 });
 onHide(() => {

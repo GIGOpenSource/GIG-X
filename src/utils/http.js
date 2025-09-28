@@ -1,6 +1,8 @@
 import {
 	host
 } from '@/config/config.js'
+import { login } from "@/api/setup.js";
+import { userinfoStore } from "@/store/userinfos";
 // 验证token是否失效
 var expired = false;
 let requestRecord = {
@@ -92,6 +94,17 @@ function request(url, params, other) {
 						}
 						reject(data.data)
 					}
+				}else if (data.statusCode == 401){
+					const params = {
+						username: uni.getStorageSync("guid_name"),
+						password: uni.getStorageSync("guid_password"),
+					  };
+					  login(params).then((res) => {
+						uni.setStorageSync("user_info", res.data);
+						uni.setStorageSync("token", res.data.token);
+						const store = userinfoStore();
+						store.getUserinfo({ id: res.data.user_id });
+					  });
 				} else {
 					if (httpConfig.errorOutput) {
 						uni.showToast({

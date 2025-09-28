@@ -1,7 +1,28 @@
 <script>
+import { guid } from "uview-plus";
+import { login } from "@/api/setup.js";
+import { userinfoStore } from "@/store/userinfos";
+
 export default {
   onLaunch: function () {
     console.log("App Launch");
+    let guid_name = guid();
+    let guid_password = guid();
+    const params = {
+      username: guid_name,
+      password: guid_password,
+    };
+    login(params).then((res) => {
+      uni.setStorageSync("guid_name", guid_name);
+      uni.setStorageSync("guid_password", guid_password);
+      uni.setStorageSync("user_info", res.data);
+      uni.setStorageSync("token", res.data.token);
+      // 延迟调用 store，确保 Pinia 已初始化
+      this.$nextTick(() => {
+        const store = userinfoStore();
+        store.getUserinfo({ id: res.data.user_id });
+      });
+    });
   },
   onShow: function () {
     console.log("App Show");
@@ -17,9 +38,9 @@ export default {
 @import "uview-plus/index.scss";
 
 /* #ifdef H5 */
-:deep(.uni-tabbar){
-  .uni-tabbar__item:nth-of-type(4){
-    .uni-tabbar__icon{
+:deep(.uni-tabbar) {
+  .uni-tabbar__item:nth-of-type(4) {
+    .uni-tabbar__icon {
       width: 42px !important;
       height: 42px !important;
       margin-top: -2px !important;
@@ -27,7 +48,6 @@ export default {
   }
 }
 /* #endif */
-
 
 /* #ifndef APP-NVUE */
 page {
