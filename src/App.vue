@@ -13,6 +13,8 @@ export default {
       password: uni.getStorageSync("guid_password") || guid_password,
     };
     login(params).then((res) => {
+      uni.setStorageSync("guid_name", guid_name);
+      uni.setStorageSync("guid_password", guid_password);
       uni.setStorageSync("user_info", res.data);
       uni.setStorageSync("token", res.data.token);
       // 延迟调用 store，确保 Pinia 已初始化
