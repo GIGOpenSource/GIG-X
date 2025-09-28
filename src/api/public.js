@@ -27,8 +27,16 @@ export const search = (params) => {
 	return getRequest('/contents/', params)
 }
 
-//上传
-export const uploadFile = (params) => {
-	return postRequest('/upload/', params)
+//支付
+export const pay = (params) => {
+	return postRequest('/orders/initiate-payment/', params)
 }
+
+//账单记录
+export const bill = (params) => {
+	return getRequest('/orders/', params)
+}
+
+
+
 
