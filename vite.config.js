@@ -1,10 +1,9 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import uni from '@dcloudio/vite-plugin-uni'
-
-import {  VitePWA } from 'vite-plugin-pwa'
-
-// https://vitejs.dev/config/
-export default defineConfig({
+import { VitePWA } from 'vite-plugin-pwa'
+export default defineConfig(({ command, mode }) => {  
+  const env = loadEnv(mode, process.cwd())
+  return {
   plugins: [
     uni(),
     VitePWA({
@@ -17,9 +16,9 @@ export default defineConfig({
 			},
 			includeAssets: ['favicon.ico', 'logo.png'],
 			manifest: {
-				name: 'X',
-				short_name: 'x',
-				description: 'A short-video app',
+				name: env.VITE_API_NAME,
+				short_name: env.VITE_API_SHORT_NAME,
+				description: env.VITE_API_DESCRIPTION ,
 				theme_color: '#ffffff',
 				icons: [{
 						src: '/static/icon/pwa-192x192.png',
@@ -71,5 +70,6 @@ export default defineConfig({
     alias: {
       '@': '/src'
     }
+  }
   }
 })
