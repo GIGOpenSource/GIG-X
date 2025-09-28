@@ -9,11 +9,15 @@ let requestRecord = {
 
 }
 
-const token = uni.getStorageSync('token') || ''
+// 登录状态管理
+let isLoginRequesting = false;
+let pendingRequests = [];
+let currentToken = uni.getStorageSync('token') || '';
+
 let httpConfig = {
 	header: {
 		'Content-Type': "application/json",
-		'Authorization':'Token ' +  token,
+		'Authorization':'Token ' +  currentToken,
 		'is-dev': 'true'
 	},
 	method: 'POST',
@@ -27,13 +31,32 @@ let httpConfig = {
 	errorOutput: true // 请求失败输出信息
 }
 
-function request(url, params, other) {
+// 处理队列中的请求
+function processPendingRequests() {
+	if (pendingRequests.length > 0 && !isLoginRequesting) {
+		console.log('开始处理队列中的请求，共', pendingRequests.length, '个');
+		pendingRequests.forEach(({ url, params, other, resolve, reject }) => {
+			// 更新请求头中的 token
+			other.header = {
+				...other.header,
+				'Authorization': 'Token ' + currentToken,
+				'token': currentToken
+			};
+			console.log('处理队列请求:', url, '使用 token:', currentToken);
+			executeRequest(url, params, other).then(resolve).catch(reject);
+		});
+		pendingRequests = [];
+	}
+}
+
+// 执行实际的请求
+function executeRequest(url, params, other) {
 	other = {
 		...httpConfig,
 		...other
 	};
 	// 防止莫名其妙token有时不刷新问题
-	other.header['token'] = token
+	other.header['token'] = currentToken
 	return new Promise((resolve, reject) => {
 		if (other.stopRepeat) {
 			if (requestRecord.url === true) {
@@ -78,7 +101,7 @@ function request(url, params, other) {
 							}
 							reject(data.data);
 						}
-					} else {
+					}else {
 						uni.removeStorage({
 							key: 'token'
 						})
@@ -95,17 +118,55 @@ function request(url, params, other) {
 						reject(data.data)
 					}
 				}else if (data.statusCode == 401){
-					const params = {
+					console.log('收到 401 状态码，接口:', url);
+					
+					// 将当前请求加入待处理队列
+					pendingRequests.push({ url, params, other, resolve, reject });
+					
+					// 如果已经在处理登录，直接返回
+					if (isLoginRequesting) {
+						console.log('已经在处理登录，当前请求已加入队列等待');
+						return;
+					}
+					
+					// 开始自动登录
+					isLoginRequesting = true;
+					console.log('开始自动登录...');
+					
+					const loginParams = {
 						username: uni.getStorageSync("guid_name"),
 						password: uni.getStorageSync("guid_password"),
-					  };
-					  login(params).then((res) => {
+					};
+					
+					login(loginParams).then((res) => {
+						console.log('自动登录成功，获得新 token:', res.data.token);
+						
+						// 更新 token
+						currentToken = res.data.token;
+						httpConfig.header['Authorization'] = 'Token ' + currentToken;
+						
+						// 保存用户信息
 						uni.setStorageSync("user_info", res.data);
 						uni.setStorageSync("token", res.data.token);
 						const store = userinfoStore();
 						store.getUserinfo({ id: res.data.user_id });
-					  });
-				} else {
+						
+						// 标记登录完成
+						isLoginRequesting = false;
+						
+						// 处理队列中的请求
+						processPendingRequests();
+					}).catch((error) => {
+						console.log('自动登录失败:', error);
+						isLoginRequesting = false;
+						
+						// 拒绝所有待处理的请求
+						pendingRequests.forEach(({ reject }) => {
+							reject(error);
+						});
+						pendingRequests = [];
+					});
+				}  else {
 					if (httpConfig.errorOutput) {
 						uni.showToast({
 							title: '请求失败',
@@ -120,6 +181,56 @@ function request(url, params, other) {
 			}
 		});
 	})
+}
+
+// 主要的请求函数
+function request(url, params, other) {
+	return new Promise((resolve, reject) => {
+		// 检查是否是登录接口
+		if (url.includes('auth/login')) {
+			console.log('检测到登录接口:', url);
+			isLoginRequesting = true;
+			
+			executeRequest(url, params, other).then((result) => {
+				console.log('登录接口调用成功');
+				
+				// 如果登录成功，更新 token
+				if (result && result.token) {
+					currentToken = result.token;
+					httpConfig.header['Authorization'] = 'Token ' + currentToken;
+					console.log('更新 token:', currentToken);
+				}
+				
+				// 标记登录完成
+				isLoginRequesting = false;
+				
+				// 处理队列中的请求
+				processPendingRequests();
+				
+				resolve(result);
+			}).catch((error) => {
+				console.log('登录接口调用失败:', error);
+				isLoginRequesting = false;
+				
+				// 拒绝所有待处理的请求
+				pendingRequests.forEach(({ reject }) => {
+					reject(error);
+				});
+				pendingRequests = [];
+				
+				reject(error);
+			});
+		} else {
+			// 非登录接口
+			if (isLoginRequesting) {
+				console.log('登录进行中，将请求加入队列:', url);
+				pendingRequests.push({ url, params, other, resolve, reject });
+			} else {
+				// 没有登录请求，直接执行
+				executeRequest(url, params, other).then(resolve).catch(reject);
+			}
+		}
+	});
 }
 
 function getRequest(url, params = {}, other = {}) {

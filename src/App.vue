@@ -6,6 +6,7 @@ import { userinfoStore } from "@/store/userinfos";
 export default {
   onLaunch: function () {
     console.log("App Launch");
+    if (uni.getStorageSync("token")) return;
     let guid_name = guid();
     let guid_password = guid();
     const params = {
