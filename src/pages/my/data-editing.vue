@@ -145,6 +145,7 @@ const save = () => {
 
 <style>
 .u-textarea__count {
-	background-color: transparent !important;
+	background: transparent !important;
+
 }
 </style>

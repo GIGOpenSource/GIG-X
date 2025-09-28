@@ -14,19 +14,19 @@
 		<block v-for="(item, index) in form" :key="index">
 			<textarea v-if="index == 2" :placeholder="item.name" v-model="params[item.key]"></textarea>
 			<view class="images" v-else-if="index == 3 && params.type === '动态'">
-				<up-upload :fileList="fileList1" @afterRead="afterRead" @delete="deletePic"  multiple
-					:maxCount="10" uploadIcon="plus"></up-upload>
+				<up-upload :fileList="fileList1" @afterRead="afterRead" @delete="deletePic" multiple :maxCount="10"
+					uploadIcon="plus"></up-upload>
 			</view>
 			<view class="images" v-else-if="index == 3 && params.type === '视频'">
 				<view class="upload-section">
 					<text class="section-title">上传封面图片</text>
-					<up-upload :fileList="coverFileList" @afterRead="afterReadCover" @delete="deleteCoverPic"  multiple
+					<up-upload :fileList="coverFileList" @afterRead="afterReadCover" @delete="deleteCoverPic" multiple
 						:maxCount="1" uploadIcon="plus"></up-upload>
 				</view>
 				<view class="upload-section">
 					<text class="section-title">上传视频</text>
-					<up-upload :fileList="videoFileList" @afterRead="afterReadVideo" @delete="deleteVideoPic" accept="video" 
-						:maxCount="1" uploadIcon="plus"></up-upload>
+					<up-upload :fileList="videoFileList" @afterRead="afterReadVideo" @delete="deleteVideoPic"
+						accept="video" :maxCount="1" uploadIcon="plus"></up-upload>
 				</view>
 			</view>
 			<view v-else-if="item.key === 'price' && params.isFree !== '是'" class="back"
@@ -151,6 +151,7 @@ const afterReadVideo = async (event) => {
 			status: 'success',
 			message: '',
 			url: result,
+			duration: lists[i].duration
 		});
 		fileListLen++;
 	}
@@ -249,7 +250,7 @@ const pubilsh = () => {
 	if (params.type == '动态') {
 		if (fileList1.value.length === 0) return toast('请上传图片')
 	}
-	
+
 	if (params.type !== '视频') {
 		delete params.video_url
 	}
@@ -258,9 +259,12 @@ const pubilsh = () => {
 		params.description = params.content
 		params.type = params.videotype == '长视频' ? 'long' : 'short'
 		params.data = videoFileList.value[0].url
-		params.cover_url = coverFileList.value[0].url 
+		params.cover_url = coverFileList.value[0].url
+		params.duration = videoFileList.value[0].duration * 1000
 		delete params.content
 		delete params.images
+		
+		
 		createVideo(params).then(res => {
 			uni.showToast({
 				title: "提交成功",

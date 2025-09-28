@@ -11,10 +11,7 @@
         </view>
         <text>{{ personInfo.user_nickname }}</text>
       </view>
-      <view class="" v-if="current == 0 && personInfo.is_vip">已开通VIP </view>
-      <view class="" v-if="current == 0 && !personInfo.is_vip">
-        未开通VIP
-      </view>
+      <view class="" v-if="current == 0"> {{ personInfo.is_vip ? '已开通VIP':' 未开通VIP' }}</view>
       <view class="" v-if="current == 1">
         <text style="font-size: 22rpx">金币余额：</text>
         <text>99999</text>

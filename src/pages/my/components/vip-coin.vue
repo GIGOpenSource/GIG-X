@@ -1,31 +1,38 @@
 <template>
   <view class="con">
-    <view
-      class="list"
-      v-for="(item, index) in 10"
-      :key="index"
-      @click="current = index"
-    >
-      <view :class="current == index ? 'title current-title' : 'title'"
-        >999金币</view
-      >
+    <view class="list" v-for="(item, index) in list" :key="index" @click="clicks(index)">
+      <view :class="current == index ? 'title current-title' : 'title'">{{ item.gold_coin }}金币</view>
       <image src="/static/image/coin.png.png"></image>
-      <view :class="current == index ? 'prices current-prices' : 'prices'"
-        >19.9元</view
-      >
-      <view
-        :class="
-          current == index ? 'ori-prices current-ori-prices' : 'ori-prices'
-        "
-        >999元</view
-      >
+      <view :class="current == index ? 'prices current-prices' : 'prices'"> {{ item.pay_price }} 元</view>
+      <view :class="current == index ? 'ori-prices current-ori-prices' : 'ori-prices'
+        ">{{ item.amount }}元</view>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import {
+  ref,
+  onMounted
+} from 'vue'
+import {
+  paylist
+} from '@/api/public.js'
 const current = ref(0);
+const list = ref([])
+const emits = defineEmits(['getmoney'])
+onMounted(() => {
+  paylist({ pay_channel: 'gold' }).then(res => {
+    list.value = res.data
+    if (list.value.length > 0) {
+      emits('getmoney', list.value[0].pay_price, [])
+    }
+  })
+})
+const clicks = (index) => {
+  current.value = index
+  emits('getmoney', list.value[index].pay_price, [])
+}
 </script>
 
 <style lang="scss" scoped>
@@ -47,10 +54,12 @@ const current = ref(0);
   flex-direction: column;
   color: rgba(255, 255, 255, 0.3);
   margin-bottom: 20rpx;
+
   image {
     width: 80rpx;
     height: 100rpx;
   }
+
   .title {
     width: 100%;
     height: 60rpx;

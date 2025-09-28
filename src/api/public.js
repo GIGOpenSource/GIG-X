@@ -37,6 +37,12 @@ export const bill = (params) => {
 	return getRequest('/orders/', params)
 }
 
+//支付模板列表
+export const paylist = (params) => {
+	return getRequest('/payments/pay/', params)
+}
+
+
 
 
 
