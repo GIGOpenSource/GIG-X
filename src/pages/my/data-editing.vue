@@ -39,9 +39,7 @@ const store = userinfoStore()
 import {
 	updataUserinfo
 } from '@/api/setup.js'
-import {
-	uploadFile
-} from '@/api/public.js'
+
 const form = reactive([{
 	name: '昵称',
 	type: 'input',
