@@ -5,13 +5,25 @@
 				<text>VIP状态</text>
 				<BadgeIcon/>
 			</view>
-			<view class="date">VIP到期：{{ formatDate(Date.now()) }}</view>
+			<view class="date">VIP剩余：{{ personInfo.vip_days }}天</view>
 		</view>
 		<view class="btn">续费</view>
 	</view>
 </template>
 
 <script setup>
+import {
+	storeToRefs
+} from 'pinia'
+import {
+	userinfoStore
+} from '@/store/userinfos.js'
+const store = userinfoStore()
+const {
+	personInfo
+} = storeToRefs(store)
+
+
 	import BadgeIcon from '../icon/badgeIcon.vue'
 	const formatDate = (timestamp) =>{
          const d = new Date(timestamp)

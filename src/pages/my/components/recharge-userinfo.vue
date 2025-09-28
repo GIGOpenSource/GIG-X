@@ -14,7 +14,7 @@
       <view class="" v-if="current == 0"> {{ personInfo.is_vip ? '已开通VIP':' 未开通VIP' }}</view>
       <view class="" v-if="current == 1">
         <text style="font-size: 22rpx">金币余额：</text>
-        <text>99999</text>
+        <text>{{ personInfo.gold_coin || 0 }}</text>
       </view>
     </view>
   </view>
