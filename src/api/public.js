@@ -26,3 +26,9 @@ export const adsDetail = (id, params) => {
 export const search = (params) => {
 	return getRequest('/contents/', params)
 }
+
+//上传
+export const uploadFile = (params) => {
+	return postRequest('/upload/', params)
+}
+
