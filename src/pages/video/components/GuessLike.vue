@@ -18,10 +18,10 @@
         <view class="like-des">
           <view class="like-name">{{ item.title }}</view>
           <view class="like-user">
-            <up-avatar :src="item.author_avatar" size="25"></up-avatar>
+            <up-avatar :src="item.author.avatar" size="25"></up-avatar>
             <up-text
               :lines="2"
-              :text="item.author_nickname"
+              :text="item.author.user_nickname"
               color="#fff"
               size="11"
             />
