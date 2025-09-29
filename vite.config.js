@@ -12,7 +12,8 @@ export default defineConfig(({ command, mode }) => {
           enabled: false
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
         },
         includeAssets: ['favicon.ico', 'logo.png'],
         manifest: {
@@ -50,7 +51,7 @@ export default defineConfig(({ command, mode }) => {
       proxy: {
         // 代理所有以 /api 开头的请求
         '/api': {
-          target: 'http://192.168.77.222:8000', // 后端服务器地址，与config.js保持一致
+          target: 'https://collide.mnvjdhsl.com/', // 后端服务器地址，与config.js保持一致
           changeOrigin: true, // 是否更换源
           secure: false, // 如果目标服务器无 HTTPS，需关闭安全验证
           rewrite: (path) => path.replace(/^\/api/, '/api'), // 保留 /api 前缀

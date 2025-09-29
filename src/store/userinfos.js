@@ -26,7 +26,7 @@ export const userinfoStore = defineStore('userinfos', {
     strategies: [
       {
         key: 'userinfos',  
-        storage: localStorage,     // 也可以换成 sessionStorage
+        storage: localStorage, 
         paths: ['userinfo', 'personInfo']
       }
     ]

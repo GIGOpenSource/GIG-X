@@ -98,7 +98,8 @@
 </template>
 
 <script>
-import { commentlike, addShare, addFollow } from '@/api/community.js';
+import { commentlike, addShare } from '@/api/community.js';
+// addFollow
 import { favoriteAdd, favoriteRemove } from '@/api/content.js';
 const animation = uni.requireNativePlugin('animation');
 export default {
@@ -321,14 +322,14 @@ export default {
 							followerId: uni.getStorageSync('user_info')?.id,
 							followeeId: this.item.authorId
 						};
-						addFollow(params).then((res) => {
-							if (res.code == 200) {
-								this.$emit('fabulousBtn', {
-									obj: obj,
-									index: this.index
-								}); //关注成功
-							}
-						});
+						// addFollow(params).then((res) => {
+						// 	if (res.code == 200) {
+						// 		this.$emit('fabulousBtn', {
+						// 			obj: obj,
+						// 			index: this.index
+						// 		}); //关注成功
+						// 	}
+						// });
 					}, 500);
 				}, 50);
 			}, 300);
