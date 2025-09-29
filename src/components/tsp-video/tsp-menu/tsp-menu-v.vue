@@ -16,7 +16,8 @@
 				</view>
 				<text class="footTitle-commodity-name text_one">商品商品商品商品商品商品商品商品商品商品商品商品商品</text>
 			</view> -->
-			<view><text class="foot-name">@{{ item.author.user_nickname }}</text></view>
+			
+			<view><text class="foot-name">@{{ item.author?.user_nickname || '--' }}</text></view>
 			<view style="width: 450rpx; position: relative" v-if="item.desc">
 				<text class="foot-cont" :class="[item.desc.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.desc
 					}}</text>
@@ -39,7 +40,7 @@
 			]">
 				<!-- 头像 -->
 				<view class="menu-avatar">
-					<image :src="item.author.avatar" mode="" class="avatar-image" @click="JumpBtn(1)"></image>
+					<image :src="item.author?.avatar" mode="" class="avatar-image" @click="JumpBtn(1)"></image>
 					<view class="follow" @click="followBtn(index)" v-if="!item.followReally"
 						:class="{ followHide: followShow == 2 }">
 						<image src="/static/tsp-icon/gou.png" mode="" class="follow-guanzhu guanzhu-gou"
@@ -264,7 +265,7 @@ export default {
 					break;
 			}
 		},
-	},
+	}
 };
 </script>
 

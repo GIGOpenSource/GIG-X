@@ -136,7 +136,7 @@ export default {
 				item.collectionShow = item.is_favourites; //是否收藏
                 item.followReally = item.is_follower; //是否已经关注
 				item.desc = item.description; //视频描述
-				item.author = item.author_nickname; //作者名称
+				item.author = item.author; //作者名称
 				item.likeCount = item.like_count; //点赞数量
 				item.commentCount = item.comment_count; //评论数量
 				item.favoriteCount = item.favorite_count; //收藏数量

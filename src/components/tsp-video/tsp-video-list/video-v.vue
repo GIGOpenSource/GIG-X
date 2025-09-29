@@ -66,6 +66,7 @@
 						<view @click="handClick($event,index)" @longpress="longpress(item)" class="vodPlayView" :style="videoStyle" @touchstart="vodViewStart($event)"
 						 @touchmove="vodViewMove($event)" @touchend="vodViewEnd($event)"></view>
 						<!-- 底部标题、右侧操作栏 -->
+						
 						<videoMenu :ref="'menuRef'+index" :vodIndex="vodIndex" :vodCurIndex="vodCurIndex" :item="item" :discussNum="totalPlayList.length" :index="index"
 						 :sliderDrag="sliderDrag" :moveOpacity="moveOpacity" :palyCartoon="palyCartoon" @handleInfo="handleInfo"></videoMenu>
 						 
