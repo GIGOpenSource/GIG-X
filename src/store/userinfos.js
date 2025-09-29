@@ -8,7 +8,7 @@ export const userinfoStore = defineStore('userinfos', {
 	state: () => {
 		return {
 			userinfo: {}, //用户信息
-			personInfo: {} 
+			personInfo: {}
 		};
 	},
 	actions: {
@@ -21,14 +21,12 @@ export const userinfoStore = defineStore('userinfos', {
 			this.personInfo = res.data
 		},
 	},
-  persist: {
-    enabled: true,
-    strategies: [
-      {
-        key: 'userinfos',  
-        storage: localStorage, 
-        paths: ['userinfo', 'personInfo']
-      }
-    ]
-  }
+	persist: {
+		storage: {
+			getItem: (key) => uni.getStorageSync(key),
+			setItem: (key, value) => uni.setStorageSync(key, value),
+			removeItem: (key) => uni.removeStorageSync(key),
+		},
+		paths: ['userinfo', 'personInfo']
+	}
 });

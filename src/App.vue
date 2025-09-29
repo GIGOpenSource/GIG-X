@@ -18,6 +18,7 @@ export default {
       uni.setStorageSync("guid_password", guid_password);
       uni.setStorageSync("user_info", res.data);
       uni.setStorageSync("token", res.data.token);
+	  console.log('xhwnggkwn',res.data.token)
       // 延迟调用 store，确保 Pinia 已初始化
       this.$nextTick(() => {
         const store = userinfoStore();

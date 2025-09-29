@@ -2896,6 +2896,11 @@ decamelize@^1.2.0:
   resolved "https://registry.yarnpkg.com/decamelize/-/decamelize-1.2.0.tgz#f6534d15148269b20352e7bee26f501f9a191290"
   integrity sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==
 
+deep-pick-omit@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/deep-pick-omit/-/deep-pick-omit-1.2.1.tgz#c035b27a4c86518b76f60ffa3004e6c61f317032"
+  integrity sha512-2J6Kc/m3irCeqVG42T+SaUMesaK7oGWaedGnQQK/+O0gYc+2SP5bKh/KKTE7d7SJ+GCA9UUE1GRzh6oDe0EnGw==
+
 deepmerge@^4.2.2:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.3.1.tgz#44b5f2147cd3b00d4b56137685966f26fd25dd4a"
@@ -2926,6 +2931,11 @@ define-properties@^1.2.1:
     has-property-descriptors "^1.0.0"
     object-keys "^1.1.1"
 
+defu@^6.1.4:
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/defu/-/defu-6.1.4.tgz#4e0c9cf9ff68fe5f3d7f2765cc1a012dfdcb0479"
+  integrity sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==
+
 delegate@^3.1.2:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/delegate/-/delegate-3.2.0.tgz#b66b71c3158522e8ab5744f720d8ca0c2af59166"
@@ -2935,6 +2945,11 @@ depd@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/depd/-/depd-2.0.0.tgz#b696163cc757560d09cf22cc8fad1571b79e76df"
   integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
+
+destr@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/destr/-/destr-2.0.5.tgz#7d112ff1b925fb8d2079fac5bdb4a90973b51fdb"
+  integrity sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==
 
 destroy@1.2.0:
   version "1.2.0"
@@ -4449,12 +4464,14 @@ pify@^2.3.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
   integrity sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==
 
-pinia-plugin-persist@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pinia-plugin-persist/-/pinia-plugin-persist-1.0.0.tgz#fc696f225527f30bd5955109fafadd43c725e888"
-  integrity sha512-M4hBBd8fz/GgNmUPaaUsC29y1M09lqbXrMAHcusVoU8xlQi1TqgkWnnhvMikZwr7Le/hVyMx8KUcumGGrR6GVw==
+pinia-plugin-persistedstate@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/pinia-plugin-persistedstate/-/pinia-plugin-persistedstate-4.5.0.tgz#18563d635720de8459a94c051da4befa0c4b18b9"
+  integrity sha512-QTkP1xJVyCdr2I2p3AKUZM84/e+IS+HktRxKGAIuDzkyaKKV48mQcYkJFVVDuvTxlI5j6X3oZObpqoVB8JnWpw==
   dependencies:
-    vue-demi "^0.12.1"
+    deep-pick-omit "^1.2.1"
+    defu "^6.1.4"
+    destr "^2.0.5"
 
 pinia@^3.0.3:
   version "3.0.3"
@@ -5572,11 +5589,6 @@ vite@5.2.8:
     rollup "^4.13.0"
   optionalDependencies:
     fsevents "~2.3.3"
-
-vue-demi@^0.12.1:
-  version "0.12.5"
-  resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.12.5.tgz#8eeed566a7d86eb090209a11723f887d28aeb2d1"
-  integrity sha512-BREuTgTYlUr0zw0EZn3hnhC3I6gPWv+Kwh4MCih6QcAeaTlaIX0DwOVN0wHej7hSvDPecz4jygy/idsgKfW58Q==
 
 vue-i18n@^9.1.9:
   version "9.14.5"

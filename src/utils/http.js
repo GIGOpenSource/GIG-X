@@ -18,7 +18,7 @@ let currentToken = uni.getStorageSync('token') || '';
 let httpConfig = {
 	header: {
 		'Content-Type': "application/json",
-		'Authorization':'Token ' +  currentToken,
+		'Authorization': 'Token ' + currentToken,
 		'is-dev': 'true'
 	},
 	method: 'POST',
@@ -79,16 +79,22 @@ function executeRequest(url, params, other) {
 			}, other.loadingTime);
 		}
 		uni.request({
+			// #ifdef APP-PLUS
+			url: 'http://192.168.77.222:8000' + host + url,
+			// #endif
+			// #ifdef H5
 			url: host + url,
+			// #endif
 			data: params,
 			header: other.header,
 			method: other.method,
+			sslVerify: false,
 			timeout: other.timeout,
 			complete: data => {
 				uni.hideLoading();
 				clearTimeout(httpConfig.timer);
 				httpConfig.timer = null;
-	
+
 				if (data.statusCode == 200 || data.statusCode == 201) {
 					if (!(data.data.code == 403 && !expired)) {
 						expired = false;
@@ -102,7 +108,7 @@ function executeRequest(url, params, other) {
 							}
 							reject(data.data);
 						}
-					}else {
+					} else {
 						uni.removeStorage({
 							key: 'token'
 						})
@@ -118,56 +124,56 @@ function executeRequest(url, params, other) {
 						}
 						reject(data.data)
 					}
-				}else if (data.statusCode == 401){
+				} else if (data.statusCode == 401) {
 					console.log('收到 401 状态码，接口:', url);
-					
+
 					// 将当前请求加入待处理队列
 					pendingRequests.push({ url, params, other, resolve, reject });
-					
+
 					// 如果已经在处理登录，直接返回
 					if (isLoginRequesting) {
 						console.log('已经在处理登录，当前请求已加入队列等待');
 						return;
 					}
-					
+
 					// 开始自动登录
 					isLoginRequesting = true;
 					console.log('开始自动登录...');
-					
+
 					const loginParams = {
 						username: uni.getStorageSync("guid_name"),
 						password: uni.getStorageSync("guid_password"),
 					};
-					
+
 					login(loginParams).then((res) => {
 						console.log('自动登录成功，获得新 token:', res.data.token);
-						
+
 						// 更新 token
 						currentToken = res.data.token;
 						httpConfig.header['Authorization'] = 'Token ' + currentToken;
-						
+
 						// 保存用户信息
 						uni.setStorageSync("user_info", res.data);
 						uni.setStorageSync("token", res.data.token);
 						const store = userinfoStore();
 						store.getUserinfo({ id: res.data.user_id });
-						
+
 						// 标记登录完成
 						isLoginRequesting = false;
-						
+
 						// 处理队列中的请求
 						processPendingRequests();
 					}).catch((error) => {
 						console.log('自动登录失败:', error);
 						isLoginRequesting = false;
-						
+
 						// 拒绝所有待处理的请求
 						pendingRequests.forEach(({ reject }) => {
 							reject(error);
 						});
 						pendingRequests = [];
 					});
-				}  else {
+				} else {
 					if (httpConfig.errorOutput) {
 						uni.showToast({
 							title: '请求失败',
@@ -191,34 +197,34 @@ function request(url, params, other) {
 		if (url.includes('auth/login')) {
 			console.log('检测到登录接口:', url);
 			isLoginRequesting = true;
-			
+
 			executeRequest(url, params, other).then((result) => {
 				console.log('登录接口调用成功');
-				
+
 				// 如果登录成功，更新 token
 				if (result && result.token) {
 					currentToken = result.token;
 					httpConfig.header['Authorization'] = 'Token ' + currentToken;
 					console.log('更新 token:', currentToken);
 				}
-				
+
 				// 标记登录完成
 				isLoginRequesting = false;
-				
+
 				// 处理队列中的请求
 				processPendingRequests();
-				
+
 				resolve(result);
 			}).catch((error) => {
 				console.log('登录接口调用失败:', error);
 				isLoginRequesting = false;
-				
+
 				// 拒绝所有待处理的请求
 				pendingRequests.forEach(({ reject }) => {
 					reject(error);
 				});
 				pendingRequests = [];
-				
+
 				reject(error);
 			});
 		} else {

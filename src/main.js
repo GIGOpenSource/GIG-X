@@ -1,3 +1,4 @@
+
 import {
 	createSSRApp
 } from "vue";
@@ -6,14 +7,12 @@ import App from "./App.vue";
 import {
 	createPinia
 } from 'pinia'
-import piniaPluginPersist from 'pinia-plugin-persist'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 const pinia = createPinia()
-pinia.use(piniaPluginPersist)
+pinia.use(piniaPluginPersistedstate)
 uni.$zp = {
 	config: {
-		//配置分页默认pageSize为15
 		'default-page-size': 20,
-		//...
 	}
 }
 export function createApp() {
