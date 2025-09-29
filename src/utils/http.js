@@ -3,7 +3,7 @@
 // } from '@/config/config.js'
 const host = import.meta.env.VITE_API_BASE_URL
 import { login } from "@/api/setup.js";
-import { userinfoStore } from "@/store/userinfos";
+// import { userinfoStore } from "@/store/userinfos";
 // 验证token是否失效
 var expired = false;
 let requestRecord = {
@@ -155,8 +155,8 @@ function executeRequest(url, params, other) {
 						// 保存用户信息
 						uni.setStorageSync("user_info", res.data);
 						uni.setStorageSync("token", res.data.token);
-						const store = userinfoStore();
-						store.getUserinfo({ id: res.data.user_id });
+						// const store = userinfoStore();
+						// store.getUserinfo({ id: res.data.user_id });
 
 						// 标记登录完成
 						isLoginRequesting = false;

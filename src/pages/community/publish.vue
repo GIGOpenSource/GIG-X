@@ -260,7 +260,7 @@ const pubilsh = () => {
 		params.type = params.videotype == '长视频' ? 'long' : 'short'
 		params.data = videoFileList.value[0].url
 		params.cover_url = coverFileList.value[0].url
-		params.duration = videoFileList.value[0].duration * 1000
+		params.duration = Math.ceil(videoFileList.value[0].duration) * 1000
 		delete params.content
 		delete params.images
 		
