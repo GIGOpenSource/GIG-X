@@ -72,6 +72,7 @@ import vip from "./vip.vue";
 import { userinfoStore } from "@/store/userinfos";
 import { onPullDownRefresh } from "@dcloudio/uni-app";
 const { personInfo } = userinfoStore();
+console.log(personInfo,'personInfo')
 const props = defineProps({
   isBack: {
     type: Boolean,

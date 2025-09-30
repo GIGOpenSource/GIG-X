@@ -24,11 +24,11 @@
 		</view>
 		<view style="height: 200rpx;"></view>
 		<view class="bottom">
-			<!-- <view class="pay">
-				<view class="zfb">支付宝</view>
-				<view class="wx">微信支付</view>
-			</view> -->
-			<view class="vip" @click="btn">{{ current == 0?personInfo.is_vip ? '续费VIP' : '立即开通VIP':'金币充值' }}</view>
+			<view class="pay">
+				<view class="zfb" :class="type == 'alipay' ? 'current' : ''" @click="type = 'alipay'">支付宝</view>
+				<view class="wx" :class="type == 'wxpay' ? 'current' : ''" @click="type = 'wxpay'">微信支付</view>
+			</view>
+			<view class="vip" @click="btn">{{ current == 0 ? personInfo.is_vip ? '续费VIP' : '立即开通VIP' : '金币充值' }}</view>
 		</view>
 		<up-popup :show="show" @close="close" @open="open" mode="center" round="10" :closeable="true">
 			<view class="popup">
@@ -44,7 +44,7 @@ import vipTime from './components/vip-time.vue'
 import vipInterests from './components/vip-interests.vue'
 import vipCoin from './components/vip-coin.vue'
 import {
-	pay
+	pay, payResult
 } from '@/api/public.js'
 import {
 	reactive, ref, onMounted
@@ -59,6 +59,7 @@ const tabs = reactive([{
 	name: '金币'
 }
 ])
+const type = ref('alipay')
 const current = ref(0)
 const deviceId = ref('')
 const imagesurl = ref('')
@@ -68,6 +69,7 @@ const membership_benefits = ref([])
 const click = (item) => {
 	current.value = item.index
 }
+const trade_no = ref('')
 const path = () => {
 	uni.navigateTo({
 		url: '/pages/my/bill'
@@ -78,6 +80,21 @@ const open = () => {
 }
 const close = () => {
 	show.value = false
+	payResult({ trade_no: trade_no.value })
+		.then(result => {
+			if (result.code == 200) {
+				uni.showToast({
+					title: '支付成功',
+					icon: 'none'
+				})
+			} else {
+					uni.showToast({
+					title: '支付失败',
+					icon: 'none'
+				})
+			}
+
+		})
 }
 const handmoney = (e, benefits) => {
 	money.value = e
@@ -86,11 +103,13 @@ const handmoney = (e, benefits) => {
 const btn = () => {
 	pay({
 		device_id: deviceId.value,
-		type: current == 0 ? 'vip' : 'gold',
-		money: money.value
+		pay_method: type.value,
+		payment_id: money.value
 	}).then(res => {
-		imagesurl.value = res.msg.payUrl
+		imagesurl.value = res.qrcode
 		show.value = true
+		trade_no.value = res.trade_no
+
 	})
 }
 onMounted(() => {
@@ -134,6 +153,11 @@ onMounted(() => {
 			color: #000;
 			font-weight: bold;
 			font-size: 28rpx;
+		}
+
+		.current {
+			background: linear-gradient(180deg, #5662E1 0%, #614793 100%);
+			color: #fff;
 		}
 	}
 

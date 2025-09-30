@@ -24,7 +24,7 @@ onMounted(() => {
 	paylist({ pay_channel: 'vip' }).then(res => {
 		list.value = res.data.results
 		if (list.value.length > 0) {
-			emits('getmoney', list.value[0].pay_price, list.value[0].benefits)
+			emits('getmoney', list.value[0].id, list.value[0].benefits)
 		}
 		console.log(list.value,'vlist.valulist.valu');
 		
@@ -32,7 +32,7 @@ onMounted(() => {
 })
 const clicks = (index) => {
 	current.value = index
-	emits('getmoney', list.value[index].pay_price, list.value[index].benefits)
+	emits('getmoney', list.value[index].id, list.value[index].benefits)
 }
 </script>
 

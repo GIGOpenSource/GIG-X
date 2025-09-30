@@ -31,6 +31,11 @@ export const search = (params) => {
 export const pay = (params) => {
 	return postRequest('/orders/initiate-payment/', params)
 }
+//支付结果
+export const payResult = (params) => {
+	return getRequest('/orders/payment-callback/', params)
+}
+
 
 //账单记录
 export const bill = (params) => {

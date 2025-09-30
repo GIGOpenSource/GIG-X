@@ -94,7 +94,7 @@ const follow = () => {
 	.right {
 		margin-left: 20rpx;
 		line-height: 50rpx;
-		width: 70%;
+		width: 60%;
 
 		.name {
 			display: flex;

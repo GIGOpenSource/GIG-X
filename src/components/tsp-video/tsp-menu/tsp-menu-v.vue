@@ -59,7 +59,7 @@
 						<image src="/static/tsp-icon/taoxin.png" mode="" class="fabulous-image" v-else></image>
 						<view class="like-pellet" :class="[likeeffect ? 'like-pellet-active' : '']"></view>
 					</view>
-					<view class="fabulous-num">{{ item.likeCount }}</view>
+					<view class="fabulous-num">{{ item.likeCount || vodCurIndex }}</view>
 				</view>
 				<!-- 评论 -->
 				<view class="fabulous" style="margin-top: 30rpx" @click="JumpBtn(2)">

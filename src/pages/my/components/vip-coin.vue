@@ -25,13 +25,13 @@ onMounted(() => {
   paylist({ pay_channel: 'gold' }).then(res => {
     list.value = res.data.results
     if (list.value.length > 0) {
-      emits('getmoney', list.value[0].pay_price, [])
+      emits('getmoney', list.value[0].id, [])
     }
   })
 })
 const clicks = (index) => {
   current.value = index
-  emits('getmoney', list.value[index].pay_price, [])
+  emits('getmoney', list.value[index].id, [])
 }
 </script>
 
