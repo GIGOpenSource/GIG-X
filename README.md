@@ -239,3 +239,6 @@ VITE_API_DESCRIPTION = A short-video app //app描述
 ```
 
 > 如果认为这么配置麻烦,就形成配置,然后引用对应变量
+
+
+<!-- 如果打包app 需要在config.js中 把服务器地址修改一下 -->
