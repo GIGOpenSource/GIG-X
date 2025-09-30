@@ -13,12 +13,12 @@
 				<text class="footTitle-commodity-name text_one">商品商品商品商品商品商品商品商品商品商品商品商品商品</text>
 			</view> -->
 			<view>
-				<text class="foot-name">{{ '@' + item.authorNickname || '@' }}</text>
+				<text class="foot-name">@{{ item.author?.user_nickname || '--' }}</text>
 			</view>
-			<view style="width: 500rpx; position: relative" v-if="item.description">
-				<text style="width: 450rpx" class="foot-cont" :class="[item.description.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.description }}</text>
-				<text class="foot-expand" v-if="item.description.length > 33" @click="expandDesc = !expandDesc">
-					{{ expandDesc ? '...收起' : '...展开' }}
+			<view style="width: 450rpx; position: relative" v-if="item.desc">
+				<text class="foot-cont" :class="[item.desc.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.desc }}</text>
+				<text class="foot-expand" v-if="item.desc.length > 33" @click="expandDesc = !expandDesc">
+					{{ expandDesc ? "...收起" : "展开" }}
 				</text>
 			</view>
 			<!-- <view><text class="foot-primary">卧槽无情的原声</text></view> -->
@@ -29,7 +29,7 @@
 				<!-- 头像 -->
 				<view class="vodMenu-top">
 					<view class="menu-avatar" @click="JumpBtn(1)">
-						<image :src="item.authorAvatar || '/static/tsp-icon/touxiang.jpg'" mode="" class="avatar-image"></image>
+						<image :src="item.author?.avatar" mode="" class="avatar-image"></image>
 					</view>
 					<view class="follow" @click="followBtn(index)" v-if="!item.followReally" :class="{ followHide: followShow == 2 }">
 						<image src="/static/tsp-icon/gou.png" mode="" class="follow-guanzhu guanzhu-gou" v-if="followShow == 1 || followShow == 2"></image>
@@ -45,14 +45,14 @@
 						<image src="/static/tsp-icon/selectTaoxin.png" mode="" class="fabulous-image" v-if="item.fabulousShow"></image>
 						<image src="/static/tsp-icon/taoxin.png" mode="" class="fabulous-image" v-else></image>
 					</view>
-					<text class="fabulous-num">{{ item.likeCount || 0 }}</text>
+					<text class="fabulous-num">{{ item.likeCount }}</text>
 				</view>
 				<!-- 评论 -->
 				<view class="fabulous" style="margin-top: 30rpx" @click="JumpBtn(2)">
 					<view class="fabulous-image">
 						<image src="/static/tsp-icon/pinlun.png" mode="" class="fabulous-image"></image>
 					</view>
-					<text class="fabulous-num">{{ item.commentCount || 0 }}</text>
+					<text class="fabulous-num">{{ item.commentCount }}</text>
 				</view>
 				<!-- 收藏 -->
 				<view class="fabulous" style="margin-top: 30rpx">
@@ -63,14 +63,14 @@
 						<up-icon name="star-fill" color="#ffff00" size="45" class="fabulous-image" v-if="item.collectionShow"></up-icon>
 						<up-icon name="star-fill" color="#fff" size="45" class="fabulous-image" v-else></up-icon>
 					</view>
-					<text class="fabulous-num">{{ item.favoriteCount || 0 }}</text>
+					<text class="fabulous-num">{{ item.favoriteCount }}</text>
 				</view>
 				<!-- 转发 -->
 				<view class="fabulous" style="margin-top: 30rpx" @click="JumpBtn(3)">
 					<view class="fabulous-image">
 						<image src="/static/tsp-icon/ward.png" mode="" class="fabulous-image"></image>
 					</view>
-					<text class="fabulous-num" style="font-size: 26rpx">{{ item.shareCount || 0 }}</text>
+					<text class="fabulous-num" style="font-size: 26rpx">{{ item.share_count }}</text>
 				</view>
 			</view>
 		</view>
@@ -84,12 +84,12 @@
 			<view style="position: relative; width: 95rpx; height: 95rpx" @click="JumpBtn(4)">
 				<view :ref="'rotateImg' + index">
 					<view class="rotate-avatar">
-						<image :src="item.authorAvatar || '/static/tsp-icon/touxiang.jpg'" mode="" class="rotate-image"></image>
+						<image :src="item.author?.avatar" mode="" class="rotate-image"></image>
 					</view>
 				</view>
 				<view :style="`position: absolute;top: 0;left: 0;opacity:${item.vodPaly ? 0 : 1}`">
 					<view class="rotate-avatar">
-						<image :src="item.authorAvatar || '/static/tsp-icon/touxiang.jpg'" mode="" class="rotate-image"></image>
+						<image :src="item.author?.avatar" mode="" class="rotate-image"></image>
 					</view>
 				</view>
 			</view>
@@ -98,9 +98,8 @@
 </template>
 
 <script>
-import { commentlike, addShare } from '@/api/community.js';
-// addFollow
-import { favoriteAdd, favoriteRemove } from '@/api/content.js';
+import { contentLike, contentCollect } from "@/api/common";
+import { followtoggle } from '@/api/community'
 const animation = uni.requireNativePlugin('animation');
 export default {
 	props: {
@@ -270,18 +269,14 @@ export default {
 				obj: obj,
 				index: this.index
 			}); //点赞成功
-			const params = {
-				likeType: 'SHOTVIDEOS',
-				targetId: obj.id,
-				userId: uni.getStorageSync('user_info').id
-			};
-			commentlike(params).then((res) => {
-				console.log('点赞成功', res);
-			});
-			/* clearTimeout(this.fabuTimeOut)
-				this.fabuTimeOut = setTimeout(()=>{
-					console.log('发送请求')
-				},300) */
+			
+			contentLike(this.item.id)
+				.then((res) => {
+					console.log("点赞成功");
+				})
+				.catch((err) => {
+					console.log("点赞失败");
+				});
 		},
 		/* 收藏动效 */
 		collectionBtn() {
@@ -297,16 +292,13 @@ export default {
 				index: this.index
 			}); // 收藏成功
 
-			const params = {
-				favoriteType: 'CONTENT',
-				targetId: obj.id,
-				userId: uni.getStorageSync('user_info').id
-			};
-			if (obj.collectionShow) {
-				favoriteAdd(params).then((res) => {});
-			} else {
-				favoriteRemove(params).then((res) => {});
-			}
+			contentCollect(this.item.id)
+				.then((res) => {
+					console.log("收藏成功");
+				})
+				.catch((err) => {
+					console.log("收藏失败");
+				});
 		},
 		/* 关注动效 */
 		followBtn(index) {
@@ -318,21 +310,18 @@ export default {
 				setTimeout(() => {
 					this.followShow = 2;
 					setTimeout(() => {
-						const params = {
-							followerId: uni.getStorageSync('user_info')?.id,
-							followeeId: this.item.authorId
-						};
-						// addFollow(params).then((res) => {
-						// 	if (res.code == 200) {
-						// 		this.$emit('fabulousBtn', {
-						// 			obj: obj,
-						// 			index: this.index
-						// 		}); //关注成功
-						// 	}
-						// });
-					}, 500);
-				}, 50);
-			}, 300);
+						followtoggle({followee_id: this.item.author?.id}).then((res) => {
+							console.log("关注成功");
+							this.$emit('fabulousBtn', {
+								obj: obj,
+								index: this.index
+							}); //关注成功
+						}).catch((err) => {
+							console.log("关注失败");
+						});
+					}, 300);
+				}, 100);
+			}, 500);
 		},
 		/* 点击右侧菜单选项 1头像 2评论 3转发 4旋转头像 */
 		JumpBtn(index) {
@@ -343,10 +332,9 @@ export default {
 			};
 			switch (index) {
 				case 1:
-					console.log('点击头像');
-					uni.navigateTo({
-						url: '/pages/details/details-n'
-					});
+					console.log("点击头像", this.item);
+					uni.setStorageSync('otherId', this.item.author?.id)
+					uni.navigateTo({ url: "/pages/my/person" });
 					break;
 				case 2:
 					console.log('点击3评论');
@@ -643,12 +631,21 @@ export default {
 
 /*字体单行省略*/
 .text_one {
-	lines: 1;
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 
 /*字体两行省略*/
 .text_two {
-	lines: 2;
+	display: -webkit-box;
+	word-break: break-all;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .rotate-avatar {
