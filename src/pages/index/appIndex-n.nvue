@@ -154,14 +154,14 @@ export default {
 						if (res.code === 200) {
 							this.tNum += 1;
 							this.totalvod = res.data.pagination.total; //视频总数量，有值才能滑动加载到最后一个视频并禁止循环滑动（仅H5、小程序支持）
-							let dataList = res.data.results
+							var dataList = res.data.results
 							dataList.filter((item, index) => {
 								/** 参数数据自行拼接  */
 								item.tsId = "tsId" + (this.tNum * 15 + index); //视频id，用于删除视频, 需要改成自己的视频id
 								item.vodUrl = item.data;
 								item.coverImg = item.cover_url; //视频封面
 								// #ifdef APP-NVUE
-								item.coverShow = true; //是否显示视频封面，vue 小程序端不播放会显示视频，可以不用显示封面，App不播放不会显示视频，就需要封面了
+								item.coverShow = false; //是否显示视频封面，vue 小程序端不播放会显示视频，可以不用显示封面，App不播放不会显示视频，就需要封面了
 								// #endif
 								// #ifndef APP-NVUE
 								item.coverShow = false; //是否显示视频封面，vue 小程序端不播放会显示视频，可以不用显示封面，App不播放不会显示视频，就需要封面了
@@ -196,7 +196,7 @@ export default {
 		/* 初始加载视频 */
 		initVod() {
 			this.startData().then((res) => {
-				console.log('resss', res);
+				console.log('ressshahahahhahahahahhahahahahahha', res);
 				if (res.length > 0) {
 					/* 调用视频的初始方法 */
 					if (this.swId && this.tabIndex != this.pageIndex) {

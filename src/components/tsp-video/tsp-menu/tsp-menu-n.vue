@@ -317,7 +317,7 @@ export default {
 								index: this.index
 							}); //关注成功
 						}).catch((err) => {
-							console.log("关注失败");
+							console.log("关注失败",err);
 						});
 					}, 300);
 				}, 100);
