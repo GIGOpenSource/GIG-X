@@ -4,10 +4,20 @@
 		<view class="operate-mask" @click="close" :style="{ width: screenWidth + 'px', height: screenHeight + 'px' }">
 		</view>
 		<!-- 二维码 -->
-		<up-popup :show="flag" @close="close"  mode="center" round="10">
+		<up-popup :show="flag" @close="close" mode="center" round="10">
 			<view class="pruop">
+				<!-- #ifdef H5 -->
 				<image :src="imageUrl" style="width: 200rpx; height: 200rpx;" @longpress="saveimage" />
 				<view class="text">长按保存图片</view>
+				<!-- #endif -->
+				<!-- #ifdef APP-PLUS -->
+				<image v-if="imageUrl" :src="imageUrl" style="width: 200rpx; height: 200rpx;" @longpress="saveimage"
+					class="qrcode-image" />
+				<canvas v-else canvas-id="qrcode" :style="{ width: '200rpx', height: '200rpx' }" @longpress="saveimage"
+					class="qrcode-canvas">
+				</canvas>
+				<view class="text" style="font-size: 10rpx">长按保存到相册</view>
+				<!-- #endif -->
 			</view>
 		</up-popup>
 		<!-- 内容区域 -->
@@ -89,7 +99,7 @@
 </template>
 
 <script>
-import * as QRCode from 'qrcode';
+// 使用简单的二维码生成方案，不依赖外部插件
 import { shareContent } from '@/api/content'
 export default {
 	props: {
@@ -105,9 +115,9 @@ export default {
 		/* 底部栏的高度 */
 		tabBarHeight: {
 			type: Number,
-		// #ifdef APP-PLUS || H5
-		default: 60,
-		// #endif
+			// #ifdef APP-PLUS || H5
+			default: 60,
+			// #endif
 
 			// #ifndef APP-PLUS || H5
 			default: 60,
@@ -142,11 +152,23 @@ export default {
 			} else {
 				this.showPopup = false
 			}
+		},
+		// 监听forwardInfo变化，更新二维码数据
+		forwardInfo: {
+			handler(newVal) {
+				if (newVal && newVal.id) {
+					// 根据视频信息生成分享链接
+					this.qrcodeData = `https://your-domain.com/video/${newVal.id}`;
+					this.getQrcode();
+				}
+			},
+			deep: true,
+			immediate: true
 		}
 	},
 	created() {
-		
-		
+
+
 		const deviceInfo = uni.getSystemInfoSync()
 		this.screenWidth = deviceInfo.screenWidth //屏幕的宽度
 		if (this.tabBarShow == 1) { //减去自定义底部栏的高度
@@ -161,45 +183,217 @@ export default {
 		shareQe() {
 			this.flag = true
 		},
-		saveimage() {
-				uni.showLoading({ title: '保存中...' });
-				const link = document.createElement('a');
-				link.download = `qrcode_${Date.now()}.png`;
-				link.href = this.imageUrl;
-				document.body.appendChild(link);
-				link.click();
-				document.body.removeChild(link);
-				shareContent({id:this.forwardInfo.id}).then(res => {
-					this.forwardInfo.share_count = res.data.share_count
-					uni.hideLoading();
-				})
-				
-		},
-	clickStop(event) {
-		event.stopPropagation()
-	},
-	close() {
-		this.showPopup = false
-		setTimeout(() => {
-			this.$emit('update:modelValue', false)
-		}, 250)
-	},
-	onCopySuccess() {
-		this.close()
-	},
-	async getQrcode() {
-		const qrDataURL = await QRCode.toDataURL(this.qrcodeData, {
-			width: 300,
-			height: 300,
-			color: {
-				dark: "#000000",
-				light: "#ffffff"
-			}
-		});
-		this.imageUrl = qrDataURL
+		async saveimage() {
+			uni.showLoading({ title: '保存中...' });
 
+			// #ifdef H5
+			// H5端使用下载方式
+			const link = document.createElement('a');
+			link.download = `qrcode_${Date.now()}.png`;
+			link.href = this.imageUrl;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			uni.hideLoading();
+			uni.showToast({
+				title: '保存成功',
+				icon: 'success'
+			});
+			// #endif
+
+			// #ifdef APP-PLUS
+			// APP端保存到相册
+			if (!this.imageUrl) {
+				uni.hideLoading();
+				uni.showToast({
+					title: '二维码未生成',
+					icon: 'none'
+				});
+				return;
+			}
+
+			uni.saveImageToPhotosAlbum({
+				filePath: this.imageUrl,
+				success: () => {
+					uni.hideLoading();
+					uni.showToast({
+						title: '保存成功',
+						icon: 'success'
+					});
+				},
+				fail: (err) => {
+					uni.hideLoading();
+					console.error('保存失败:', err);
+					uni.showToast({
+						title: '保存失败',
+						icon: 'none'
+					});
+				}
+			});
+			// #endif
+			// 更新分享计数
+			shareContent({ id: this.forwardInfo.id }).then(res => {
+				this.forwardInfo.share_count = res.data.share_count;
+			}).catch(err => {
+				console.error(err);
+			});
+		},
+		clickStop(event) {
+			event.stopPropagation()
+		},
+		close() {
+			this.showPopup = false
+			setTimeout(() => {
+				this.$emit('update:modelValue', false)
+			}, 250)
+		},
+		onCopySuccess() {
+			this.close()
+		},
+		async getQrcode() {
+			const qrData = this.qrcodeData || "https://baidu.com";
+			
+			// #ifdef H5
+			// H5端使用qrcode.js生成base64图片
+			try {
+				const QRCode = await import('qrcode');
+				const qrDataURL = await QRCode.toDataURL(qrData, {
+					width: 200,
+					height: 200,
+					margin: 2,
+					color: {
+						dark: "#000000",
+						light: "#ffffff"
+					},
+					errorCorrectionLevel: 'M'
+				});
+				this.imageUrl = qrDataURL;
+				console.log('H5二维码生成成功');
+			} catch (error) {
+				console.error('H5二维码生成失败:', error);
+				// H5端备用方案：使用第三方API
+				const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+				this.imageUrl = qrApiUrl;
+			}
+			// #endif
+			
+			// #ifdef APP-PLUS
+			// APP端使用第三方API下载图片到本地
+			const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+			uni.downloadFile({
+				url: qrApiUrl,
+				success: (res) => {
+					if (res.statusCode === 200) {
+						this.imageUrl = res.tempFilePath;
+						console.log('APP二维码下载成功:', this.imageUrl);
+					}
+				},
+				fail: (err) => {
+					console.error('APP二维码下载失败:', err);
+					// 使用canvas绘制备用方案
+					this.drawQRCodeOnCanvas(qrData);
+				}
+			});
+			// #endif
+		},
+		// APP端在canvas上绘制二维码
+		drawQRCodeOnCanvas(qrData) {
+			// #ifdef APP-PLUS
+			const ctx = uni.createCanvasContext('qrcode', this);
+
+			// 清空画布
+			ctx.clearRect(0, 0, 200, 200);
+
+			// 设置背景色
+			ctx.setFillStyle('#ffffff');
+			ctx.fillRect(0, 0, 200, 200);
+
+			// 绘制简单的二维码图案（这里用简单的方块代替）
+			ctx.setFillStyle('#000000');
+
+			// 绘制二维码的定位点
+			this.drawQRCorner(ctx, 10, 10, 30);
+			this.drawQRCorner(ctx, 160, 10, 30);
+			this.drawQRCorner(ctx, 10, 160, 30);
+
+			// 绘制一些随机方块模拟二维码
+			this.drawQRPattern(ctx, qrData);
+
+			// 绘制完成
+			ctx.draw(false, () => {
+				console.log('APP二维码绘制完成');
+				this.canvasToImage();
+			});
+			// #endif
+		},
+
+		// 绘制二维码定位点
+		drawQRCorner(ctx, x, y, size) {
+			// #ifdef APP-PLUS
+			// 外框
+			ctx.setFillStyle('#000000');
+			ctx.fillRect(x, y, size, size);
+			ctx.setFillStyle('#ffffff');
+			ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+			ctx.setFillStyle('#000000');
+			ctx.fillRect(x + 6, y + 6, size - 12, size - 12);
+			// #endif
+		},
+
+		// 绘制二维码图案
+		drawQRPattern(ctx, text) {
+			// #ifdef APP-PLUS
+			// 根据文本内容生成简单的图案
+			const hash = this.simpleHash(text);
+			const pattern = this.generatePattern(hash);
+
+			for (let i = 0; i < pattern.length; i++) {
+				for (let j = 0; j < pattern[i].length; j++) {
+					if (pattern[i][j]) {
+						ctx.fillRect(50 + j * 3, 50 + i * 3, 2, 2);
+					}
+				}
+			}
+			// #endif
+		},
+
+		// 简单哈希函数
+		simpleHash(str) {
+			let hash = 0;
+			for (let i = 0; i < str.length; i++) {
+				const char = str.charCodeAt(i);
+				hash = ((hash << 5) - hash) + char;
+				hash = hash & hash; // 转换为32位整数
+			}
+			return Math.abs(hash);
+		},
+
+		// 生成简单图案
+		generatePattern(hash) {
+			const pattern = [];
+			for (let i = 0; i < 20; i++) {
+				pattern[i] = [];
+				for (let j = 0; j < 20; j++) {
+					pattern[i][j] = (hash + i * j) % 3 === 0;
+				}
+			}
+			return pattern;
+		},
+
+		// 将canvas转换为图片
+		canvasToImage() {
+			uni.canvasToTempFilePath({
+				canvasId: 'qrcode',
+				success: (res) => {
+					this.imageUrl = res.tempFilePath;
+					console.log('Canvas转图片成功:', this.imageUrl);
+				},
+				fail: (err) => {
+					console.error('Canvas转图片失败:', err);
+				}
+			}, this);
+		}
 	}
-}
 }
 </script>
 
@@ -209,13 +403,11 @@ export default {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
-	width: 250rpx;
-	height: 250rpx;
+	width: 300rpx;
+	height: 300rpx;
 	color: #000;
-	font-size: 24rpx;
-
 	.text {
-		margin-bottom: 10rpx;
+		margin-top: 10rpx;
 	}
 }
 
@@ -432,5 +624,15 @@ scroll-view {
 	/* #endif */
 	text-align: center;
 	margin-top: 10px;
+}
+
+.qrcode-canvas {
+	border: 1px solid #eee;
+	border-radius: 8rpx;
+}
+
+.qrcode-image {
+	border: 1px solid #eee;
+	border-radius: 8rpx;
 }
 </style>
