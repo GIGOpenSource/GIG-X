@@ -1,7 +1,10 @@
-// import {
-// 	host
-// } from '@/config/config.js'
-const host = import.meta.env.VITE_API_BASE_URL
+// #ifdef APP-PLUS
+import { host } from '@/config/config.js';
+// #endif
+
+// #ifndef APP-PLUS
+const host = import.meta.env.VITE_API_BASE_URL;
+// #endif
 import { login } from "@/api/setup.js";
 // import { userinfoStore } from "@/store/userinfos";
 // 验证token是否失效
@@ -79,8 +82,8 @@ function executeRequest(url, params, other) {
 			}, other.loadingTime);
 		}
 		uni.request({
-			// #ifdef APP-PLUS
-			url: 'http://192.168.77.222:8000' + host + url,
+				// #ifdef APP-PLUS
+			url: host + url,
 			// #endif
 			// #ifdef H5
 			url: host + url,

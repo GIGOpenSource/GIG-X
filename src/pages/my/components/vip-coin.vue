@@ -23,7 +23,7 @@ const list = ref([])
 const emits = defineEmits(['getmoney'])
 onMounted(() => {
   paylist({ pay_channel: 'gold' }).then(res => {
-    list.value = res.data
+    list.value = res.data.results
     if (list.value.length > 0) {
       emits('getmoney', list.value[0].pay_price, [])
     }

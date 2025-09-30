@@ -22,10 +22,12 @@ const current = ref(0)
 const list = ref([])
 onMounted(() => {
 	paylist({ pay_channel: 'vip' }).then(res => {
-		list.value = res.data
+		list.value = res.data.results
 		if (list.value.length > 0) {
 			emits('getmoney', list.value[0].pay_price, list.value[0].benefits)
 		}
+		console.log(list.value,'vlist.valulist.valu');
+		
 	})
 })
 const clicks = (index) => {

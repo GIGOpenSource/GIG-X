@@ -94,7 +94,7 @@ const follow = () => {
 	.right {
 		margin-left: 20rpx;
 		line-height: 50rpx;
-		width: 60%;
+		width: 70%;
 
 		.name {
 			display: flex;
@@ -117,6 +117,10 @@ const follow = () => {
 		.phone {
 			color: rgba(255, 255, 255, .6);
 			font-size: 28rpx;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		
 		}
 
 	}

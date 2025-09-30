@@ -105,10 +105,10 @@ const oparea = () => {
 const getdetails = () => {
 	details({
 		receiver_id: personInfo.value.session_id,
-		// reply_to_id: personInfo.value.id,
-		// sender_id: uni.getStorageSync('user_info').user_id
+	    currentPage:1,
+		pageSize:100
 	}).then(res => {
-		list.value = res.data
+		list.value = res.data.results
 	})
 }
 onMounted(() => {
