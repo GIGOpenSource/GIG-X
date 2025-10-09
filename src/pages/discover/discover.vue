@@ -54,7 +54,6 @@
         <tabs-page
           :current="currentTab"
           :tabsIndex="index"
-          v-if="currentTab == item.tab"
         ></tabs-page>
       </swiper-item>
     </swiper>

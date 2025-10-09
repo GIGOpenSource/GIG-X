@@ -1,11 +1,8 @@
 <template>
 	<view>
 		<!-- 底部标题 -->
-		<view
-			@click.stop.prevent="moveHandle"
-			class="footTitle"
-			:class="[vodIndex == index ? (sliderDrag ? 'vodMenu-bright1' : moveOpacity ? 'vodMenu-bright2' : 'vodMenu-bright0') : '']"
-		>
+		<view @click.stop.prevent="moveHandle" class="footTitle"
+			:class="[vodIndex == index ? (sliderDrag ? 'vodMenu-bright1' : moveOpacity ? 'vodMenu-bright2' : 'vodMenu-bright0') : '']">
 			<!-- <view class="footTitle-commodity">
 				<view class="footTitle-commodity-icon">
 					<image src="/static/tsp-icon/cart.png" class="footTitle-commodity-icon-img"></image>
@@ -16,7 +13,8 @@
 				<text class="foot-name">@{{ item.author?.user_nickname || '--' }}</text>
 			</view>
 			<view style="width: 450rpx; position: relative" v-if="item.desc">
-				<text class="foot-cont" :class="[item.desc.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.desc }}</text>
+				<text class="foot-cont" :class="[item.desc.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.desc
+				}}</text>
 				<text class="foot-expand" v-if="item.desc.length > 33" @click="expandDesc = !expandDesc">
 					{{ expandDesc ? "...收起" : "展开" }}
 				</text>
@@ -25,15 +23,19 @@
 		</view>
 		<!-- 右侧操作栏 -->
 		<view class="menuBox" :style="{ height: vodHeight + 'px' }" @click.stop.prevent="moveHandle">
-			<view class="vodMenu" :class="[vodIndex == index ? (sliderDrag ? 'vodMenu-bright1' : moveOpacity ? 'vodMenu-bright2' : 'vodMenu-bright0') : '']">
+			<view class="vodMenu"
+				:class="[vodIndex == index ? (sliderDrag ? 'vodMenu-bright1' : moveOpacity ? 'vodMenu-bright2' : 'vodMenu-bright0') : '']">
 				<!-- 头像 -->
 				<view class="vodMenu-top">
 					<view class="menu-avatar" @click="JumpBtn(1)">
 						<image :src="item.author?.avatar" mode="" class="avatar-image"></image>
 					</view>
-					<view class="follow" @click="followBtn(index)" v-if="!item.followReally" :class="{ followHide: followShow == 2 }">
-						<image src="/static/tsp-icon/gou.png" mode="" class="follow-guanzhu guanzhu-gou" v-if="followShow == 1 || followShow == 2"></image>
-						<image src="/static/tsp-icon/guanzhu.png" mode="" class="follow-guanzhu" v-if="followShow == null || followShow == 0"></image>
+					<view class="follow" @click="followBtn(index)" v-if="!item.followReally"
+						:class="{ followHide: followShow == 2 }">
+						<image src="/static/tsp-icon/gou.png" mode="" class="follow-guanzhu guanzhu-gou"
+							v-if="followShow == 1 || followShow == 2"></image>
+						<image src="/static/tsp-icon/guanzhu.png" mode="" class="follow-guanzhu"
+							v-if="followShow == null || followShow == 0"></image>
 					</view>
 				</view>
 				<!-- 点赞 -->
@@ -42,7 +44,8 @@
 						<view class="like-pellet" :class="'like-pellet' + j" v-for="(lt, j) in 8" :key="j"></view>
 					</view>
 					<view class="fabulous-image" @click="fabulousBtn" :ref="'likeRef' + index">
-						<image src="/static/tsp-icon/selectTaoxin.png" mode="" class="fabulous-image" v-if="item.fabulousShow"></image>
+						<image src="/static/tsp-icon/selectTaoxin.png" mode="" class="fabulous-image"
+							v-if="item.fabulousShow"></image>
 						<image src="/static/tsp-icon/taoxin.png" mode="" class="fabulous-image" v-else></image>
 					</view>
 					<text class="fabulous-num">{{ item.likeCount }}</text>
@@ -60,7 +63,8 @@
 						<view class="like-pellet" :class="'like-pellet' + j" v-for="(lt, j) in 8" :key="j"></view>
 					</view>
 					<view class="fabulous-image" @click="collectionBtn" :ref="'collectionRef' + index">
-						<up-icon name="star-fill" color="#ffff00" size="45" class="fabulous-image" v-if="item.collectionShow"></up-icon>
+						<up-icon name="star-fill" color="#ffff00" size="45" class="fabulous-image"
+							v-if="item.collectionShow"></up-icon>
 						<up-icon name="star-fill" color="#fff" size="45" class="fabulous-image" v-else></up-icon>
 					</view>
 					<text class="fabulous-num">{{ item.favoriteCount }}</text>
@@ -75,12 +79,8 @@
 			</view>
 		</view>
 		<!-- 旋转头像 -->
-		<view
-			@click.stop.prevent="moveHandle"
-			class="avatarMenu"
-			v-if="item.rotateImgShow"
-			:class="[vodIndex == index ? (sliderDrag ? 'vodMenu-bright1' : moveOpacity ? 'vodMenu-bright2' : 'vodMenu-bright0') : '']"
-		>
+		<view @click.stop.prevent="moveHandle" class="avatarMenu" v-if="item.rotateImgShow"
+			:class="[vodIndex == index ? (sliderDrag ? 'vodMenu-bright1' : moveOpacity ? 'vodMenu-bright2' : 'vodMenu-bright0') : '']">
 			<view style="position: relative; width: 95rpx; height: 95rpx" @click="JumpBtn(4)">
 				<view :ref="'rotateImg' + index">
 					<view class="rotate-avatar">
@@ -260,7 +260,7 @@ export default {
 			this.likeNum = 0;
 			this.pelletNum = 0;
 			let result = obj.fabulousShow ? this.likeDropList : this.likeCancelList;
-			this.addAnimation('likeRef', result, this.likeNum); //点赞动画
+			this.addAnimation('likeRef', result, this.likeNum);
 			if (obj.fabulousShow) {
 				//小圆点闪出动画
 				this.addAnimation('pelRef', this.pelletList, this.pelletNum);
@@ -268,8 +268,12 @@ export default {
 			this.$emit('fabulousBtn', {
 				obj: obj,
 				index: this.index
-			}); //点赞成功
-			
+			});
+			if (obj.fabulousShow) {
+				obj.likeCount = (obj.likeCount || 0) + 1;
+			} else {
+				obj.likeCount = Math.max((obj.likeCount || 0) - 1, 0);
+			}
 			contentLike(this.item.id)
 				.then((res) => {
 					console.log("点赞成功");
@@ -282,8 +286,12 @@ export default {
 		collectionBtn() {
 			let obj = Object.assign({}, this.item);
 			obj.collectionShow = !obj.collectionShow;
-
 			this.likeNum = 0;
+			if (obj.collectionShow) {
+				obj.favoriteCount = (obj.favoriteCount || 0) + 1;
+			} else {
+				obj.favoriteCount = Math.max((obj.favoriteCount || 0) - 1, 0);
+			}
 			let result = obj.collectionShow ? this.likeDropList : this.likeCancelList;
 			this.addAnimation('collectionRef', result, this.likeNum); //点赞动画
 
@@ -310,14 +318,14 @@ export default {
 				setTimeout(() => {
 					this.followShow = 2;
 					setTimeout(() => {
-						followtoggle({followee_id: this.item.author?.id}).then((res) => {
+						followtoggle({ followee_id: this.item.author?.id }).then((res) => {
 							console.log("关注成功");
 							this.$emit('fabulousBtn', {
 								obj: obj,
 								index: this.index
 							}); //关注成功
 						}).catch((err) => {
-							console.log("关注失败",err);
+							console.log("关注失败", err);
 						});
 					}, 300);
 				}, 100);

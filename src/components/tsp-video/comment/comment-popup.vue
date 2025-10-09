@@ -400,37 +400,46 @@ export default {
 			if(this.status == 'noMore') return
 			this.getList()
 		},
-		/* 列表请求 */
-		getList() {
-			if(this.openReq) return
-			let valueIdNum = parseInt(uni.getStorageSync('commentIdsNum') || 1)
-			this.openReq = true
-			this.startData().then((res)=>{
-				console.log("🚀 ~ getList ~ res:", res)
-				this.total = res.data.pagination.total
-				this.openReq = false
-				if(res.code == 200){
-					let list = res.data.results
-					list.forEach((item,index)=>{
-						/** 必要参数数据必须拼接  */
-						item.imgList = index % 2 == 0 ? []:[] //图片或者图集
-						item.listTotal = index % 2 == 0 ? 15 : 5 //回复评论的总数量 --- 可根据自己的真实数据赋值
-						item.phizImg = '' //表情
-						item.likeShow = false //是否已点赞: true、false --- 默认必须参数，可赋值修改 (如果真实数据是0-1的话，可根据条件判断成true、false)
-						item.foldShow = false //是否已踩踏: true、false --- 默认必须参数，可赋值修改 (如果真实数据是0-1的话，可根据条件判断成true、false)
+	/* 列表请求 */
+	getList() {
+		if(this.openReq) return
+		let valueIdNum = parseInt(uni.getStorageSync('commentIdsNum') || 1)
+		this.openReq = true
+		this.startData().then((res)=>{
+			console.log("🚀 ~ getList ~ res:", res)
+			this.total = res.data.pagination.total
+			// 将评论总数传递给父组件
+			this.$emit('updateCommentCount', this.total)
+			this.openReq = false
+			if(res.code == 200){
+				let list = res.data.results
+				list.forEach((item,index)=>{
+					/** 必要参数数据必须拼接  */
+					item.imgList = index % 2 == 0 ? []:[] //图片或者图集
+					item.listTotal = index % 2 == 0 ? 15 : 5 //回复评论的总数量 --- 可根据自己的真实数据赋值
+					item.phizImg = '' //表情
+					
+					// 点赞相关属性（使用接口返回的数据）
+					item.is_liked = item.is_liked || false //是否已点赞
+					item.likeCount = item.like_count || 0 //点赞数量
+					item.likeShow = item.is_liked //兼容旧属性名
+					item.likes = item.likeCount //兼容旧属性名
+					item.likeeffect = null //点赞动效
+					
+					item.foldShow = false //是否已踩踏: true、false --- 默认必须参数，可赋值修改 (如果真实数据是0-1的话，可根据条件判断成true、false)
 
-						item.list = [] //回复列表 --- 默认必须参数，不用修改
-						item.wbId = valueIdNum + index //虚拟id --- 默认必须参数 (主要用于文本展开、收起判断)
-						item.pageNum = 1 //回复列表分页 --- 默认必须参数，不用修改
-						item.expandIndex = 0 //展开评论的层级 --- 默认必须参数，不用修改
-						item.expandNum = 0 //已经展开评论的数量 --- 默认必须参数，不用修改
-						item.loadShow = false //是否显示loading加载动画 --- 默认必须参数，不用修改
-						item.imgStyle = {} //评论图片加载的宽高 --- 默认必须参数，不用修改
-						item.textShow = true //添加插入评论时控制文本显示加载使用的 --- 默认必须参数，不用修改
-						item.isOmit = false //文本内容是否收起  --- 默认必须参数，不用修改
-						item.isShow = false //文本内容是否显示展开、收起  --- 默认必须参数，不用修改
-						item.selectedRow = false //是否选中添加背景样式  --- 默认必须参数，不用修改
-					})
+					item.list = [] //回复列表 --- 默认必须参数，不用修改
+					item.wbId = valueIdNum + index //虚拟id --- 默认必须参数 (主要用于文本展开、收起判断)
+					item.pageNum = 1 //回复列表分页 --- 默认必须参数，不用修改
+					item.expandIndex = 0 //展开评论的层级 --- 默认必须参数，不用修改
+					item.expandNum = 0 //已经展开评论的数量 --- 默认必须参数，不用修改
+					item.loadShow = false //是否显示loading加载动画 --- 默认必须参数，不用修改
+					item.imgStyle = {} //评论图片加载的宽高 --- 默认必须参数，不用修改
+					item.textShow = true //添加插入评论时控制文本显示加载使用的 --- 默认必须参数，不用修改
+					item.isOmit = false //文本内容是否收起  --- 默认必须参数，不用修改
+					item.isShow = false //文本内容是否显示展开、收起  --- 默认必须参数，不用修改
+					item.selectedRow = false //是否选中添加背景样式  --- 默认必须参数，不用修改
+				})
 					this.commentlist = this.commentlist.concat(list)
 					this.status = 'noMore'
 				}else{
@@ -548,17 +557,20 @@ export default {
 				this.commentlist[index].list[i].list[idx].imgStyle = item.imgStyle
 			}
 		},
-		/* 点赞成功更新数据 */
-		updataLike(type, obj, index, i, idx){
-			if(type == 'pl'){ //评论点赞更新
-				this.commentlist[index].likeShow = obj.likeShow
-				this.commentlist[index].likeeffect = obj.likeeffect
-				this.commentlist[index].likes = obj.likes
-			}else if(type == 'hf'){ //回复点赞更新
-				this.commentlist[index].list[i].list[idx].likeShow = obj.likeShow
-				this.commentlist[index].list[i].list[idx].likeeffect = obj.likeeffect
-				this.commentlist[index].list[i].list[idx].likes = obj.likes
-			}else if(type == 'cai'){ //踩踏点赞
+	/* 点赞成功更新数据 */
+	updataLike(type, obj, index, i, idx){
+		if(type == 'pl'){ //评论点赞更新
+			this.commentlist[index].is_liked = obj.is_liked
+			this.commentlist[index].likeeffect = obj.likeeffect
+			this.commentlist[index].likeCount = obj.likeCount
+			// 兼容旧属性名
+			this.commentlist[index].likeShow = obj.is_liked
+			this.commentlist[index].likes = obj.likeCount
+		}else if(type == 'hf'){ //回复点赞更新
+			this.commentlist[index].list[i].list[idx].likeShow = obj.likeShow
+			this.commentlist[index].list[i].list[idx].likeeffect = obj.likeeffect
+			this.commentlist[index].list[i].list[idx].likes = obj.likes
+		}else if(type == 'cai'){ //踩踏点赞
 				if(i >= 0){
 					this.commentlist[index].list[i].list[idx].foldShow = obj.foldShow
 				}else{

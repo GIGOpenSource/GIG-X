@@ -45,9 +45,9 @@
 			</view>
 		</view>
 
-		<!-- 评论弹窗 -->
-		<comment-popup ref="commentRef" v-model="commentVisible" :commentInfo="commentInfo"
-			@submitComment="submitComment" />
+	<!-- 评论弹窗 -->
+	<comment-popup ref="commentRef" v-model="commentVisible" :commentInfo="commentInfo"
+		@submitComment="submitComment" @updateCommentCount="handleCommentCountUpdate" />
 
 		<!-- 转发弹窗 -->
 		<forwardMenu v-model="showForward" :forwardInfo="commentInfo"></forwardMenu>
@@ -188,22 +188,43 @@ export default {
 				this.changeSwitchTab(index);
 			}
 		},
-		/* 评论组件内容回调 */
-		async submitComment(val, item) {
-			console.log(val, item);
-			const params = {
-				type: "short",
-				tabs: "recommend",
-				target_id: this.commentInfo.id,
-				parent_comment_id: item.id || 0,
-				content: val.text,
-			};
-			const res = await addContentComment(params);
-			console.log("res", res);
-			if (res.code === 200) {
-				// ...
+	/* 评论组件内容回调 */
+	async submitComment(val, item) {
+		console.log(val, item);
+		const params = {
+			type: "short",
+			tabs: "recommend",
+			target_id: this.commentInfo.id,
+			parent_comment_id: item.id || 0,
+			content: val.text,
+		};
+		const res = await addContentComment(params);
+		console.log("res", res);
+		if (res.code === 201) {
+			// 重新加载评论列表，列表加载后会通过updateCommentCount事件更新数量
+			this.$nextTick(() => {
+				if (this.$refs.commentRef) {
+					this.$refs.commentRef.loadData();
+				}
+			});
+		}
+	},
+	/* 处理评论数量更新 */
+	handleCommentCountUpdate(total) {
+		try {
+			// 获取当前页面的视频组件
+			const currentPage = this.pageList[this.tabIndex];
+			if (currentPage && currentPage.$refs.vodRef && currentPage.$refs.vodRef.$refs.videoGroup) {
+				const videoGroup = currentPage.$refs.vodRef.$refs.videoGroup;
+				// 使用接口返回的实际评论数量更新
+				if (videoGroup.updateVideoCommentCount) {
+					videoGroup.updateVideoCommentCount(this.commentInfo.id, total);
+				}
 			}
-		},
+		} catch (error) {
+			console.error("更新评论数量失败", error);
+		}
+	},
 		onswiperscroll(e) {
 			// this.$refs.tabRef.onswiperscroll(e)
 		},

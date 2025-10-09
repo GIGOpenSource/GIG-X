@@ -1107,20 +1107,39 @@ export default {
 		openScreen(index){
 			this.$refs[`myVideo${index}${this.swId}`][0].requestFullScreen();
 		},
-		/* 点赞关注操作 */
-		handleInfo(obj) {
-			this.totalPlayList.filter((item, index) => {
-				if (item.videoIndex == obj.videoIndex) {
-					this.$set(this.totalPlayList, index, obj)
-				}
-			})
-			this.vodList.filter((item, index) => {
-				if (item.videoIndex == obj.videoIndex) {
-					this.$set(this.vodList, index, obj)
-				}
-			})
-			/* 更新获取当前视频播放对象 */
-			this.getVodInfo()
-		},
-	}
+	/* 点赞关注操作 */
+	handleInfo(obj) {
+		this.totalPlayList.filter((item, index) => {
+			if (item.videoIndex == obj.videoIndex) {
+				this.$set(this.totalPlayList, index, obj)
+			}
+		})
+		this.vodList.filter((item, index) => {
+			if (item.videoIndex == obj.videoIndex) {
+				this.$set(this.vodList, index, obj)
+			}
+		})
+		/* 更新获取当前视频播放对象 */
+		this.getVodInfo()
+	},
+	/* 更新视频评论数量 */
+	updateVideoCommentCount(videoId, commentCount) {
+		this.totalPlayList.filter((item, index) => {
+			if (item.id == videoId) {
+				const updatedItem = Object.assign({}, item);
+				updatedItem.commentCount = commentCount; // 使用接口返回的实际数量
+				this.$set(this.totalPlayList, index, updatedItem);
+			}
+		})
+		this.vodList.filter((item, index) => {
+			if (item.id == videoId) {
+				const updatedItem = Object.assign({}, item);
+				updatedItem.commentCount = commentCount; // 使用接口返回的实际数量
+				this.$set(this.vodList, index, updatedItem);
+			}
+		})
+		/* 更新获取当前视频播放对象 */
+		this.getVodInfo()
+	},
+}
 }

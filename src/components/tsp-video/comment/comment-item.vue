@@ -1,14 +1,8 @@
 <template>
 	<view>
-		<view
-			class="comment-list-item f"
-			:ref="'commentId' + index"
-			@touchstart="textViewStart($event, item, index)"
-			@touchmove="textViewMove($event, item, index)"
-			@touchend="textViewEnd($event, item, index)"
-			@longpress="longpressText($event, item, index)"
-			:class="[item.selectedRow ? 'list-item-active' : '']"
-		>
+		<view class="comment-list-item f" :ref="'commentId' + index" @touchstart="textViewStart($event, item, index)"
+			@touchmove="textViewMove($event, item, index)" @touchend="textViewEnd($event, item, index)"
+			@longpress="longpressText($event, item, index)" :class="[item.selectedRow ? 'list-item-active' : '']">
 			<view>
 				<image class="comment-list-item-avatar" :src="item.user_avatar" mode="aspectFill"></image>
 			</view>
@@ -21,48 +15,42 @@
 				<view class="mgt7" :class="[item.foldShow ? 'comment-list-item-list' : '']">
 					<!-- 文本内容 -->
 					<view>
-						<commentText :index="index" v-if="item.textShow" :conText="item.content" :item="item" @packUpText="packUpText"></commentText>
+						<commentText :index="index" v-if="item.textShow" :conText="item.content" :item="item"
+							@packUpText="packUpText"></commentText>
 					</view>
 
 					<!-- 图集 -->
 					<view class="mgt7 f f-v-c" v-if="item.imgList && item.imgList.length > 1">
-						<view
-							:class="[imgIdx == 1 ? 'gallery-spacing' : '']"
-							v-for="(itemImg, imgIdx) in item.imgList"
+						<view :class="[imgIdx == 1 ? 'gallery-spacing' : '']" v-for="(itemImg, imgIdx) in item.imgList"
 							:key="imgIdx"
 							:style="{ width: galleryPlwidth + 'px', height: galleryPlwidth + 'px', position: 'relative' }"
-							@click="previewImg(item.imgList, imgIdx)"
-						>
-							<image
-								class="comment-list-item-imgBox-img"
-								:src="itemImg"
-								mode="aspectFill"
+							@click="previewImg(item.imgList, imgIdx)">
+							<image class="comment-list-item-imgBox-img" :src="itemImg" mode="aspectFill"
 								v-if="imgIdx < 3"
-								:style="{ width: galleryPlwidth + 'px', height: galleryPlwidth + 'px' }"
-							></image>
-							<view class="comment-list-item-imgPoint f f-lv-c" v-if="item.imgList.length > 3 && imgIdx == 2">
-								<image src="/static/tsp-icon/tsp-img.png" class="comment-list-item-imgPoint-img"></image>
+								:style="{ width: galleryPlwidth + 'px', height: galleryPlwidth + 'px' }"></image>
+							<view class="comment-list-item-imgPoint f f-lv-c"
+								v-if="item.imgList.length > 3 && imgIdx == 2">
+								<image src="/static/tsp-icon/tsp-img.png" class="comment-list-item-imgPoint-img">
+								</image>
 								<text class="comment-list-item-imgPoint-text">+{{ item.imgList.length - 3 }}</text>
 							</view>
 						</view>
 					</view>
 					<!-- 单图 -->
 					<view class="mgt7 f f-v-c" v-if="item.imgList && item.imgList.length == 1">
-						<view v-for="(itemImg, imgIdx) in item.imgList" :key="imgIdx" @click="previewImg(item.imgList, imgIdx)">
+						<view v-for="(itemImg, imgIdx) in item.imgList" :key="imgIdx"
+							@click="previewImg(item.imgList, imgIdx)">
 							<view :class="[!item.imgWidth ? 'comment-list-item-list' : '']">
-								<image
-									class="comment-list-item-imgBox-img"
-									:src="itemImg"
-									mode="aspectFill"
+								<image class="comment-list-item-imgBox-img" :src="itemImg" mode="aspectFill"
 									@load="loadImage($event, 'pl', item, index)"
-									:style="{ width: item.imgStyle.width, height: item.imgStyle.height }"
-								></image>
+									:style="{ width: item.imgStyle.width, height: item.imgStyle.height }"></image>
 							</view>
 						</view>
 					</view>
 					<!-- 表情 -->
 					<view class="mgt7 f f-v-c" v-if="item.phizImg" @click="previewImg([item.phizImg], 0)">
-						<image class="comment-list-item-bqImg" :class="[screenWidth > 500 ? 'bqImgWhPx' : 'bqImgWhRpx']" :src="item.phizImg" mode="aspectFill"></image>
+						<image class="comment-list-item-bqImg" :class="[screenWidth > 500 ? 'bqImgWhPx' : 'bqImgWhRpx']"
+							:src="item.phizImg" mode="aspectFill"></image>
 					</view>
 				</view>
 				<view class="f f-lv-s" :class="[item.foldShow ? '' : 'mgt7']">
@@ -71,27 +59,28 @@
 						<text class="comment-list-item-zbdz">该评论已被折叠</text>
 					</view>
 					<view class="f f-v-c" v-else @click="openPlReply('pl', item, index)">
-						<text class="comment-list-item-zbdz">{{ item.time }}</text>
-						<text class="comment-list-item-fh">·</text>
+						<text class="comment-list-item-zbdz">{{ item.create_time }}</text>
+						<!-- <text class="comment-list-item-fh">·</text> -->
 						<text class="comment-list-item-zbdz">{{ item.ipAddres }}</text>
-						<text class="comment-list-item-reply">回复</text>
+						<!-- <text class="comment-list-item-reply">回复</text> -->
 					</view>
 					<view class="f f-v-c">
 						<view class="f f-v-c comment-list-item-dzmgr" @click="plLikeBtn('pl', item, index)">
-							<view
-								class="comment-list-item-dzImg"
+							<view class="comment-list-item-dzImg"
 								:class="[item.likeeffect == true ? 'fabulous-taoxin' : item.likeeffect == false ? 'cancel-taoxin' : '']"
-								:ref="'likePlRef' + index"
-							>
-								<image src="/static/tsp-icon/tsp-dztxSed.png" class="comment-list-item-dzImg" v-if="item.likeShow"></image>
-								<image src="/static/tsp-icon/tsp-dztx.png" class="comment-list-item-dzImg" v-else></image>
+								:ref="'likePlRef' + index">
+								<image src="/static/tsp-icon/tsp-dztxSed.png" class="comment-list-item-dzImg"
+									v-if="item.is_liked"></image>
+								<image src="/static/tsp-icon/tsp-dztx.png" class="comment-list-item-dzImg" v-else>
+								</image>
 							</view>
-							<text class="comment-list-item-dzNum" v-if="item.likeCount">{{ item.likeCount }}</text>
+							<text class="comment-list-item-dzNum">{{ item.likeCount || '0'}}</text>
 						</view>
-						<view class="comment-list-item-dzImg" @click="foldCommentBtn('cai', item, index)">
-							<image src="/static/tsp-icon/tsp-dzcaiSed.png" class="comment-list-item-dzImg" v-if="item.foldShow"></image>
+						<!-- <view class="comment-list-item-dzImg" @click="foldCommentBtn('cai', item, index)">
+							<image src="/static/tsp-icon/tsp-dzcaiSed.png" class="comment-list-item-dzImg"
+								v-if="item.is_liked"></image>
 							<image src="/static/tsp-icon/tsp-dzcai.png" class="comment-list-item-dzImg" v-else></image>
-						</view>
+						</view> -->
 					</view>
 				</view>
 			</view>
@@ -105,19 +94,14 @@
 						<!--  :class="[!it.expand ? 'foldHeight':'']" -->
 						<view v-if="it.expand">
 							<!-- v.show 控制延迟显示，解决渲染会闪烁的问题 -->
-							<view
-								class="f contBox-item"
-								v-for="(v, idx) in it.list"
-								:key="idx"
-								:ref="'commentId' + index + i + idx"
-								:id="'commentId' + index + i + idx"
+							<view class="f contBox-item" v-for="(v, idx) in it.list" :key="idx"
+								:ref="'commentId' + index + i + idx" :id="'commentId' + index + i + idx"
 								:class="[v.show ? 'mgb5' : 'comment-list-item-list', v.selectedRow ? 'list-item-active' : '']"
 								:style="{ width: screenWidth - 60 + 'px' }"
 								@touchstart="textViewStart($event, item, index, i, idx)"
 								@touchmove="textViewMove($event, item, index, i, idx)"
 								@touchend="textViewEnd($event, item, index, i, idx)"
-								@longpress="longpressText($event, item, index, i, idx)"
-							>
+								@longpress="longpressText($event, item, index, i, idx)">
 								<view>
 									<image class="comment-list-item-avatarHf" :src="v.avatar" mode="aspectFill"></image>
 								</view>
@@ -127,7 +111,8 @@
 										<text class="comment-list-item-author boxSizing" v-if="v.author">作者</text>
 										<!-- 回复人昵称 -->
 										<view class="f f-v-c" v-if="v.replyUser">
-											<image src="/static/tsp-icon/caret-right.png" class="comment-list-item-hfImg"></image>
+											<image src="/static/tsp-icon/caret-right.png"
+												class="comment-list-item-hfImg"></image>
 											<text class="comment-list-item-title">{{ v.replyUser }}</text>
 										</view>
 									</view>
@@ -136,67 +121,54 @@
 
 										<!-- 文本内容 -->
 										<view :style="{ width: screenWidth - 120 + 'px' }">
-											<commentText
-												v-if="v.textShow"
-												:index="index"
-												:i="i"
-												:idx="idx"
-												:item="v"
-												showType="hf"
-												:conText="v.content"
-												@packUpText="packUpText"
-											></commentText>
+											<commentText v-if="v.textShow" :index="index" :i="i" :idx="idx" :item="v"
+												showType="hf" :conText="v.content" @packUpText="packUpText">
+											</commentText>
 										</view>
 
 										<!-- 图集 -->
 										<view class="mgt7 f f-v-c" v-if="v.imgList && v.imgList.length > 1">
-											<view
-												:class="[imgIdx == 1 ? 'gallery-spacing' : '']"
-												v-for="(itemImg, imgIdx) in v.imgList"
-												:key="imgIdx"
+											<view :class="[imgIdx == 1 ? 'gallery-spacing' : '']"
+												v-for="(itemImg, imgIdx) in v.imgList" :key="imgIdx"
 												:style="{ width: galleryHfwidth + 'px', height: galleryHfwidth + 'px', position: 'relative' }"
-												@click="previewImg(v.imgList, imgIdx)"
-											>
-												<image
-													class="comment-list-item-imgBox-img"
-													:src="itemImg"
-													mode="aspectFill"
-													v-if="imgIdx < 3"
-													:style="{ width: galleryHfwidth + 'px', height: galleryHfwidth + 'px' }"
-												></image>
-												<view class="comment-list-item-imgPoint f f-lv-c" v-if="v.imgList.length > 3 && imgIdx == 2">
-													<image src="/static/tsp-icon/tsp-img.png" class="comment-list-item-imgPoint-img"></image>
-													<text class="comment-list-item-imgPoint-text">+{{ v.imgList.length - 3 }}</text>
+												@click="previewImg(v.imgList, imgIdx)">
+												<image class="comment-list-item-imgBox-img" :src="itemImg"
+													mode="aspectFill" v-if="imgIdx < 3"
+													:style="{ width: galleryHfwidth + 'px', height: galleryHfwidth + 'px' }">
+												</image>
+												<view class="comment-list-item-imgPoint f f-lv-c"
+													v-if="v.imgList.length > 3 && imgIdx == 2">
+													<image src="/static/tsp-icon/tsp-img.png"
+														class="comment-list-item-imgPoint-img"></image>
+													<text class="comment-list-item-imgPoint-text">+{{ v.imgList.length -
+														3 }}</text>
 												</view>
 											</view>
 										</view>
 										<!-- 单图 -->
 										<view class="mgt7 f f-v-c" v-if="v.imgList && v.imgList.length == 1">
-											<view v-for="(itemImg, imgIdx) in v.imgList" :key="imgIdx" @click="previewImg(v.imgList, imgIdx)">
+											<view v-for="(itemImg, imgIdx) in v.imgList" :key="imgIdx"
+												@click="previewImg(v.imgList, imgIdx)">
 												<view :class="[!v.imgWidth ? 'comment-list-item-list' : '']">
-													<image
-														class="comment-list-item-imgBox-img"
-														:src="itemImg"
+													<image class="comment-list-item-imgBox-img" :src="itemImg"
 														mode="aspectFill"
 														@load="loadImage($event, 'hf', v, index, i, idx)"
-														:style="{ width: v.imgStyle.width, height: v.imgStyle.height }"
-													></image>
+														:style="{ width: v.imgStyle.width, height: v.imgStyle.height }">
+													</image>
 												</view>
 											</view>
 										</view>
 										<!-- 表情 -->
 										<view class="mgt7 f f-v-c" v-if="v.phizImg" @click="previewImg([v.phizImg], 0)">
-											<image
-												class="comment-list-item-bqImg"
+											<image class="comment-list-item-bqImg"
 												:class="[screenWidth > 500 ? 'bqImgWhPx' : 'bqImgWhRpx']"
-												:src="v.phizImg"
-												mode="aspectFill"
-											></image>
+												:src="v.phizImg" mode="aspectFill"></image>
 										</view>
 									</view>
 									<view class="f f-lv-s" :class="[v.foldShow ? '' : 'mgt7']">
 										<view class="f f-v-c" v-if="v.foldShow">
-											<image src="/static/tsp-icon/tsp-dzcaiZd.png" class="comment-list-item-caiImg"></image>
+											<image src="/static/tsp-icon/tsp-dzcaiZd.png"
+												class="comment-list-item-caiImg"></image>
 											<text class="comment-list-item-zbdz">该评论已被折叠</text>
 										</view>
 										<view class="f f-v-c" v-else @click="openHfReply('hf', item, v, index, i, idx)">
@@ -206,20 +178,25 @@
 											<text class="comment-list-item-reply">回复</text>
 										</view>
 										<view class="f f-v-c">
-											<view class="f f-v-c comment-list-item-dzmgr" @click="plLikeBtn('hf', v, index, i, idx)">
-												<view
-													class="comment-list-item-dzImg"
+											<view class="f f-v-c comment-list-item-dzmgr"
+												@click="plLikeBtn('hf', v, index, i, idx)">
+												<view class="comment-list-item-dzImg"
 													:ref="'likeHfRef' + index + i + idx"
-													:class="[v.likeeffect == true ? 'fabulous-taoxin' : v.likeeffect == false ? 'cancel-taoxin' : '']"
-												>
-													<image src="/static/tsp-icon/tsp-dztxSed.png" class="comment-list-item-dzImg" v-if="v.likeShow"></image>
-													<image src="/static/tsp-icon/tsp-dztx.png" class="comment-list-item-dzImg" v-else></image>
+													:class="[v.likeeffect == true ? 'fabulous-taoxin' : v.likeeffect == false ? 'cancel-taoxin' : '']">
+													<image src="/static/tsp-icon/tsp-dztxSed.png"
+														class="comment-list-item-dzImg" v-if="v.likeShow"></image>
+													<image src="/static/tsp-icon/tsp-dztx.png"
+														class="comment-list-item-dzImg" v-else></image>
 												</view>
-												<text class="comment-list-item-dzNum" v-if="v.likes">{{ v.likes }}</text>
+												<text class="comment-list-item-dzNum" v-if="v.likes">{{ v.likes
+													}}</text>
 											</view>
-											<view class="comment-list-item-dzImg" @click="foldCommentBtn('cai', v, index, i, idx)">
-												<image src="/static/tsp-icon/tsp-dzcaiSed.png" class="comment-list-item-dzImg" v-if="v.foldShow"></image>
-												<image src="/static/tsp-icon/tsp-dzcai.png" class="comment-list-item-dzImg" v-else></image>
+											<view class="comment-list-item-dzImg"
+												@click="foldCommentBtn('cai', v, index, i, idx)">
+												<image src="/static/tsp-icon/tsp-dzcaiSed.png"
+													class="comment-list-item-dzImg" v-if="v.foldShow"></image>
+												<image src="/static/tsp-icon/tsp-dzcai.png"
+													class="comment-list-item-dzImg" v-else></image>
 											</view>
 										</view>
 									</view>
@@ -231,13 +208,15 @@
 
 				<!-- loading加载 -->
 				<!-- #ifndef APP-NVUE -->
-				<view class="comment-list-item-loading f f-lv-c mgt5" v-if="item.loadShow" :style="{ width: screenWidth / 2.1 + 'px' }">
+				<view class="comment-list-item-loading f f-lv-c mgt5" v-if="item.loadShow"
+					:style="{ width: screenWidth / 2.1 + 'px' }">
 					<tspLoading :lodingSxSize="10" />
 				</view>
 				<!-- #endif -->
 
 				<!-- #ifdef APP-NVUE -->
-				<view class="comment-list-item-loading f f-v-c mgt5" v-if="item.loadShow" :style="{ width: screenWidth / 2.1 + 'px' }">
+				<view class="comment-list-item-loading f f-v-c mgt5" v-if="item.loadShow"
+					:style="{ width: screenWidth / 2.1 + 'px' }">
 					<tspLoading :loadingType="3" />
 				</view>
 				<!-- #endif -->
@@ -279,6 +258,7 @@ const animation = uni.requireNativePlugin('animation');
 // #endif
 import tspLoading from '../tsp-load/tsp-loading.vue';
 import commentText from './comment-text.vue';
+import { addContentLike } from "@/api/common";
 export default {
 	components: {
 		tspLoading,
@@ -422,25 +402,40 @@ export default {
 				current: index ? index : 0
 			});
 		},
-		/* 点赞 */
-		plLikeBtn(type, item, index, i, idx) {
-			let obj = Object.assign({}, item);
-			obj.likeShow = !obj.likeShow;
-			obj.likeeffect = obj.likeShow;
-			obj.likeCount = obj.likeShow ? obj.likeCount + 1 : obj.likeCount - 1;
-			let nameRef = type == 'hf' ? 'likeHfRef' + index + i + idx : 'likePlRef' + index;
-
-			// #ifdef APP-NVUE
-			this.likeNum = 0;
-			let result = obj.likeShow ? this.likeDropList : this.likeCancelList;
-			this.addAnimation(nameRef, result, this.likeNum, type); //点赞动画
-			// #endif
-			this.$emit('updataLike', type, obj, index, i, idx); //点赞成功，更新数据
-		},
+	/* 点赞 */
+	plLikeBtn(type, item, index, i, idx) {
+		let obj = Object.assign({}, item);
+		obj.is_liked = !obj.is_liked;
+		obj.likeeffect = obj.is_liked; // 设置点赞动效状态
+		obj.likeCount = obj.is_liked ? (obj.likeCount || 0) + 1 : Math.max((obj.likeCount || 0) - 1, 0);
+		let nameRef = type == 'hf' ? 'likeHfRef' + index + i + idx : 'likePlRef' + index;
+		
+		// 调用点赞接口
+		addContentLike({ target_id: obj.id }).then((res) => {
+			console.log("评论点赞成功", res);
+		}).catch((err) => {
+			console.log("评论点赞失败", err);
+		});
+		
+		// #ifdef APP-NVUE
+		this.likeNum = 0;
+		let result = obj.is_liked ? this.likeDropList : this.likeCancelList;
+		this.addAnimation(nameRef, result, this.likeNum, type); //点赞动画
+		// #endif
+		
+		this.$emit('updataLike', type, obj, index, i, idx); //点赞成功，更新数据
+		
+		// 动画播放完后清除动效状态
+		setTimeout(() => {
+			let clearObj = Object.assign({}, obj);
+			clearObj.likeeffect = null;
+			this.$emit('updataLike', type, clearObj, index, i, idx);
+		}, 500); // 动画持续时间为 0.5s
+	},
 		/* 踩、折叠评论 */
 		foldCommentBtn(type, item, index, i, idx) {
 			let obj = Object.assign({}, item);
-			obj.foldShow = !obj.foldShow;
+			obj.is_liked = !obj.is_liked
 			this.$emit('updataLike', type, obj, index, i, idx); //踩赞成功，更新数据
 
 			/* if(obj.foldShow){
@@ -525,6 +520,7 @@ view,
 scroll-view {
 	box-sizing: border-box;
 }
+
 /* #endif */
 
 .f {
@@ -685,6 +681,7 @@ scroll-view {
 	height: 97px;
 	border: 1rpx solid #e8e8e8;
 }
+
 .bqImgWhRpx {
 	width: 204rpx;
 	height: 204rpx;
@@ -700,6 +697,7 @@ scroll-view {
 	height: 15px;
 	border-radius: 4px;
 }
+
 .comment-list-item-imgPoint-text {
 	font-size: 11px;
 	color: #fff;
@@ -840,6 +838,7 @@ scroll-view {
 	padding-left: 15px;
 	margin-bottom: 5px;
 }
+
 .contBox-item {
 	/* background-color: #f5f5f5; */
 	padding: 5px 15px 5px 5px;
@@ -847,6 +846,7 @@ scroll-view {
 	box-sizing: border-box;
 	/* #endif */
 }
+
 .contBox-left {
 	width: 40px;
 	height: 1px;

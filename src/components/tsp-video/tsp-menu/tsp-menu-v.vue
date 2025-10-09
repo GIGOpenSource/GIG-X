@@ -16,11 +16,11 @@
 				</view>
 				<text class="footTitle-commodity-name text_one">商品商品商品商品商品商品商品商品商品商品商品商品商品</text>
 			</view> -->
-			
+
 			<view><text class="foot-name">@{{ item.author?.user_nickname || '--' }}</text></view>
 			<view style="width: 450rpx; position: relative" v-if="item.desc">
 				<text class="foot-cont" :class="[item.desc.length > 33 && !expandDesc ? 'text_two' : '']">{{ item.desc
-					}}</text>
+				}}</text>
 				<text class="foot-expand" v-if="item.desc.length > 33" @click="expandDesc = !expandDesc">
 					{{ expandDesc ? "...收起" : "展开" }}
 				</text>
@@ -67,12 +67,12 @@
 						<image src="/static/tsp-icon/pinlun.png" mode="" class="fabulous-image"></image>
 					</view>
 					<view class="fabulous-num">{{
-						item.commentCount 
+						item.commentCount
 					}}</view>
 				</view>
 				<!-- 收藏 -->
 				<view class="fabulous" :class="collectionMeans" style="margin-top: 30rpx" @click="collectionBtn(index)">
-					<view class="fabulous-image" >
+					<view class="fabulous-image">
 						<up-icon name="star-fill" color="#ffff00" size="45" class="fabulous-image"
 							v-if="item.collectionShow"></up-icon>
 						<up-icon name="star-fill" color="#fff" size="45" class="fabulous-image" v-else></up-icon>
@@ -190,7 +190,11 @@ export default {
 			let obj = Object.assign({}, this.item);
 			obj.fabulousShow = !obj.fabulousShow;
 			this.likeeffect = obj.fabulousShow;
-
+			if (obj.fabulousShow) {
+				obj.likeCount = (obj.likeCount || 0) + 1;
+			} else {
+				obj.likeCount = Math.max((obj.likeCount || 0) - 1, 0);
+			}
 			contentLike(this.item.id)
 				.then((res) => {
 					console.log("点赞成功");
@@ -214,8 +218,8 @@ export default {
 					setTimeout(() => {
 						this.followOpen = false;
 						this.followShow = null;
-						
-						followtoggle({followee_id:this.item.author.id}).then((res) => {
+
+						followtoggle({ followee_id: this.item.author.id }).then((res) => {
 							console.log("关注成功");
 							this.$emit("handleInfo", obj); //关注成功
 
@@ -231,6 +235,13 @@ export default {
 			let obj = Object.assign({}, this.item);
 			obj.collectionShow = !obj.collectionShow;
 			this.collectionShow = obj.collectionShow;
+
+			if (obj.collectionShow) {
+				obj.favoriteCount = (obj.favoriteCount || 0) + 1;
+			} else {
+				obj.favoriteCount = Math.max((obj.favoriteCount || 0) - 1, 0);
+			}
+
 			contentCollect(this.item.id)
 				.then((res) => {
 					this.$emit("handleInfo", obj); //收藏成功
@@ -248,7 +259,7 @@ export default {
 			};
 			switch (index) {
 				case 1:
-					console.log("点击头像",  this.item);
+					console.log("点击头像", this.item);
 					uni.setStorageSync('otherId', this.item.author.id)
 					uni.navigateTo({ url: "/pages/my/person" });
 					break;

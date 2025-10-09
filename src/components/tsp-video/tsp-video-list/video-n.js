@@ -782,9 +782,19 @@ export default {
 		openScreen(index){
 			this.$refs[`myVideo${index}${this.swId}`][0].requestFullScreen();
 		},
-		/* 视频点赞、关注 */
-		fabulousBtn(data) {
-			this.$set(this.vodList, data.index, data.obj)
-		}
+	/* 视频点赞、关注 */
+	fabulousBtn(data) {
+		this.$set(this.vodList, data.index, data.obj)
+	},
+	/* 更新视频评论数量 */
+	updateVideoCommentCount(videoId, commentCount) {
+		this.vodList.filter((item, index) => {
+			if (item.id == videoId) {
+				const updatedItem = Object.assign({}, item);
+				updatedItem.commentCount = commentCount; // 使用接口返回的实际数量
+				this.$set(this.vodList, index, updatedItem);
+			}
+		})
 	}
+}
 }

@@ -38,6 +38,12 @@ export const contentCommentList= (params) => {
 export const addContentComment= (params) => {
 	return postRequest('/comments/v1/', params)
 }
+
+//内容评论点赞 
+export const addContentLike= (params) => {
+	return postRequest('/likes/v1/comment/toggle/', params)
+}
+
 // 猜你喜欢
 export const guessLike= (params) => {
 	return getRequest('/contents/guesslike/', params)

@@ -469,6 +469,7 @@ scroll-view {
 
 	/* #ifdef APP-NVUE */
 	lines: 1;
+	text-overflow: ellipsis;
 	/* #endif */
 }
 

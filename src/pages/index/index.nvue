@@ -41,8 +41,8 @@
 			</view>
 		</view>
 
-		<!-- 评论 -->
-		<comment-popup ref="commentRef" v-model="commentVisible" :commentInfo="commentInfo" @submitComment="submitComment" />
+	<!-- 评论 -->
+	<comment-popup ref="commentRef" v-model="commentVisible" :commentInfo="commentInfo" @submitComment="submitComment" @updateCommentCount="handleCommentCountUpdate" />
 
 		<!-- 转发弹窗 -->
 		<forwardMenu v-model="showForward" :forwardInfo="commentInfo"></forwardMenu>
@@ -56,9 +56,7 @@ const deviceInfo = uni.getSystemInfoSync();
 import tabsPage from './tabs/tabs-page.vue';
 import commentPopup from '@/components/tsp-video/comment/comment-popup.vue';
 import forwardMenu from '@/components/tsp-video/forward-menu/forward-menu.vue';
-
-import { addComment } from '@/api/community';
-
+import { addContentComment } from "@/api/common";
 export default {
 	components: {
 		tabsPage,
@@ -169,20 +167,44 @@ export default {
 				this.changeSwitchTab(index);
 			}
 		},
-		/* 评论组件内容回调 */
-		async submitComment(val) {
-			console.log(val, this.commentInfo);
-			const params = {
-				targetId: this.commentInfo.id,
-				content: val.text,
-				commentType: 'SHOTVIDEOS',
-				userId: uni.getStorageSync('user_info').id
-			};
-			const res = await addComment(params);
-			console.log('res', res);
-			if (res.code === 200) {
+	/* 评论组件内容回调 */
+	async submitComment(val) {
+		console.log(val, this.commentInfo);
+		const params = {
+		   type: "short",
+			tabs: "recommend",
+			target_id: this.commentInfo.id,
+			parent_comment_id: val.id || 0,
+			content: val.text,
+		};
+		const res = await addContentComment(params);
+		console.log(params,'paramsparamsparams')
+		console.log('reschuangjianchenggqb', res);
+		if (res.code === 201) {
+			// 重新加载评论列表，列表加载后会通过updateCommentCount事件更新数量
+			this.$nextTick(() => {
+				if (this.$refs.commentRef) {
+					this.$refs.commentRef.loadData();
+				}
+			});
+		}
+	},
+	/* 处理评论数量更新 */
+	handleCommentCountUpdate(total) {
+		try {
+			// 获取当前页面的视频组件
+			const currentPage = this.pageList[this.tabIndex];
+			if (currentPage && currentPage.$refs.vodRef && currentPage.$refs.vodRef.$refs.videoGroup) {
+				const videoGroup = currentPage.$refs.vodRef.$refs.videoGroup;
+				// 使用接口返回的实际评论数量更新
+				if (videoGroup.updateVideoCommentCount) {
+					videoGroup.updateVideoCommentCount(this.commentInfo.id, total);
+				}
 			}
-		},
+		} catch (error) {
+			console.error("更新评论数量失败", error);
+		}
+	},
 		onswiperscroll(e) {
 			// this.$refs.tabRef.onswiperscroll(e)
 		},
