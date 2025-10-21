@@ -49,6 +49,26 @@
 				</view>
 			</view>
 		</view>
+		
+		<!-- VIP/金币校验弹窗 -->
+		<Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisible = false"
+			@close="dialogVisible = false" :confirmText="userinfo.is_vip ? (userinfo.gold_coin < dataDetail.price ? '去充值' : '确认') : '去开通'">
+			<template #tip>
+				<view v-if="userinfo.is_vip">
+					<view v-if="userinfo.gold_coin >= dataDetail.price">
+						是否花费{{dataDetail.price}}个金币下载此游戏
+					</view>
+					<view v-else>
+						此游戏需要{{dataDetail.price}}个金币,您的金币不足
+					</view>
+				</view>
+				<view v-if="!userinfo.is_vip">
+					<view>
+						此游戏需要VIP下载,请开通VIP后下载
+					</view>
+				</view>
+			</template>
+		</Coin>
 	</z-paging>
 </template>
 
@@ -57,10 +77,14 @@ import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
 import { adsDetail } from '@/api/public.js';
+import { userinfoStore } from '@/store/userinfos';
+import Coin from "@/components/Coin.vue";
 
 const id = ref(0);
 const paging = ref(null);
 const dataDetail = ref({});
+const dialogVisible = ref(false);
+const { userinfo } = userinfoStore();
 
 onLoad((options) => {
 	id.value = options.id;
@@ -90,6 +114,18 @@ const queryList = (pageNo, pageSize) => {
 };
 
 const handleClickDown = () => {
+	if (!userinfo.is_vip && dataDetail.value.is_vip) {
+		dialogVisible.value = true;
+		return;
+	}
+	if (userinfo.is_vip && dataDetail.value.price && userinfo.gold_coin < dataDetail.value.price) {
+		dialogVisible.value = true;
+		return;
+	}
+	downloadGame();
+};
+
+const downloadGame = () => {
 	// #ifdef APP-PLUS
 	plus.runtime.openURL(dataDetail.value.click_url);
 	// #endif
@@ -97,6 +133,21 @@ const handleClickDown = () => {
 	// #ifdef H5
 	window.open(dataDetail.value.clickUrl, '_blank');
 	// #endif
+};
+
+// 处理弹窗确认
+const handleConfirm = () => {
+	if (!userinfo.is_vip) {
+		uni.navigateTo({
+			url: '/pages/my/recharge'
+		});
+	} else if (userinfo.gold_coin < dataDetail.value.price) {
+		uni.navigateTo({
+			url: '/pages/my/recharge'
+		});
+	} else {
+		downloadGame();
+	}
 };
 </script>
 

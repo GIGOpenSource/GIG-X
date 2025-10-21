@@ -66,13 +66,14 @@
 </template>
 
 <script setup>
+	import { onShow } from "@dcloudio/uni-app";
 import { ref, reactive, onMounted } from "vue";
 import userinfo from "./userinfo.vue";
 import vip from "./vip.vue";
 import { userinfoStore } from "@/store/userinfos";
 import { onPullDownRefresh } from "@dcloudio/uni-app";
 const { personInfo } = userinfoStore();
-console.log(personInfo,'personInfo')
+
 const props = defineProps({
   isBack: {
     type: Boolean,
@@ -110,6 +111,9 @@ onMounted(() => {
     tarbar.value = ["动态", "视频"];
   }
 });
+onShow(() => {
+	console.log(personInfo,'personInfo')
+})
 onPullDownRefresh(() => {
   if (current.value == 0) {
     act.value.page = 1;

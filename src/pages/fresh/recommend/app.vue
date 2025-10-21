@@ -34,7 +34,7 @@
       <view
         class="app-item"
         v-for="item in dataList"
-        @click="handleClickApp(item.click_url)"
+        @click="handleClickApp(item)"
       >
         <up-image
           :src="item.image_url"
@@ -47,6 +47,26 @@
         }}</view>
       </view>
     </view>
+    
+    <!-- VIP/金币校验弹窗 -->
+    <Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisible = false"
+      @close="dialogVisible = false" :confirmText="userinfo.is_vip ? (userinfo.gold_coin < currentApp.price ? '去充值' : '确认') : '去开通'">
+      <template #tip>
+        <view v-if="userinfo.is_vip">
+          <view v-if="userinfo.gold_coin >= currentApp.price">
+            是否花费{{currentApp.price}}个金币下载此APP
+          </view>
+          <view v-else>
+            此APP需要{{currentApp.price}}个金币,您的金币不足
+          </view>
+        </view>
+        <view v-if="!userinfo.is_vip">
+          <view>
+            此APP需要VIP下载,请开通VIP后下载
+          </view>
+        </view>
+      </template>
+    </Coin>
   </z-paging>
 </template>
 
@@ -54,10 +74,14 @@
 import { ref } from "vue";
 
 import { getAdsList } from "@/api/public";
+import { userinfoStore } from '@/store/userinfos';
+import Coin from "@/components/Coin.vue";
 
 const paging = ref(null);
-// v-model绑定的这个变量不要在分页请求结束中自己赋值，直接使用即可
 const dataList = ref([]);
+const dialogVisible = ref(false);
+const currentApp = ref({});
+const { userinfo } = userinfoStore();
 
 const queryList = (pageNo, pageSize) => {
   const params = {
@@ -68,16 +92,30 @@ const queryList = (pageNo, pageSize) => {
   getAdsList(params)
     .then((res) => {
       console.log("resres", res);
-      // 将请求结果通过complete传给z-paging处理，同时也代表请求结束，这一行必须调用
       paging.value.complete(res.data.results);
     })
     .catch((res) => {
-      // 如果请求失败写paging.value.complete(false);
       paging.value.complete(false);
     });
 };
 
-const handleClickApp = (url) => {
+const handleClickApp = (item) => {
+  currentApp.value = item;
+
+  if (!userinfo.is_vip && item.is_vip) {
+    dialogVisible.value = true;
+    return;
+  }
+  
+  if (userinfo.is_vip && item.price && userinfo.gold_coin < item.price) {
+    dialogVisible.value = true;
+    return;
+  }
+  
+  openApp(item.click_url);
+};
+
+const openApp = (url) => {
   // #ifdef APP-PLUS
   plus.runtime.openURL(url);
   // #endif
@@ -85,6 +123,21 @@ const handleClickApp = (url) => {
   // #ifdef H5
   window.open(url, "_blank");
   // #endif
+};
+
+// 处理弹窗确认
+const handleConfirm = () => {
+  if (!userinfo.is_vip) {
+    uni.navigateTo({
+      url: '/pages/my/recharge'
+    });
+  } else if (userinfo.gold_coin < currentApp.value.price) {
+    uni.navigateTo({
+      url: '/pages/my/recharge'
+    });
+  } else {
+    openApp(currentApp.value.click_url);
+  }
 };
 </script>
 
