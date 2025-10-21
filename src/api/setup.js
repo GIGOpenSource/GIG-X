@@ -38,6 +38,12 @@ export const getVideo = (params) => {
 	return getRequest('/contents/', params)
 }
 
+//购买视频
+export const purchase = (params) => {
+	return postRequest(`/comments/v1/${params.id}/purchase/`, params)
+}
+
+
 
 
 

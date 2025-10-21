@@ -34,6 +34,12 @@
 				</view>
 			</template>
 		</dragball>
+		<Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisibl = false"
+			@close="dialogVisibl = false" :confirmText="'去开通'">
+			<template #tip>
+				请开通VIP后发布内容
+			</template>
+		</Coin>
 	</z-paging-swiper>
 </template>
 
@@ -143,13 +149,21 @@
 	};
 
 	const clicks = () => {
-		console.log(userinfo.is_vip,'userinfouserinfo')
-		return
-		uni.navigateTo({
-			url: '/pages/community/publish'
-		});
+		
+	
+		if(userinfo.is_vip){
+			uni.navigateTo({
+				url: '/pages/community/publish'
+			});
+		}else{
+			dialogVisible.value = true
+		}
 	};
-
+    const handleConfirm = () => {
+		 uni.navigateTo({
+		 	url:'/pages/my/recharge'
+		 })
+	}
 	// 下拉刷新
 	onPullDownRefresh(() => {
 		refreshData();

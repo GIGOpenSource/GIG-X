@@ -2,15 +2,15 @@
 	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 86vh">
 		<view v-for="(item, index) in isList ? list : list.slice(0, 1)" :key="index" class="con"
 			@click="handleCardClick(item)">
-			<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip">
+			<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && isfollow">
 				<view class="">此内容VIP才可以观看</view>
-				<view class="btn" @click="dialogVisible = true,obj = item">去开通</view>
+				<view class="btn" @click="dialogVisible = true,obj = item,videoindex = index">去开通</view>
 			</view>
-			<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase">
+			<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase &&  isfollow">
 				<view class="">此内容需要金币才可以观看</view>
-				<view class="btn" @click="dialogVisible = true,obj = item">金币预览</view>
+				<view class="btn" @click="dialogVisible = true,obj = item,videoindex = index">金币预览</view>
 			</view>
-			<view class="top">
+			<view class="top"> 
 				<view class="left">
 					<view class="" @click.stop="topath(item.user.id)"><up-avatar :src="item.user.avatar"
 							size="40"></up-avatar></view>
@@ -55,8 +55,8 @@
 		</view>
 		<up-empty mode="data" v-if="!list.length"></up-empty>
 		<operation :show="show" @update:show="(val) => (show = val)" />
-		<Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisibl = false"
-			@close="dialogVisibl = false" :confirmText="userinfo.is_vip ? userinfo.gold_coin < obj.price ?'去充值':'确认' : '去开通'">
+		<Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisible = false"
+			@close="dialogVisible = false" :confirmText="userinfo.is_vip ? userinfo.gold_coin < obj.price ?'去充值':'确认' : '去开通'">
 			<template #tip>
 				<view class="" v-if="userinfo.is_vip">
 					<view v-if="userinfo.gold_coin == obj.price || userinfo.gold_coin > obj.price">
@@ -135,6 +135,7 @@
 		}
 	});
 	const list = ref([]);
+	const videoindex = ref('')
 	const todetails = (id) => {
 		if (props.isList) {
 			uni.navigateTo({
@@ -143,6 +144,10 @@
 		}
 	}
 	const handleCardClick = (item) => {
+		if(!props.isfollow){
+			todetails(item.id);
+			return
+		}
 		if (!userinfo.is_vip && item.is_vip) return
 		if (userinfo.is_vip && !item.is_free && !item.is_purchase) return
 		todetails(item.id);
@@ -155,7 +160,7 @@
 			})
 			return 
 		}
-		if (userinfo.gold_coin < obj.price) {
+		if (userinfo.gold_coin < obj.value.price) {
 			uni.navigateTo({
 				url: '/pages/my/recharge'
 			})
@@ -163,7 +168,11 @@
 			purchase({
 				id: obj.value.id
 			}).then(res => {
-				console.log(res, 'res')
+				uni.showToast({
+					title: '购买成功',
+					icon: 'none'
+				})
+				list.value[videoindex.value].is_purchase = true
 			}).catch(err => {
 				uni.showToast({
 					title: err.message,
