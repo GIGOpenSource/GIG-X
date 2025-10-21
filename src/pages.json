@@ -140,6 +140,13 @@
 			"style": {
 				"navigationBarTitleText": "vip"
 			}
+		},
+		{
+			"path" : "components/coin/coin",
+			"style" : 
+			{
+				"navigationBarTitleText" : ""
+			}
 		}
 	],
 	"tabBar": {

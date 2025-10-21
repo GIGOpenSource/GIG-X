@@ -93,6 +93,7 @@ const close = () => {
 					icon: 'none'
 				})
 			}
+			store.getUserinfo({ id: uni.getStorageSync('user_info').user_id })
 
 		})
 }
@@ -109,7 +110,8 @@ const btn = () => {
 		imagesurl.value = res.qrcode
 		show.value = true
 		trade_no.value = res.trade_no
-
+		
+	
 	})
 }
 onMounted(() => {

@@ -39,7 +39,7 @@ const clicks = (index) => {
 <style lang="scss" scoped>
 .con {
 	display: flex;
-	justify-content: space-between;
+	// justify-content: space-between;
 	margin-bottom: 30rpx;
 	flex-wrap: wrap;
 }
@@ -55,7 +55,7 @@ const clicks = (index) => {
 	flex-direction: column;
 	color: rgba(255, 255, 255, .3);
 	margin-bottom: 20rpx;
-
+    margin-right: 10rpx;
 	.title {
 		width: 100%;
 		height: 60rpx;
@@ -95,5 +95,8 @@ const clicks = (index) => {
 	.current-promotion {
 		color: #FFF;
 	}
+}
+.con .list:nth-of-type(3){
+	 margin-right: 0 !important;
 }
 </style>
