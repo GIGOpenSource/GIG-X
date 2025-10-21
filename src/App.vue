@@ -10,12 +10,16 @@ export default {
     let guid_name = guid();
     let guid_password = guid();
     const params = {
-      username: uni.getStorageSync("guid_name") || guid_name,
-      password: uni.getStorageSync("guid_password") || guid_password,
+      // username: uni.getStorageSync("guid_name") || guid_name,
+      // password: uni.getStorageSync("guid_password") || guid_password,
+      username:1111,
+      password:2222
     };
     login(params).then((res) => {
-      uni.setStorageSync("guid_name", guid_name);
-      uni.setStorageSync("guid_password", guid_password);
+      // uni.setStorageSync("guid_name", guid_name);
+      // uni.setStorageSync("guid_password", guid_password);
+      uni.setStorageSync("guid_name", 1111);
+      uni.setStorageSync("guid_password", 2222);
       uni.setStorageSync("user_info", res.data);
       uni.setStorageSync("token", res.data.token);
 	  console.log('xhwnggkwn',res.data.token)
@@ -36,7 +40,7 @@ export default {
 </script>
 
 <style lang="scss">
-/* 注意要写在第一行，同时给style标签加入lang="scss"属性 */
+///* 注意要写在第一行，同时给style标签加入lang="scss"属性 */
 @import "uview-plus/index.scss";
 
 /* #ifdef H5 */

@@ -12,6 +12,11 @@ export const getUserinfo = (params) => {
 	return getRequest(`/auth/users/${params.id}`)
 }
 
+// 获取当前用户信息
+export const getCurrentUserinfo = () => {
+	return getRequest('/auth/users')
+}
+
 // 用户兴趣标签
 export const tagList = params => {
 	return getRequest('/tags/', params)
