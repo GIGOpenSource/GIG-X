@@ -1,18 +1,17 @@
-
 <template>
   <z-paging ref="paging">
     <up-navbar
-        bgColor="transparent"
-        placeholder
-        :autoBack="isBack"
-        :fixed="false"
+      bgColor="transparent"
+      placeholder
+      :autoBack="isBack"
+      :fixed="false"
     >
       <template #left>
         <up-icon
-            name="arrow-left"
-            color="#ffffff"
-            size="20"
-            v-if="isBack"
+          name="arrow-left"
+          color="#ffffff"
+          size="20"
+          v-if="isBack"
         ></up-icon>
       </template>
       <template #right>
@@ -24,8 +23,8 @@
     </up-navbar>
     <view class="content">
       <userinfo
-          :isFollow="isBack"
-          :userId="
+        :isFollow="isBack"
+        :userId="
           isBack
             ? uni.getStorageSync('otherId')
             : uni.getStorageSync('user_info').user_id
@@ -35,19 +34,19 @@
       <!-- 动态，视频，互动 -->
       <view class="tabs">
         <view
-            v-for="(item, index) in tarbar"
-            :key="index"
-            :class="current == index ? 'current' : ''"
-            @click="clicks(index)"
-        >{{ item }}</view
+          v-for="(item, index) in tarbar"
+          :key="index"
+          :class="current == index ? 'current' : ''"
+          @click="clicks(index)"
+          >{{ item }}</view
         >
       </view>
       <active
-          v-if="current == 0"
-          :isfollow="isBack"
-          :more="true"
-          :tabs="6"
-          ref="act"
+        v-if="current == 0"
+        :isfollow="isBack"
+        :more="true"
+        :tabs="6"
+        ref="act"
       />
       <myvideo v-if="current == 1" :isfollow="isBack" ref="video" />
       <interact v-if="current == 2" :isfollow="isBack" ref="hudong" />
@@ -56,18 +55,18 @@
   </z-paging>
 
   <view
-      class="private-message"
-      v-if="
+    class="private-message"
+    v-if="
       isBack &&
       uni.getStorageSync('user_info').user_id !== uni.getStorageSync('otherId')
     "
-      @click="toPath('/pages/my/dialogue')"
-  >私信</view
+    @click="toPath('/pages/my/dialogue')"
+    >私信</view
   >
 </template>
 
 <script setup>
-import { onShow } from "@dcloudio/uni-app";
+	import { onShow } from "@dcloudio/uni-app";
 import { ref, reactive, onMounted } from "vue";
 import userinfo from "./userinfo.vue";
 import vip from "./vip.vue";
@@ -113,7 +112,7 @@ onMounted(() => {
   }
 });
 onShow(() => {
-  console.log(personInfo,'personInfo')
+	console.log(personInfo,'personInfo')
 })
 onPullDownRefresh(() => {
   if (current.value == 0) {
@@ -173,5 +172,3 @@ onPullDownRefresh(() => {
   bottom: 30rpx;
 }
 </style>
-
-    

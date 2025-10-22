@@ -94,8 +94,8 @@ const queryList = (pageNo, pageSize) => {
   };
   taskList(params).then(res => {
     if (res.code === 200) {
-      paging.value.complete(res.data.results.filter(item => item.task_template_type == activeTab.value));
-      signlist.value = res.data.results.filter(item => item.task_template_type == 'checkin')[0]
+      paging.value.complete(res.data.filter(item => item.task_template_type == activeTab.value));
+      signlist.value = res.data.filter(item => item.task_template_type == 'checkin')[0]
       if(!signlist.value.data.claimed_times.length){
            generateDateList()
            return
@@ -312,3 +312,4 @@ onShow(() => {
   background: #9b9b9b;
 }
 </style>
+
