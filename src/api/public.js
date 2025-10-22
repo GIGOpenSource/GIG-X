@@ -22,6 +22,11 @@ export const tagList = params => {
 	return getRequest('/tags/', params)
 }
 
+// 获取分类标签
+export const getCategories = (params) => {
+	return getRequest('/categories/', params)
+}
+
 // 广告（游戏）详情
 export const adsDetail = (id, params) => {
 	return getRequest(`/ad/ads/${id}`, params)

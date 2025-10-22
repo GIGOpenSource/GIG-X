@@ -1,6 +1,17 @@
 <template>
   <view class="pageBox">
+    <!-- 推荐用户组件 - 仅在关注页面且显示推荐用户时显示 -->
+    <RecommendUsers
+      ref="recommendUsers"
+      v-if="showRecommendUsers && recommendData.length > 0"
+      :recommendData="recommendData"
+      @follow-user="handleFollowUser"
+      @check-vip-permission="handleRecommendVipCheck"
+    />
+
+    <!-- 视频组件 - 正常视频播放时显示 -->
     <tw-videov
+      v-else
       ref="videoGroup"
       @lodData="loadingData"
       @refreshData="refreshData"
@@ -65,7 +76,11 @@
     >
       <template #title>金币不足</template>
       <template #tip>
-        <text>此视频为金币视频,您的金币不足,请充值</text>
+        <text
+          >此视频为金币视频,您的金币不足,需充值{{
+            (currentVideoData?.price || 0) - (store.userinfo.gold_coin || 0)
+          }}金币</text
+        >
       </template>
     </Dialog>
 
@@ -84,7 +99,15 @@
  */
 import twVideov from "@/components/tsp-video/tsp-video-list/video-v.vue";
 import Dialog from "@/components/Dialog.vue";
-import { contentList, contentFollowList } from "@/api/common";
+import RecommendUsers from "@/components/recommend-users/RecommendUsers.vue";
+import {
+  contentList,
+  contentFollowList,
+  getRecommendTagUsers,
+  getContentsByUser,
+  followUser,
+} from "@/api/common";
+import { purchase } from "@/api/community.js";
 import { userinfoStore } from "@/store/userinfos.js";
 import { computed, ref } from "vue";
 
@@ -92,6 +115,7 @@ export default {
   components: {
     twVideov,
     Dialog,
+    RecommendUsers,
   },
   props: {
     /* 多个tab视频时需传入不同的类型id */
@@ -141,11 +165,20 @@ export default {
       tNum: 0,
       currIndex: 0,
       totalvod: 0, //视频总数量，有值才能滑动加载到最后一个视频并禁止循环滑动（仅H5、小程序支持）
+      showRecommendUsers: false, // 是否显示推荐用户
+      recommendData: [], // 推荐用户数据
     };
   },
   created() {
     // this.videoData = getVodData()
     this.initVod();
+
+    // 监听视频购买成功事件
+    uni.$on("video-purchased", this.handleVideoPurchased);
+  },
+  beforeUnmount() {
+    // 移除事件监听
+    uni.$off("video-purchased", this.handleVideoPurchased);
   },
   onShow() {
     /* 播放视频 */
@@ -175,6 +208,30 @@ export default {
         }
       });
     },
+    tabItem: {
+      handler(newVal, oldVal) {
+        // 监听tabItem变化，特别是切换到关注页面时重新请求数据
+        console.log("tabItem变化:", newVal, "从", oldVal);
+
+        // 如果切换到关注页面，重新请求数据
+        if (newVal && newVal.id === "follow") {
+          console.log("切换到关注页面，重新请求数据");
+          this.refreshData();
+        }
+        // 如果从关注页面切换到其他页面，也重新请求数据
+        else if (
+          oldVal &&
+          oldVal.id === "follow" &&
+          newVal &&
+          newVal.id !== "follow"
+        ) {
+          console.log("从关注页面切换到其他页面，重新请求数据");
+          this.refreshData();
+        }
+      },
+      deep: true,
+      immediate: false,
+    },
   },
   methods: {
     startData() {
@@ -203,6 +260,25 @@ export default {
               this.tNum += 1;
               this.totalvod = res.data.pagination.total; //视频总数量，有值才能滑动加载到最后一个视频并禁止循环滑动（仅H5、小程序支持）
               let dataList = res.data.results;
+
+              // 如果是关注页面且results长度为0，获取推荐用户
+              if (this.tabItem.id === "follow" && dataList.length === 0) {
+                console.log("关注页面无数据，获取推荐用户");
+                this.getRecommendUsers()
+                  .then((recommendData) => {
+                    if (recommendData.length > 0) {
+                      resolve(recommendData);
+                    } else {
+                      resolve([]);
+                    }
+                  })
+                  .catch((err) => {
+                    console.error("获取推荐用户失败:", err);
+                    resolve([]);
+                  });
+                return;
+              }
+
               dataList.filter((item, index) => {
                 /** 参数数据自行拼接  */
                 item.tsId = "tsId" + (this.tNum * 15 + index); //视频id，用于删除视频, 需要改成自己的视频id
@@ -243,6 +319,91 @@ export default {
           });
       });
     },
+    /* 获取推荐用户及其作品 */
+    async getRecommendUsers() {
+      try {
+        console.log("开始获取推荐用户");
+        // 1. 获取推荐用户标签
+        const recommendUsersRes = await getRecommendTagUsers();
+        console.log("推荐用户标签响应:", recommendUsersRes);
+
+        if (
+          recommendUsersRes.code !== 200 ||
+          !recommendUsersRes.data ||
+          recommendUsersRes.data.length === 0
+        ) {
+          console.log("没有推荐用户数据");
+          return [];
+        }
+
+        const userIds = recommendUsersRes.data.map((user) => user.id);
+        console.log("推荐用户ID列表:", userIds);
+
+        // 2. 批量获取每个用户的作品（最多3个）
+        const allContents = [];
+
+        for (const userId of userIds) {
+          try {
+            const userContentsRes = await getContentsByUser({
+              user: userId,
+              page_size: 3, // 最多获取3个作品
+              type: "short",
+            });
+
+            if (
+              userContentsRes.code === 200 &&
+              userContentsRes.data &&
+              userContentsRes.data.results
+            ) {
+              const userContents = userContentsRes.data.results;
+              console.log(`用户 ${userId} 的作品:`, userContents);
+
+              // 为每个作品添加用户信息
+              userContents.forEach((content, index) => {
+                content.tsId = `recommend_${userId}_${index}`;
+                content.vodUrl = content.data;
+                content.coverImg = content.cover_url;
+                content.coverShow = false;
+                content.object_fit = content.object_fit;
+                content.fullScreenShow = content.fullScreenShow;
+                content.sliderShow = true;
+                content.rotateImgShow = false;
+                content.fabulousShow = content.is_liked;
+                content.collectionShow = content.is_favourites;
+                content.followReally = content.is_follower;
+                content.desc = content.description;
+                content.author = content.author;
+                content.likeCount = content.like_count;
+                content.commentCount = content.comment_count;
+                content.favoriteCount = content.favorite_count;
+                content.is_vip = content.is_vip;
+
+                // 添加推荐标识
+                content.isRecommend = true;
+                content.recommendUser = recommendUsersRes.data.find(
+                  (user) => user.id === userId
+                );
+              });
+
+              allContents.push(...userContents);
+            }
+          } catch (error) {
+            console.error(`获取用户 ${userId} 作品失败:`, error);
+          }
+        }
+
+        console.log("所有推荐内容:", allContents);
+
+        // 设置推荐用户数据
+        this.recommendData = allContents;
+        this.showRecommendUsers = allContents.length > 0;
+
+        return allContents;
+      } catch (error) {
+        console.error("获取推荐用户失败:", error);
+        return [];
+      }
+    },
     /* 初始加载视频数据 */
     initVod() {
       this.startData().then((res) => {
@@ -273,6 +434,10 @@ export default {
     /* 下拉刷新 */
     refreshData() {
       this.tNum = 0;
+      // 重置推荐用户状态
+      this.showRecommendUsers = false;
+      this.recommendData = [];
+
       this.startData().then((res) => {
         if (res.length > 0) {
           /* 调用视频的重新加载方法 */
@@ -379,6 +544,12 @@ export default {
         this.$refs.videoGroup.showPlay();
         this.$refs.videoGroup.muteVideo(false); //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
       }
+
+      // 如果当前是关注页面，重新请求数据
+      if (this.tabItem && this.tabItem.id === "follow") {
+        console.log("切换到关注页面，重新请求数据");
+        this.refreshData();
+      }
     },
     /* tabVideo onHide 暂停视频 */
     assemblyOnHide() {
@@ -403,6 +574,12 @@ export default {
       console.log("视频price:", videoData?.price);
       console.log("用户is_vip:", this.is_vip);
 
+      // 如果视频不是VIP视频，直接允许操作
+      if (videoData && !videoData.is_vip) {
+        console.log("非VIP视频，直接允许操作");
+        return true; // 有权限
+      }
+
       // 如果视频是VIP视频且用户不是VIP
       if (videoData && videoData.is_vip && !this.is_vip) {
         console.log("检测到VIP视频且用户非VIP，显示弹窗");
@@ -411,12 +588,10 @@ export default {
 
         // 根据操作类型进行不同处理
         if (actionType === "play") {
-          // 如果是播放操作，暂停当前视频并显示遮罩层
+          // 如果是播放操作，暂停当前视频
           if (this.$refs.videoGroup) {
             this.$refs.videoGroup.videoPause(this.$refs.videoGroup.vodIndex);
           }
-          // 显示VIP遮罩层
-          this.showVipMask = true;
         }
 
         return false; // 没有权限
@@ -461,20 +636,11 @@ export default {
     /* VIP弹窗取消 */
     onVipDialogCancel() {
       this.showVipDialog = false;
-      // 如果用户还不是VIP，显示遮罩层
-      if (
-        this.currentVideoData &&
-        this.currentVideoData.is_vip &&
-        !this.is_vip
-      ) {
-        this.showVipMask = true;
-      }
       this.currentVideoData = null;
     },
     /* VIP弹窗确认 - 跳转到VIP开通页面 */
     onVipDialogConfirm() {
       this.showVipDialog = false;
-      this.showVipMask = false;
       // 跳转到VIP开通页面
       uni.navigateTo({
         url: "/pages/my/recharge",
@@ -486,8 +652,6 @@ export default {
       console.log("收到VIP权限检查请求:", data);
       this.currentVideoData = data.videoData;
       this.showVipDialog = true;
-      // 对于菜单操作，不显示遮罩层
-      this.showVipMask = false;
     },
     /* 处理来自菜单组件的金币购买弹窗请求 */
     onShowCoinDialog(data) {
@@ -521,11 +685,45 @@ export default {
     },
     /* 金币购买弹窗确认 */
     onCoinDialogConfirm() {
-      this.showCoinDialog = false;
-      // 这里可以调用购买接口
       console.log("确认购买视频，花费金币:", this.currentVideoData?.price);
-      // TODO: 调用购买接口，购买成功后更新视频的 is_purchase 状态
-      this.currentVideoData = null;
+
+      // 调用购买接口
+      purchase({
+        id: this.currentVideoData?.id,
+      })
+        .then((res) => {
+          console.log("购买成功:", res);
+          this.showCoinDialog = false;
+
+          // 购买成功后更新视频的 is_purchase 状态
+          if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
+            const videoIndex = this.$refs.videoGroup.totalPlayList.findIndex(
+              (item) => item.id === this.currentVideoData?.id
+            );
+            if (videoIndex !== -1) {
+              this.$refs.videoGroup.totalPlayList[
+                videoIndex
+              ].is_purchase = true;
+            }
+          }
+
+          // 显示成功提示
+          uni.showToast({
+            title: "购买成功",
+            icon: "success",
+            duration: 2000,
+          });
+
+          this.currentVideoData = null;
+        })
+        .catch((err) => {
+          console.error("购买失败:", err);
+          uni.showToast({
+            title: err.message || "购买失败，请重试",
+            icon: "none",
+            duration: 2000,
+          });
+        });
     },
     /* 金币不足弹窗取消 */
     onInsufficientCoinDialogCancel() {
@@ -541,6 +739,102 @@ export default {
       });
       console.log("跳转到充值页面");
       this.currentVideoData = null;
+    },
+    /* 处理推荐用户关注 */
+    async handleFollowUser(user) {
+      console.log("关注用户:", user);
+
+      try {
+        // 调用关注接口
+        const followRes = await followUser({
+          followee_id: user.id,
+        });
+
+        if (followRes.code === 200) {
+          console.log("关注成功:", followRes);
+
+          // 更新推荐用户组件的关注状态
+          this.$refs.recommendUsers &&
+            this.$refs.recommendUsers.updateUserFollowStatus(user.id);
+
+          // 关注成功后，重新获取关注内容
+          this.refreshFollowContent();
+
+          uni.showToast({
+            title: "关注成功",
+            icon: "success",
+            duration: 2000,
+          });
+        } else {
+          throw new Error(followRes.message || "关注失败");
+        }
+      } catch (error) {
+        console.error("关注失败:", error);
+        uni.showToast({
+          title: error.message || "关注失败，请重试",
+          icon: "none",
+          duration: 2000,
+        });
+      }
+    },
+    /* 关注成功后刷新关注内容 */
+    async refreshFollowContent() {
+      try {
+        console.log("关注成功后，重新获取关注内容");
+
+        // 重置推荐用户状态
+        this.showRecommendUsers = false;
+        this.recommendData = [];
+
+        // 重新获取关注内容
+        const params = {
+          type: "short",
+          currentPage: 1,
+        };
+
+        const res = await contentFollowList(params);
+        console.log("重新获取关注内容:", res);
+
+        if (
+          res.code === 200 &&
+          res.data &&
+          res.data.results &&
+          res.data.results.length > 0
+        ) {
+          // 有关注内容，切换到视频播放模式
+          this.showRecommendUsers = false;
+          this.refreshData();
+        } else {
+          // 仍然没有关注内容，重新获取推荐用户
+          console.log("仍然没有关注内容，重新获取推荐用户");
+          this.getRecommendUsers()
+            .then((recommendData) => {
+              if (recommendData.length > 0) {
+                this.recommendData = recommendData;
+                this.showRecommendUsers = true;
+              }
+            })
+            .catch((err) => {
+              console.error("重新获取推荐用户失败:", err);
+            });
+        }
+      } catch (error) {
+        console.error("刷新关注内容失败:", error);
+      }
+    },
+    /* 处理推荐用户VIP权限检查 */
+    handleRecommendVipCheck(content) {
+      console.log("检查推荐用户VIP权限:", content);
+      // 使用现有的VIP权限检查逻辑
+      this.checkVipPermission(content, "play");
+    },
+    /* 处理视频购买成功 */
+    handleVideoPurchased(contentId) {
+      console.log("视频购买成功，更新推荐用户组件:", contentId);
+      // 更新推荐用户组件中的视频购买状态
+      if (this.$refs.recommendUsers) {
+        this.$refs.recommendUsers.updateVideoPurchaseStatus(contentId);
+      }
     },
   },
 };

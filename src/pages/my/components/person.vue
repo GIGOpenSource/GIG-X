@@ -41,7 +41,7 @@
           >{{ item }}</view
         >
       </view>
-      <active
+      <active1
         v-if="current == 0"
         :isfollow="isBack"
         :more="true"
@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-	import { onShow } from "@dcloudio/uni-app";
+import { onShow } from "@dcloudio/uni-app";
 import { ref, reactive, onMounted } from "vue";
 import userinfo from "./userinfo.vue";
 import vip from "./vip.vue";
@@ -112,8 +112,8 @@ onMounted(() => {
   }
 });
 onShow(() => {
-	console.log(personInfo,'personInfo')
-})
+  console.log(personInfo, "personInfo");
+});
 onPullDownRefresh(() => {
   if (current.value == 0) {
     act.value.page = 1;
