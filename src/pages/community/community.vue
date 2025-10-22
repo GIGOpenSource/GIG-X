@@ -51,9 +51,10 @@
 	} from 'vue';
 	import tabs from '@/components/tabs/tabs.vue';
 	import SocialPost from './components/SocialPost.vue';
-	import {
-		onPullDownRefresh
-	} from '@dcloudio/uni-app';
+import {
+	onPullDownRefresh,
+	onShow
+} from '@dcloudio/uni-app';
 	import {
 		communityList
 	} from '@/api/community.js';
@@ -149,8 +150,6 @@
 	};
 
 	const clicks = () => {
-		
-	
 		if(userinfo.is_vip){
 			uni.navigateTo({
 				url: '/pages/community/publish'
@@ -167,6 +166,10 @@
 	// 下拉刷新
 	onPullDownRefresh(() => {
 		refreshData();
+	
+	});
+	onShow(() => {
+	  userinfoStore().getUserinfo({ id: uni.getStorageSync('user_info').user_id })
 	});
 </script>
 <style lang="scss" scoped>

@@ -2,11 +2,11 @@
 	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 86vh">
 		<view v-for="(item, index) in isList ? list : list.slice(0, 1)" :key="index" class="con"
 			@click="handleCardClick(item)">
-			<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && isfollow">
+			<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && !isfollow && item.user.id !== uni.getStorageSync('user_info').user_id">
 				<view class="">此内容VIP才可以观看</view>
 				<view class="btn" @click="dialogVisible = true,obj = item,videoindex = index">去开通</view>
 			</view>
-			<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase &&  isfollow">
+			<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase && !isfollow && item.user.id !== uni.getStorageSync('user_info').user_id">
 				<view class="">此内容需要金币才可以观看</view>
 				<view class="btn" @click="dialogVisible = true,obj = item,videoindex = index">金币预览</view>
 			</view>
@@ -144,7 +144,7 @@
 		}
 	}
 	const handleCardClick = (item) => {
-		if(!props.isfollow){
+		if(props.isfollow && item.user.id !== uni.getStorageSync('user_info').user_id){
 			todetails(item.id);
 			return
 		}
@@ -281,6 +281,8 @@
 	const refreshData = async () => {
 		resetData();
 		await getlist(props.tabs);
+		userinfoStore().getUserinfo({ id: uni.getStorageSync('user_info').user_id })
+		
 	}
 
 	const lower = () => {

@@ -29,7 +29,7 @@
 						accept="video" :maxCount="1" uploadIcon="plus"></up-upload>
 				</view>
 			</view>
-			<view v-else-if="item.key === 'price' && params.isFree !== '是'" class="back"
+			<view v-else-if="item.key === 'price' && params.is_free !== '是'" class="back"
 				@click="choose(index, item.key)">
 				<input type="text" :placeholder="item.name" :disabled="index == 0 || index == 4 || index == 6"
 					v-model="params[item.key]" />
@@ -69,7 +69,7 @@ const form = ref([{
 	key: 'content'
 }, {
 	name: '是否免费',
-	key: 'isFree'
+	key: 'is_free'
 }, {
 	name: '设置价格（元）',
 	key: 'price'
@@ -79,7 +79,7 @@ const params = reactive({
 	title: '',
 	content: '',//描述
 	images: [],
-	isFree: '',
+	is_free: '',
 	price: '',
 })
 const fileList1 = ref([]);
@@ -200,7 +200,7 @@ const confirm = (e) => {
 	show.value = false
 
 	// 如果选择免费，将价格设置为0
-	if (keyIndex.value === 'isFree' && e.value[0] === '是') {
+	if (keyIndex.value === 'is_free' && e.value[0] === '是') {
 		params.price = '0'
 	}
 
@@ -219,7 +219,7 @@ const confirm = (e) => {
 		images: fileList1.value
 	}, {
 		name: '是否免费',
-		key: 'isFree'
+		key: 'is_free'
 	}, {
 		name: '设置价格（元）',
 		key: 'price'
@@ -235,11 +235,11 @@ const pubilsh = () => {
 	if (!params.title) return toast('请输入发布标题')
 	if (params.title.length > 20) return toast('发布标题不能超过20字')
 	if (!params.content) return toast('请输入发布内容')
-	if (params.isFree == '') return toast('请选择是否免费')
-	if (params.isFree === '否' && (!params.price || params.price.trim() === '' || params.price === '0')) {
+	if (params.is_free == '') return toast('请选择是否免费')
+	if (params.is_free === '否' && (!params.price || params.price.trim() === '' || params.price === '0')) {
 		return toast('请设置价格')
 	}
-	if (params.isFree === '否' && params.price && isNaN(parseFloat(params.price))) {
+	if (params.is_free === '否' && params.price && isNaN(parseFloat(params.price))) {
 		return toast('价格必须是数字')
 	}
 	if (params.type == '视频') {
@@ -254,7 +254,7 @@ const pubilsh = () => {
 	if (params.type !== '视频') {
 		delete params.video_url
 	}
-	params.isFree = params.isFree == '是' ? true : false
+	params.is_free = params.is_free == '是' ? true : false
 	if (params.type == '视频') {
 		params.description = params.content
 		params.type = params.videotype == '长视频' ? 'long' : 'short'
