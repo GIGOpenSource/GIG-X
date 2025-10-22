@@ -173,6 +173,8 @@
 					icon: 'none'
 				})
 				list.value[videoindex.value].is_purchase = true
+				// 刷新用户信息
+				userinfoStore().getUserinfo({ id: uni.getStorageSync('user_info').user_id })
 			}).catch(err => {
 				uni.showToast({
 					title: err.message,

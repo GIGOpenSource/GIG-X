@@ -73,7 +73,7 @@
 <script setup>
 import { ref } from "vue";
 
-import { getAdsList } from "@/api/public";
+import { getAdsList, purchase } from "@/api/public";
 import { userinfoStore } from '@/store/userinfos';
 import Coin from "@/components/Coin.vue";
 
@@ -82,6 +82,7 @@ const dataList = ref([]);
 const dialogVisible = ref(false);
 const currentApp = ref({});
 const { userinfo } = userinfoStore();
+const store = userinfoStore();
 
 const queryList = (pageNo, pageSize) => {
   const params = {
@@ -101,18 +102,34 @@ const queryList = (pageNo, pageSize) => {
 
 const handleClickApp = (item) => {
   currentApp.value = item;
-
+  
+  // 如果已购买，直接打开
+  if (item.is_purchase) {
+    openApp(item.click_url);
+    dialogVisible.value = false;
+    return;
+  }
+  
+  // 检查VIP权限
   if (!userinfo.is_vip && item.is_vip) {
     dialogVisible.value = true;
     return;
   }
   
+  // 检查金币权限
   if (userinfo.is_vip && item.price && userinfo.gold_coin < item.price) {
     dialogVisible.value = true;
     return;
   }
   
-  openApp(item.click_url);
+  // 如果用户是VIP且金币足够，也显示确认弹窗
+  if (userinfo.is_vip && item.price && userinfo.gold_coin >= item.price) {
+    dialogVisible.value = true;
+    return;
+  }
+  
+  // 免费内容直接打开
+  // openApp(item.click_url);
 };
 
 const openApp = (url) => {
@@ -136,7 +153,31 @@ const handleConfirm = () => {
       url: '/pages/my/recharge'
     });
   } else {
-    openApp(currentApp.value.click_url);
+    if (currentApp.value.price) {
+      purchase({id: currentApp.value.id}).then(res => {
+        uni.showToast({
+          title: '购买成功',
+          icon: 'none'
+        }).then(() => {
+          // 更新APP状态为已购买
+          const appIndex = dataList.value.findIndex(app => app.id === currentApp.value.id);
+          if (appIndex !== -1) {
+            dataList.value[appIndex].is_purchase = true;
+          }
+          // 刷新用户信息
+          store.getUserinfo({ id: uni.getStorageSync('user_info').user_id });
+          // 打开APP
+          openApp(currentApp.value.click_url);
+        });
+      }).catch(err => {
+        uni.showToast({
+          title: err.message || '购买失败',
+          icon: 'none'
+        });
+      });
+    } else {
+      openApp(currentApp.value.click_url);
+    }
   }
 };
 </script>

@@ -47,6 +47,11 @@ export const paylist = (params) => {
 	return getRequest('/payments/pay/', params)
 }
 
+//购买广告
+export const purchase = (params) => {
+	return postRequest(`/ad/ads/${params.id}/adv_purchase/`, params)
+}
+
 
 
 
