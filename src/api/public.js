@@ -12,9 +12,19 @@ export const getUserinfo = (params) => {
 	return getRequest(`/auth/users/${params.id}`)
 }
 
+// 获取当前用户信息
+export const getCurrentUserinfo = () => {
+	return getRequest('/auth/users')
+}
+
 // 用户兴趣标签
 export const tagList = params => {
 	return getRequest('/tags/', params)
+}
+
+// 获取分类标签
+export const getCategories = (params) => {
+	return getRequest('/categories/', params)
 }
 
 // 广告（游戏）详情
@@ -45,6 +55,11 @@ export const bill = (params) => {
 //支付模板列表
 export const paylist = (params) => {
 	return getRequest('/payments/pay/', params)
+}
+
+//购买广告
+export const purchase = (params) => {
+	return postRequest(`/ad/ads/${params.id}/adv_purchase/`, params)
 }
 
 

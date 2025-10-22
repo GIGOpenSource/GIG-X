@@ -2,11 +2,12 @@
 	<scroll-view scroll-y="true" @scrolltolower="lower" style="max-height: 86vh">
 		<view v-for="(item, index) in isList ? list : list.slice(0, 1)" :key="index" class="con"
 			@click="handleCardClick(item)">
-			<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && isfollow">
+			<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && item.user.id !== uni.getStorageSync('user_info').user_id">
 				<view class="">此内容VIP才可以观看</view>
 				<view class="btn" @click="dialogVisible = true,obj = item,videoindex = index">去开通</view>
 			</view>
-			<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase &&  isfollow">
+			
+			<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase  && item.user.id !== uni.getStorageSync('user_info').user_id">
 				<view class="">此内容需要金币才可以观看</view>
 				<view class="btn" @click="dialogVisible = true,obj = item,videoindex = index">金币预览</view>
 			</view>
@@ -75,12 +76,13 @@
 </template>
 
 <script setup>
-	import {
-		ref,
-		reactive,
-		onMounted,
-		watch
-	} from 'vue';
+import {
+	ref,
+	reactive,
+	onMounted,
+	watch
+} from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 	import {
 		communityList,
 		getDetails,
@@ -94,9 +96,18 @@
 		userinfoStore
 	} from '@/store/userinfos'
 	import Coin from "@/components/Coin.vue";
-	const {
-		userinfo
-	} = userinfoStore()
+const store = userinfoStore()
+const userinfo = ref({})
+
+// 初始化时获取用户信息
+const getUserInfo = () => {
+	store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+		userinfo.value = store.userinfo
+	})
+}
+
+// 组件初始化时获取用户信息
+getUserInfo()
 	const src = ref('http://pic2.sc.chinaz.com/Files/pic/pic9/202002/hpic2119_s.jpg');
 	const show = ref(false);
 	const page = ref(1)
@@ -144,23 +155,23 @@
 		}
 	}
 	const handleCardClick = (item) => {
-		if(!props.isfollow){
+		if(item.user.id == uni.getStorageSync('user_info').user_id){
 			todetails(item.id);
 			return
 		}
-		if (!userinfo.is_vip && item.is_vip) return
-		if (userinfo.is_vip && !item.is_free && !item.is_purchase) return
+		if (!userinfo.value.is_vip && item.is_vip) return
+		if (userinfo.value.is_vip && !item.is_free && !item.is_purchase) return
 		todetails(item.id);
 	}
 	//金币
 	const handleConfirm = () => {
-		if(!userinfo.is_vip){
+		if(!userinfo.value.is_vip){
 			uni.navigateTo({
 				url: '/pages/my/recharge'
 			})
 			return 
 		}
-		if (userinfo.gold_coin < obj.value.price) {
+		if (userinfo.value.gold_coin < obj.value.price) {
 			uni.navigateTo({
 				url: '/pages/my/recharge'
 			})
@@ -173,6 +184,9 @@
 					icon: 'none'
 				})
 				list.value[videoindex.value].is_purchase = true
+				store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+					userinfo.value = store.userinfo
+				})
 			}).catch(err => {
 				uni.showToast({
 					title: err.message,
@@ -246,8 +260,8 @@
 		if (newVal == 4) {
 			res = await getDetails({
 				dynamic_id: props.detailId,
-				userId: userinfo.id,
-				currentUserId: userinfo.id
+				userId: userinfo.value.id,
+				currentUserId: userinfo.value.id
 			})
 			list.value = [res.data]
 		} else if (newVal == 1) {
@@ -279,6 +293,8 @@
 	const refreshData = async () => {
 		resetData();
 		await getlist(props.tabs);
+		userinfoStore().getUserinfo({ id: uni.getStorageSync('user_info').user_id })
+		
 	}
 
 	const lower = () => {
@@ -294,12 +310,17 @@
 	}, {
 		immediate: true
 	});
-	//暴露
-	defineExpose({
-		getlist,
-		resetData,
-		refreshData
-	})
+// 页面显示时刷新用户信息
+onShow(() => {
+	getUserInfo()
+});
+
+//暴露
+defineExpose({
+	getlist,
+	resetData,
+	refreshData
+})
 </script>
 
 <style lang="scss" scoped>

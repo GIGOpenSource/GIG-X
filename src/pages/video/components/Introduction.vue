@@ -20,18 +20,26 @@
               ? detail.author.user_nickname
               : ""
           }}</view>
-          <view class="nums">{{ detail.author.followers_count }}粉丝</view>
+          <view class="nums"
+            >{{
+              detail.author && detail.author.followers_count
+                ? detail.author.followers_count
+                : 0
+            }}粉丝</view
+          >
         </view>
       </view>
       <!-- <view class="now">2355人正在看</view> -->
     </view>
 
     <!-- 简介 -->
-    <view class="des">{{ detail.description }}</view>
+    <view class="des">{{ detail.description || "" }}</view>
 
     <!-- 标签 -->
     <view class="tags">
-      <view v-for="(item, index) in detail.tags" :key="index">#{{ item }}</view>
+      <view v-for="(item, index) in detail.tags || []" :key="index"
+        >#{{ item }}</view
+      >
     </view>
 
     <!-- 评分 -->
@@ -58,7 +66,7 @@
       >
     </view>
     <!-- 猜你喜欢 -->
-    <guess-like></guess-like>
+    <guess-like ref="guessLikeRef"></guess-like>
   </view>
 </template>
 
@@ -76,6 +84,7 @@ const rateCount = ref(5);
 const countValue = ref(0);
 const isUserRating = ref(false); // 添加标志位来区分用户操作和程序设置
 const lastUserValue = ref(0); // 记录用户上次的评分值
+const guessLikeRef = ref();
 
 watch(
   () => props.detail,
@@ -89,6 +98,7 @@ watch(
 );
 
 const getRating = () => {
+  if (!props.detail || !props.detail.id) return;
   ratingGet({ content_id: props.detail.id })
     .then((res) => {
       // 通过 content_id 筛选出匹配的评分对象
@@ -135,6 +145,7 @@ const handleChange = (value) => {
 
   if (isUserAction && value > 0) {
     console.log("执行评分接口调用");
+    if (!props.detail || !props.detail.id) return;
     ratingRate({ content_id: props.detail.id, score: value.toFixed(1) })
       .then((res) => {
         console.log("评分成功:", res);
@@ -155,6 +166,20 @@ const handleChange = (value) => {
     isUserRating.value = false;
   }
 };
+
+// 刷新猜你喜欢数据
+const refreshGuessLike = () => {
+  console.log("刷新猜你喜欢数据");
+  if (guessLikeRef.value && guessLikeRef.value.refreshData) {
+    return guessLikeRef.value.refreshData();
+  }
+  return Promise.resolve();
+};
+
+// 暴露方法给父组件
+defineExpose({
+  refreshGuessLike,
+});
 </script>
 
 <style lang="scss" scoped>

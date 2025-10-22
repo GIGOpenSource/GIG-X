@@ -76,7 +76,7 @@ export const createVideo = (params) => {
 
 //购买动态(金币)
 export const purchase = (params) => {
-	return postRequest(`/comments/v2/${params.id}/purchase/`, params)
+	return postRequest(`/comments/v1/${params.id}/purchase/`, params)
 }
 
 

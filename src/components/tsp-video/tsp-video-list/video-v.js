@@ -401,26 +401,136 @@ export default {
 				this.videoPause(index)
 				this.beforeVodInfo.pauseShow = true; //显示暂停图标
 			} else { //播放
-				this.clickPlay = true
-				this.videoPlay(index)
-				this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+				// 检查VIP权限
+				const currentVideoData = this.totalPlayList.find(item => item.videoIndex === this.vodCurIndex);
+				console.log('playSpot - 当前视频数据:', currentVideoData);
+				console.log('playSpot - 视频is_vip:', currentVideoData?.is_vip);
 				
-				/* 解决手机浏览器h5前三个滑动不能自动播放的问题 */
-				// #ifdef H5
-				if(!this.autoplay && this.autoplayNum == 0){
-					this.autoplayNum = 1
-					this.vodList.filter((item,idx)=>{
-						if(idx != index){
-							// uni.createVideoContext('myVideo' + idx + this.swId, this).pause();
-							this.$refs[`myVideo${idx}${this.swId}`][0].pause();
+				if (currentVideoData) {
+					console.log('playSpot - 视频VIP状态:', currentVideoData.is_vip);
+					
+					// 如果视频不是VIP视频，直接播放
+					if (!currentVideoData.is_vip) {
+						console.log('playSpot - 非VIP视频，直接播放');
+						this.clickPlay = true
+						this.videoPlay(index)
+						this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+						
+						/* 解决手机浏览器h5前三个滑动不能自动播放的问题 */
+						// #ifdef H5
+						if(!this.autoplay && this.autoplayNum == 0){
+							this.autoplayNum = 1
+							this.vodList.filter((item,idx)=>{
+								if(idx != index){
+									// uni.createVideoContext('myVideo' + idx + this.swId, this).pause();
+									this.$refs[`myVideo${idx}${this.swId}`][0].pause();
+								}
+							})
 						}
-					})
+						// #endif
+						return;
+					}
+					
+					// 如果是VIP视频，检查用户权限
+					console.log('playSpot - VIP视频，开始检查用户权限');
+					this.$emit('checkVipPermission', {
+						videoData: currentVideoData,
+						actionType: 'play',
+						callback: (hasPermission) => {
+							console.log('playSpot - VIP权限检查结果:', hasPermission);
+							if (!hasPermission) {
+								console.log('playSpot - 没有VIP权限，停止播放');
+								// 没有VIP权限，不播放视频
+								return;
+							} else {
+								// 有权限，继续播放
+								this.clickPlay = true
+								this.videoPlay(index)
+								this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+								
+								/* 解决手机浏览器h5前三个滑动不能自动播放的问题 */
+								// #ifdef H5
+								if(!this.autoplay && this.autoplayNum == 0){
+									this.autoplayNum = 1
+									this.vodList.filter((item,idx)=>{
+										if(idx != index){
+											// uni.createVideoContext('myVideo' + idx + this.swId, this).pause();
+											this.$refs[`myVideo${idx}${this.swId}`][0].pause();
+										}
+									})
+								}
+								// #endif
+							}
+						}
+					});
+					return; // 等待回调结果
+				} else {
+					console.log('playSpot - 跳过VIP权限检查');
+					console.log('playSpot - currentVideoData:', currentVideoData);
 				}
-				// #endif
 			}
 		},
 		/* 播放视频 */
 		videoPlay(index) {
+			// 获取当前视频数据并检查VIP权限
+			const currentVideoData = this.totalPlayList.find(item => item.videoIndex === this.vodCurIndex);
+			console.log('videoPlay - 当前视频数据:', currentVideoData);
+			console.log('videoPlay - 视频is_vip:', currentVideoData?.is_vip);
+			
+			if (currentVideoData) {
+				console.log('videoPlay - 视频VIP状态:', currentVideoData.is_vip);
+				
+				// 如果视频不是VIP视频，直接播放
+				if (!currentVideoData.is_vip) {
+					console.log('videoPlay - 非VIP视频，直接播放');
+					this.openSpot = true
+					this.getVodInfo() //获取当前视频播放对象
+					this.showShade = false //是否显示遮罩swiper
+					this.beforeVodInfo.vodPaly = true;
+					this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+					this.brightSlider = false; //隐藏光亮的进度条
+					this.loadStart = false
+					this.$nextTick(() => {
+						this.moveOpacity = false
+						// uni.createVideoContext('myVideo' + index + this.swId, this).play();
+						this.$refs[`myVideo${index}${this.swId}`][0].play();
+					})
+					return;
+				}
+				
+				// 如果是VIP视频，检查用户权限
+				console.log('videoPlay - VIP视频，开始检查用户权限');
+				this.$emit('checkVipPermission', {
+					videoData: currentVideoData,
+					actionType: 'play',
+					callback: (hasPermission) => {
+						console.log('videoPlay - VIP权限检查结果:', hasPermission);
+						if (!hasPermission) {
+							console.log('videoPlay - 没有VIP权限，停止播放');
+							// 没有VIP权限，不播放视频
+							return;
+						} else {
+							// 有权限，继续播放
+							this.openSpot = true
+							this.getVodInfo() //获取当前视频播放对象
+							this.showShade = false //是否显示遮罩swiper
+							this.beforeVodInfo.vodPaly = true;
+							this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+							this.brightSlider = false; //隐藏光亮的进度条
+							this.loadStart = false
+							this.$nextTick(() => {
+								this.moveOpacity = false
+								// uni.createVideoContext('myVideo' + index + this.swId, this).play();
+								this.$refs[`myVideo${index}${this.swId}`][0].play();
+							})
+						}
+					}
+				});
+				return; // 等待回调结果
+			} else {
+				console.log('videoPlay - 跳过VIP权限检查');
+			}
+			
 			this.openSpot = true
 			this.getVodInfo() //获取当前视频播放对象
 			this.showShade = false //是否显示遮罩swiper
@@ -757,13 +867,69 @@ export default {
 			let videoCtx = null
 			// videoCtx = uni.createVideoContext('myVideo' + this.vodIndex + this.swId, this)
 			videoCtx = this.$refs[`myVideo${this.vodIndex}${this.swId}`][0]
-			videoCtx.seek(this.endTime);
-			videoCtx.play();
-			this.beforeVodInfo.vodPaly = true; //开启播放
-			this.beforeVodInfo.pauseShow = false; //关闭暂停图标
-			this.sliderEndTime = setTimeout(() => {
-				this.brightSlider = false; //隐藏光亮的进度条
-			}, 2000)
+			
+			// 保存拖动前的进度条位置
+			const originalProgress = this.sliderProgress;
+			const originalTime = this.sliderTime;
+			
+			// 检查VIP权限
+			const currentVideoData = this.totalPlayList.find(item => item.videoIndex === this.vodCurIndex);
+			if (currentVideoData) {
+				console.log('touchendSlider - 视频VIP状态:', currentVideoData.is_vip);
+				
+				// 如果视频不是VIP视频，直接播放
+				if (!currentVideoData.is_vip) {
+					console.log('touchendSlider - 非VIP视频，直接播放');
+					videoCtx.seek(this.endTime);
+					videoCtx.play();
+					this.beforeVodInfo.vodPaly = true; //开启播放
+					this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+					this.sliderEndTime = setTimeout(() => {
+						this.brightSlider = false; //隐藏光亮的进度条
+					}, 2000)
+					return;
+				}
+				
+				// 如果是VIP视频，检查用户权限
+				console.log('touchendSlider - VIP视频，开始检查用户权限');
+				this.$emit('checkVipPermission', {
+					videoData: currentVideoData,
+					actionType: 'play',
+					callback: (hasPermission) => {
+						console.log('touchendSlider - VIP权限检查结果:', hasPermission);
+						if (!hasPermission) {
+							console.log('touchendSlider - 没有VIP权限，停止播放');
+							// 没有VIP权限，恢复进度条到拖动前的位置
+							this.sliderProgress = originalProgress;
+							this.sliderTime = originalTime;
+							this.endTime = originalTime;
+							this.sliderEndTime = setTimeout(() => {
+								this.brightSlider = false; //隐藏光亮的进度条
+							}, 2000)
+							return;
+						} else {
+							// 有权限，继续播放
+							videoCtx.seek(this.endTime);
+							videoCtx.play();
+							this.beforeVodInfo.vodPaly = true; //开启播放
+							this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+							this.sliderEndTime = setTimeout(() => {
+								this.brightSlider = false; //隐藏光亮的进度条
+							}, 2000)
+						}
+					}
+				});
+				return; // 等待回调结果
+			} else {
+				console.log('touchendSlider - 跳过VIP权限检查');
+				videoCtx.seek(this.endTime);
+				videoCtx.play();
+				this.beforeVodInfo.vodPaly = true; //开启播放
+				this.beforeVodInfo.pauseShow = false; //关闭暂停图标
+				this.sliderEndTime = setTimeout(() => {
+					this.brightSlider = false; //隐藏光亮的进度条
+				}, 2000)
+			}
 		},
 		/* 触碰的坐标 */
 		vodViewStart(e) {
@@ -1121,6 +1287,21 @@ export default {
 		})
 		/* 更新获取当前视频播放对象 */
 		this.getVodInfo()
+	},
+	/* 处理VIP权限弹窗请求 */
+	handleShowVipDialog(data) {
+		console.log("video-v.js 转发VIP弹窗请求:", data);
+		this.$emit("showVipDialog", data);
+	},
+	/* 处理金币购买弹窗请求 */
+	handleShowCoinDialog(data) {
+		console.log("video-v.js 转发金币购买弹窗请求:", data);
+		this.$emit("showCoinDialog", data);
+	},
+	/* 处理金币不足弹窗请求 */
+	handleShowInsufficientCoinDialog(data) {
+		console.log("video-v.js 转发金币不足弹窗请求:", data);
+		this.$emit("showInsufficientCoinDialog", data);
 	},
 	/* 更新视频评论数量 */
 	updateVideoCommentCount(videoId, commentCount) {

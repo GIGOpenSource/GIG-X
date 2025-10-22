@@ -2,7 +2,8 @@ import {
 	defineStore
 } from 'pinia';
 import {
-	getUserinfo
+	getUserinfo,
+	getCurrentUserinfo
 } from '@/api/public.js'
 export const userinfoStore = defineStore('userinfos', {
 	state: () => {
@@ -19,6 +20,21 @@ export const userinfoStore = defineStore('userinfos', {
 		async getPersonInfo(params) {
 			const res = await getUserinfo(params)
 			this.personInfo = res.data
+		},
+		// 获取当前用户信息并覆盖
+		async updateCurrentUserinfo() {
+			try {
+				const res = await getCurrentUserinfo()
+				if (res && res.data) {
+					// 覆盖用户信息
+					this.userinfo = res.data
+					console.log('用户信息已更新:', res.data)
+					return res.data
+				}
+			} catch (error) {
+				console.error('获取用户信息失败:', error)
+				throw error
+			}
 		},
 	},
 	persist: {

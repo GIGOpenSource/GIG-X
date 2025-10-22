@@ -72,8 +72,9 @@
 
 <script setup>
 import { ref } from "vue";
+import { onShow } from '@dcloudio/uni-app';
 
-import { getAdsList } from "@/api/public";
+import { getAdsList, purchase } from "@/api/public";
 import { userinfoStore } from '@/store/userinfos';
 import Coin from "@/components/Coin.vue";
 
@@ -81,8 +82,17 @@ const paging = ref(null);
 const dataList = ref([]);
 const dialogVisible = ref(false);
 const currentApp = ref({});
-const { userinfo } = userinfoStore();
+const store = userinfoStore();
+const userinfo = ref({})
 
+// 初始化时获取用户信息
+const getUserInfo = () => {
+	store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+		userinfo.value = store.userinfo
+	})
+}
+
+getUserInfo()
 const queryList = (pageNo, pageSize) => {
   const params = {
     type: "app",
@@ -101,18 +111,34 @@ const queryList = (pageNo, pageSize) => {
 
 const handleClickApp = (item) => {
   currentApp.value = item;
-
-  if (!userinfo.is_vip && item.is_vip) {
+  console.log(userinfo.value.gold_coin,'userinfo.valueuserinfo.value')
+  // 如果已购买，直接打开
+  if (item.is_purchase) {
+    openApp(item.click_url);
+    dialogVisible.value = false;
+    return;
+  }
+  
+  // 检查VIP权限
+  if (!userinfo.value.is_vip && item.is_vip) {
     dialogVisible.value = true;
     return;
   }
   
-  if (userinfo.is_vip && item.price && userinfo.gold_coin < item.price) {
+  // 检查金币权限
+  if (userinfo.value.is_vip && item.price && userinfo.value.gold_coin < item.price) {
     dialogVisible.value = true;
     return;
   }
   
-  openApp(item.click_url);
+  // 如果用户是VIP且金币足够，也显示确认弹窗
+  if (userinfo.value.is_vip && item.price && userinfo.value.gold_coin >= item.price) {
+    dialogVisible.value = true;
+    return;
+  }
+  
+  // 免费内容直接打开
+  // openApp(item.click_url);
 };
 
 const openApp = (url) => {
@@ -127,18 +153,46 @@ const openApp = (url) => {
 
 // 处理弹窗确认
 const handleConfirm = () => {
-  if (!userinfo.is_vip) {
+  if (!userinfo.value.is_vip) {
     uni.navigateTo({
       url: '/pages/my/recharge'
     });
-  } else if (userinfo.gold_coin < currentApp.value.price) {
+  } else if (userinfo.value.gold_coin < currentApp.value.price) {
     uni.navigateTo({
       url: '/pages/my/recharge'
     });
   } else {
-    openApp(currentApp.value.click_url);
+    if (currentApp.value.price) {
+      purchase({id: currentApp.value.id}).then(res => {
+        uni.showToast({
+          title: '购买成功',
+          icon: 'none'
+        }).then(() => {
+          // 更新APP状态为已购买
+          const appIndex = dataList.value.findIndex(app => app.id === currentApp.value.id);
+          if (appIndex !== -1) {
+            dataList.value[appIndex].is_purchase = true;
+          }
+         store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+         	userinfo.value = store.userinfo
+         })
+          openApp(currentApp.value.click_url);
+        });
+      }).catch(err => {
+        uni.showToast({
+          title: err.message || '购买失败',
+          icon: 'none'
+        });
+      });
+    } else {
+      openApp(currentApp.value.click_url);
+    }
   }
 };
+
+onShow(() => {
+  getUserInfo()
+});
 </script>
 
 <style lang="scss" scoped>

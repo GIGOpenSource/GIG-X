@@ -67,7 +67,9 @@
 
 <script setup>
 import { ref } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import { taskList, addtask } from '@/api/common'
+import { userinfoStore } from '@/store/userinfos';
 const dataList = ref([]);
 const signlist = ref([])
 const currentStep = ref(1);
@@ -160,6 +162,10 @@ const generateDateList = () => {
   }
 }
 
+// 页面显示时刷新用户信息
+onShow(() => {
+	userinfoStore().getUserinfo({ id: uni.getStorageSync('user_info').user_id })
+});
 
 </script>
 

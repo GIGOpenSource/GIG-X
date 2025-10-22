@@ -6,7 +6,7 @@ import { host } from '@/config/config.js';
 const host = import.meta.env.VITE_API_BASE_URL;
 // #endif
 import { login } from "@/api/setup.js";
-// import { userinfoStore } from "@/store/userinfos";
+import { userinfoStore } from "@/store/userinfos";
 // 验证token是否失效
 var expired = false;
 let requestRecord = {
@@ -101,8 +101,20 @@ function executeRequest(url, params, other) {
 				if (data.statusCode == 200 || data.statusCode == 201) {
 					if (!(data.data.code == 403 && !expired)) {
 						expired = false;
-						if (data.data.code == 200 || data.data.code == 201) resolve(data.data);
-						else {
+						if (data.data.code == 200 || data.data.code == 201) {
+							// 检查是否是 auth/users 接口，如果是则更新用户信息
+							if (url.includes('auth/users') && data.data.data) {
+								console.log('检测到 auth/users 接口响应，更新用户信息');
+								try {
+									const store = userinfoStore();
+									store.userinfo = data.data.data;
+									console.log('用户信息已自动更新:', data.data.data);
+								} catch (error) {
+									console.error('更新用户信息失败:', error);
+								}
+							}
+							resolve(data.data);
+						} else {
 							if (httpConfig.errorOutput) {
 								uni.showToast({
 									title: data.data.msg || data.data.message || '请求失败',

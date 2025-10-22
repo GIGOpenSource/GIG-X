@@ -74,25 +74,36 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 
-import { adsDetail } from '@/api/public.js';
+import { adsDetail,purchase } from '@/api/public.js';
 import { userinfoStore } from '@/store/userinfos';
 import Coin from "@/components/Coin.vue";
-
 const id = ref(0);
 const paging = ref(null);
 const dataDetail = ref({});
 const dialogVisible = ref(false);
-const { userinfo } = userinfoStore();
+const store = userinfoStore();
+const userinfo = ref({})
 
+// 初始化时获取用户信息
+const getUserInfo = () => {
+	store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+		userinfo.value = store.userinfo
+	})
+}
+
+// 组件初始化时获取用户信息
+getUserInfo()
 onLoad((options) => {
 	id.value = options.id;
-
 	queryList();
 });
 
 const downConditions = computed(() => {
+	if(dataDetail.value.is_purchase){
+		return '已购买'
+	}
 	if( !dataDetail.value.is_vip && !dataDetail.value.price ) {
 		return '免费下载'
 	}
@@ -114,6 +125,11 @@ const queryList = (pageNo, pageSize) => {
 };
 
 const handleClickDown = () => {
+	if(dataDetail.value.is_purchase){
+		downloadGame();
+		dialogVisible.value = false
+		return
+	}
 	if (!userinfo.is_vip && dataDetail.value.is_vip) {
 		dialogVisible.value = true;
 		return;
@@ -122,7 +138,10 @@ const handleClickDown = () => {
 		dialogVisible.value = true;
 		return;
 	}
-	downloadGame();
+	if (userinfo.is_vip && dataDetail.value.price && userinfo.gold_coin >= dataDetail.value.price) {
+		dialogVisible.value = true;
+		return;
+	}
 };
 
 const downloadGame = () => {
@@ -137,18 +156,36 @@ const downloadGame = () => {
 
 // 处理弹窗确认
 const handleConfirm = () => {
-	if (!userinfo.is_vip) {
+	if (!userinfo.value.is_vip) {
 		uni.navigateTo({
 			url: '/pages/my/recharge'
 		});
-	} else if (userinfo.gold_coin < dataDetail.value.price) {
+	} else if (userinfo.value.gold_coin < dataDetail.value.price) {
 		uni.navigateTo({
 			url: '/pages/my/recharge'
 		});
 	} else {
-		downloadGame();
+		purchase({id:dataDetail.value.id}).then(res => {
+			uni.showToast({
+				title:'购买成功',
+				icon:'none'
+			}).then(res => {
+				queryList();
+				store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+					userinfo.value = store.userinfo
+				})
+				downloadGame();
+			})
+			
+		})
+		
 	}
 };
+
+// 页面显示时刷新用户信息
+onShow(() => {
+	getUserInfo()
+});
 </script>
 
 <style lang="scss" scoped>

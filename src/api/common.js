@@ -73,3 +73,18 @@ export const addtask = (id) =>{
 export const bloggerList = (params) => {
 	return getRequest('/tags/recommend-users/', params)
 }
+
+// 获取推荐用户标签
+export const getRecommendTagUsers = (params) => {
+	return getRequest('/contents/content_follow/recommend_tag_users/', params)
+}
+
+// 根据用户ID获取作品
+export const getContentsByUser = (params) => {
+	return getRequest('/contents/', params)
+}
+
+// 关注用户
+export const followUser = (params) => {
+	return postRequest('/follows/v2/toggle/', params)
+}
