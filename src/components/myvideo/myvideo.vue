@@ -7,10 +7,10 @@
 		</view>
 		<view class="con">
 			<view class="list" v-for="(item, index) in list" :key="index" @click="topath(item,index)">
-				<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && isfollow">
+				<view class="memgceng" v-if="!userinfo.is_vip && item.is_vip && item.author.id !== uni.getStorageSync('user_info').user_id">
 					<view class="">VIP视频</view>
 				</view>
-				<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase &&  isfollow">
+				<view class="memgceng" v-if="userinfo.is_vip && !item.is_free && !item.is_purchase &&  item.author.id !== uni.getStorageSync('user_info').user_id">
 					<view class="">金币视频</view>
 				</view>
 				<image :src="item.cover_url" mode="widthFix"></image>
@@ -43,11 +43,12 @@
 	</scroll-view>
 </template>
 <script setup>
-	import {
-		ref,
-		reactive,
-		watch
-	} from 'vue'
+import {
+	ref,
+	reactive,
+	watch
+} from 'vue'
+import { onShow } from '@dcloudio/uni-app';
 	import {
 		getVideo,purchase
 	} from '@/api/setup.js'
@@ -55,9 +56,18 @@
 		userinfoStore
 	} from '@/store/userinfos'
 	import Coin from "@/components/Coin.vue";
-	const {
-		userinfo
-	} = userinfoStore()
+	const store = userinfoStore()
+	const userinfo = ref({})
+	
+	// 初始化时获取用户信息
+	const getUserInfo = () => {
+		store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+			userinfo.value = store.userinfo
+		})
+	}
+	
+	// 组件初始化时获取用户信息
+	getUserInfo()
 	const current = ref(0)
 	const page = ref(1)
 	const list = ref([])
@@ -74,13 +84,13 @@
 		}
 	});
 	const handleConfirm = () => {
-		if (!userinfo.is_vip) {
+		if (!userinfo.value.is_vip) {
 			uni.navigateTo({
 				url: '/pages/my/recharge'
 			})
 			return
 		}
-		if (userinfo.gold_coin < obj.value.price) {
+		if (userinfo.value.gold_coin < obj.value.price) {
 			uni.navigateTo({
 				url: '/pages/my/recharge'
 			})
@@ -94,6 +104,9 @@
 				})
 				
 				list.value[videoindex.value].is_purchase = true
+				store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+					userinfo.value = store.userinfo
+				})
 			}).catch(err => {
 				uni.showToast({
 					title: err.message,
@@ -105,15 +118,21 @@
 	const topath = (item,index) => {
 		obj.value = item
 		videoindex.value = index
-		if (!props.isfollow) {
+		if (item.author.id == uni.getStorageSync('user_info').user_id) {
+			uni.navigateTo({
+				url: '/pages/video/video?id=' + item.id
+			})
+			return
+		}
+		if(item.is_vip || item.is_purchase){
 			uni.navigateTo({
 				url: '/pages/video/video?id=' + item.id
 			})
 			return
 		}
 		dialogVisible.value = true
-		if (!userinfo.is_vip && item.is_vip) return
-		if (userinfo.is_vip && !item.is_free && !item.is_purchase) return
+		if (!userinfo.value.is_vip && item.is_vip) return
+		if (userinfo.value.is_vip && !item.is_free && !item.is_purchase) return
 		uni.navigateTo({
 			url: '/pages/video/video?id=' + item.id
 		})
@@ -166,6 +185,11 @@
 		const formatNumber = (num) => num.toString().padStart(2, '0')
 		return `${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`
 	}
+
+	// 页面显示时刷新用户信息
+	onShow(() => {
+		getUserInfo()
+	});
 
 	defineExpose({
 		resetData

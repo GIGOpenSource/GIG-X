@@ -34,7 +34,21 @@
 import { ref } from 'vue';
 import tabs from '@/components/tabs/tabs.vue';
 import TaskPage from './TaskPage.vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
+import { userinfoStore } from '@/store/userinfos';
+
+const store = userinfoStore()
+const userinfo = ref({})
+
+// 初始化时获取用户信息
+const getUserInfo = () => {
+	store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+		userinfo.value = store.userinfo
+	})
+}
+
+// 组件初始化时获取用户信息
+getUserInfo()
 const currentPage = ref(0);
 
 const list = ref([
@@ -65,7 +79,11 @@ onLoad((e) => {
 	if (e.tab) {
 		currentPage.value = e.tab
 	}
+})
 
+// 页面显示时刷新用户信息
+onShow(() => {
+	getUserInfo()
 })
 </script>
 

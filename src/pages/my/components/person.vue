@@ -72,7 +72,18 @@ import userinfo from "./userinfo.vue";
 import vip from "./vip.vue";
 import { userinfoStore } from "@/store/userinfos";
 import { onPullDownRefresh } from "@dcloudio/uni-app";
-const { personInfo } = userinfoStore();
+const store = userinfoStore();
+const personInfo = ref({})
+
+// 初始化时获取用户信息
+const getUserInfo = () => {
+	store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+		personInfo.value = store.personInfo
+	})
+}
+
+// 组件初始化时获取用户信息
+getUserInfo()
 
 const props = defineProps({
   isBack: {
@@ -112,8 +123,8 @@ onMounted(() => {
   }
 });
 onShow(() => {
-  console.log(personInfo, "personInfo");
-});
+	getUserInfo()
+})
 onPullDownRefresh(() => {
   if (current.value == 0) {
     act.value.page = 1;

@@ -74,7 +74,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 
 import { adsDetail,purchase } from '@/api/public.js';
 import { userinfoStore } from '@/store/userinfos';
@@ -83,8 +83,18 @@ const id = ref(0);
 const paging = ref(null);
 const dataDetail = ref({});
 const dialogVisible = ref(false);
-const { userinfo } = userinfoStore();
-const store = userinfoStore()
+const store = userinfoStore();
+const userinfo = ref({})
+
+// 初始化时获取用户信息
+const getUserInfo = () => {
+	store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+		userinfo.value = store.userinfo
+	})
+}
+
+// 组件初始化时获取用户信息
+getUserInfo()
 onLoad((options) => {
 	id.value = options.id;
 	queryList();
@@ -146,11 +156,11 @@ const downloadGame = () => {
 
 // 处理弹窗确认
 const handleConfirm = () => {
-	if (!userinfo.is_vip) {
+	if (!userinfo.value.is_vip) {
 		uni.navigateTo({
 			url: '/pages/my/recharge'
 		});
-	} else if (userinfo.gold_coin < dataDetail.value.price) {
+	} else if (userinfo.value.gold_coin < dataDetail.value.price) {
 		uni.navigateTo({
 			url: '/pages/my/recharge'
 		});
@@ -161,7 +171,9 @@ const handleConfirm = () => {
 				icon:'none'
 			}).then(res => {
 				queryList();
-				store.getUserinfo({ id: uni.getStorageSync('user_info').user_id })
+				store.getUserinfo({ id: uni.getStorageSync('user_info').user_id }).then(() => {
+					userinfo.value = store.userinfo
+				})
 				downloadGame();
 			})
 			
@@ -169,6 +181,11 @@ const handleConfirm = () => {
 		
 	}
 };
+
+// 页面显示时刷新用户信息
+onShow(() => {
+	getUserInfo()
+});
 </script>
 
 <style lang="scss" scoped>
