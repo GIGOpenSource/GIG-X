@@ -29,7 +29,7 @@
       :class="{ refreshing: refreshing }"
     >
       <swiper-item v-for="(item, index) in 4" :key="index">
-        <active1
+        <active
           :more="true"
           :tabs="index"
           :isfollow="false"
@@ -71,11 +71,24 @@
 import { ref, onMounted, nextTick } from "vue";
 import tabs from "@/components/tabs/tabs.vue";
 import SocialPost from "./components/SocialPost.vue";
-import { onPullDownRefresh } from "@dcloudio/uni-app";
+import { onPullDownRefresh, onShow } from "@dcloudio/uni-app";
 import { communityList } from "@/api/community.js";
 import { userinfoStore } from "@/store/userinfos";
 import Coin from "@/components/Coin.vue";
-const { userinfo } = userinfoStore();
+const store = userinfoStore();
+const userinfo = ref({});
+
+// 初始化时获取用户信息
+const getUserInfo = () => {
+  store
+    .getUserinfo({ id: uni.getStorageSync("user_info").user_id })
+    .then(() => {
+      userinfo.value = store.userinfo;
+    });
+};
+
+// 组件初始化时获取用户信息
+getUserInfo();
 const current = ref(0);
 const dataList = ref([]);
 const page = ref(1);
@@ -161,7 +174,7 @@ const onTabChange = async (index) => {
 };
 
 const clicks = () => {
-  if (userinfo.is_vip) {
+  if (userinfo.value.is_vip) {
     uni.navigateTo({
       url: "/pages/community/publish",
     });
@@ -177,6 +190,9 @@ const handleConfirm = () => {
 // 下拉刷新
 onPullDownRefresh(() => {
   refreshData();
+});
+onShow(() => {
+  getUserInfo();
 });
 </script>
 <style lang="scss" scoped>
