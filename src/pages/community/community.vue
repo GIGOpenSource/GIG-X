@@ -7,12 +7,12 @@
 					<tabs :list="list" @change="onTabChange"></tabs>
 				</template>
 
-				<template #right>
+			<!-- 	<template #right>
 					<view class="search" @click="uni.navigateTo({ url: '/pages/search/search' })">
 						<up-icon name="search" color="#fff" size="22"></up-icon>
 						<text>搜索</text>
 					</view>
-				</template>
+				</template> -->
 			</up-navbar>
 		</template>
 		<swiper :current="current" class="content" :class="{ 'refreshing': refreshing }">

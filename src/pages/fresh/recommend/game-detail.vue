@@ -35,11 +35,25 @@
 
 			<view class="screen-shoot">
 				<view class="tit">游戏截图</view>
-				<scroll-view scroll-x="true" style="white-space: nowrap">
-					<view class="scroll-shoot">
-						<up-image :src="dataDetail.image_url" width="710rpx" height="320rpx" radius="30rpx" style="margin-right: 40rpx"></up-image>
-					</view>
-				</scroll-view>
+				<swiper 
+					class="screenshot-swiper" 
+					:indicator-dots="true" 
+					:autoplay="true" 
+					:interval="3000" 
+					:duration="500"
+					indicator-color="rgba(255, 255, 255, 0.3)"
+					indicator-active-color="#fff"
+				>
+					<swiper-item v-for="(imageUrl, index) in screenshotImages" :key="index">
+						<up-image 
+							:src="imageUrl" 
+							width="710rpx" 
+							height="320rpx" 
+							radius="30rpx"
+							class="screenshot-image"
+						></up-image>
+					</swiper-item>
+				</swiper>
 			</view>
 
 			<view class="long-des">
@@ -113,6 +127,12 @@ const downConditions = computed(() => {
 	if(  dataDetail.value.price ) {
 		return `支付${dataDetail.value.price}金币下载`
 	}
+});
+
+// 处理游戏截图图片数组
+const screenshotImages = computed(() => {
+	if (!dataDetail.value.banner_game_url) return [];
+	return dataDetail.value.banner_game_url.split(',').filter(url => url.trim());
 });
 
 const queryList = (pageNo, pageSize) => {
@@ -222,8 +242,14 @@ onShow(() => {
 			margin-bottom: 20rpx;
 		}
 
-		.scroll-shoot {
-			display: flex;
+		.screenshot-swiper {
+			height: 320rpx;
+			width: 710rpx;
+			
+			.screenshot-image {
+				width: 710rpx;
+				height: 320rpx;
+			}
 		}
 	}
 }
