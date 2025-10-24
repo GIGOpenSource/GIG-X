@@ -41,7 +41,7 @@
       @animationfinish="swiperAnimationfinish"
     >
       <swiper-item v-for="(tab, index) in categoryList.length" :key="tab">
-        <tabs-page
+       <tabs-page
           :tab-index="index"
           :vip="true"
           :isAuto="!dialogVisible"

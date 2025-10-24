@@ -62,6 +62,12 @@ export const purchase = (params) => {
 	return postRequest(`/ad/ads/${params.id}/adv_purchase/`, params)
 }
 
+//获取游戏分类
+export const getTags = (params) => {
+	return getRequest(`/tags/`, params)
+}
+
+
 
 
 

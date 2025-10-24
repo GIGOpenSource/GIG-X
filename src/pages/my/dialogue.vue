@@ -37,12 +37,12 @@
 		<operation :show="show" @update:show="(val) => (show = val)" />
 		<!-- <Dialog :modelValue="modelValue" @update:modelValue="val => modelValue = val" /> -->
 		<!-- <up-empty mode="data" v-if="!list.length"></up-empty> -->
-		<Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisibl = false"
-			@close="dialogVisibl = false" :confirmText="store.$state.userinfo.is_vip == false ? '去开通' : store.$state.userinfo.gold_coin < 5 ? '去充值':''">
+		<Coin v-model="dialogVisible" @confirm="handleConfirm" @cancel="dialogVisible = false"
+			@close="dialogVisible = false" :confirmText="userinfo.is_vip == false ? '去开通' : userinfo.gold_coin < 5 ? '去充值':''">
 			<template #tip>
 				
-				<view class="" v-if="!store.$state.userinfo.is_vip">该内容需要VIP解锁</view>
-				<view class="" v-if="store.$state.userinfo.is_vip && store.$state.userinfo.gold_coin < 5">您的金币不足,请充值金币</view>
+				<view class="" v-if="!userinfo.is_vip">该内容需要VIP解锁</view>
+				<view class="" v-if="userinfo.is_vip && userinfo.gold_coin < 5">您的金币不足,请充值金币</view>
 			</template>
 		</Coin>
 	</view>
@@ -78,13 +78,14 @@
 	const con = ref('')
 	const userId = uni.getStorageSync('user_info').user_id
 	const modelValue = ref(false) //是否显示弹窗
+	const userinfo = ref(store.userinfo) // 本地用户信息
 	const handleConfirm = () => {
 		uni.navigateTo({
 			url:'/pages/my/recharge'
 		})
 	}
 	const save = () => {
-		if(!store.$state.userinfo.is_vip || store.$state.userinfo.gold_coin < 5){
+		if(!userinfo.value.is_vip || userinfo.value.gold_coin < 5){
 			dialogVisible.value = true
 			return
 		} 
@@ -98,8 +99,10 @@
 					con.value = ''
 					store.getUserinfo({
 						id: uni.getStorageSync('user_info').user_id
+					}).then(() => {
+						userinfo.value = store.userinfo
+						getdetails()
 					})
-					getdetails()
 				})
 		} else {
 			createRoom({
@@ -118,9 +121,10 @@
 						})
 						store.getUserinfo({
 							id: uni.getStorageSync('user_info').user_id
+						}).then(() => {
+							userinfo.value = store.userinfo
+							getdetails()
 						})
-						getdetails()
-
 					})
 			})
 		}
