@@ -347,13 +347,103 @@ export default {
 					this.addAnimation('pauseRef',this.pauseAddList,this.pauseNum)
 				})
 			} else { //播放
-				this.clickPlay = true
-				this.videoPlay(index)
-				this.vodList[index].pauseShow = false; //关闭暂停图标
+				// 检查VIP权限
+				const currentVideoData = this.vodList[this.vodIndex];
+				console.log('playSpot - 当前视频数据:', currentVideoData);
+				console.log('playSpot - 视频is_vip:', currentVideoData?.is_vip);
+				
+				if (currentVideoData) {
+					console.log('playSpot - 视频VIP状态:', currentVideoData.is_vip);
+					
+					// 如果视频不是VIP视频，直接播放
+					if (!currentVideoData.is_vip) {
+						console.log('playSpot - 非VIP视频，直接播放');
+						this.clickPlay = true
+						this.videoPlay(index)
+						this.vodList[index].pauseShow = false; //关闭暂停图标
+						return;
+					}
+					
+					// 如果是VIP视频，检查用户权限
+					console.log('playSpot - VIP视频，开始检查用户权限');
+					this.$emit('checkVipPermission', {
+						videoData: currentVideoData,
+						actionType: 'play',
+						callback: (hasPermission) => {
+							console.log('playSpot - VIP权限检查结果:', hasPermission);
+							if (!hasPermission) {
+								console.log('playSpot - 没有VIP权限，停止播放');
+								// 没有VIP权限，不播放视频
+								return;
+							} else {
+								// 有权限，继续播放
+								this.clickPlay = true
+								this.videoPlay(index)
+								this.vodList[index].pauseShow = false; //关闭暂停图标
+							}
+						}
+					});
+					return; // 等待回调结果
+				} else {
+					console.log('playSpot - 跳过VIP权限检查');
+				}
 			}
 		},
 		/* 播放视频 */
 		videoPlay(index) {
+			// 获取当前视频数据并检查VIP权限
+			const currentVideoData = this.vodList[this.vodIndex];
+			console.log('videoPlay - 当前视频数据:', currentVideoData);
+			console.log('videoPlay - 视频is_vip:', currentVideoData?.is_vip);
+			
+			if (currentVideoData) {
+				console.log('videoPlay - 视频VIP状态:', currentVideoData.is_vip);
+				
+				// 如果视频不是VIP视频，直接播放
+				if (!currentVideoData.is_vip) {
+					console.log('videoPlay - 非VIP视频，直接播放');
+					// console.log('播放视频myVideo============>' + index)
+					let vodInfo = Object.assign({},this.vodList[index])
+					vodInfo.vodPaly = true;
+					vodInfo.pauseShow = false; //关闭暂停图标
+					this.$set(this.vodList, index, vodInfo)
+					this.brightSlider = false; //隐藏光亮的进度条
+					// 创建视频对象
+					// uni.createVideoContext('myVideo' + index + this.swId, this).play();
+					this.$refs[`myVideo${index}${this.swId}`][0].play();
+					return;
+				}
+				
+				// 如果是VIP视频，检查用户权限
+				console.log('videoPlay - VIP视频，开始检查用户权限');
+				this.$emit('checkVipPermission', {
+					videoData: currentVideoData,
+					actionType: 'play',
+					callback: (hasPermission) => {
+						console.log('videoPlay - VIP权限检查结果:', hasPermission);
+						if (!hasPermission) {
+							console.log('videoPlay - 没有VIP权限，停止播放');
+							// 没有VIP权限，不播放视频
+							return;
+						} else {
+							// 有权限，继续播放
+							// console.log('播放视频myVideo============>' + index)
+							let vodInfo = Object.assign({},this.vodList[index])
+							vodInfo.vodPaly = true;
+							vodInfo.pauseShow = false; //关闭暂停图标
+							this.$set(this.vodList, index, vodInfo)
+							this.brightSlider = false; //隐藏光亮的进度条
+							// 创建视频对象
+							// uni.createVideoContext('myVideo' + index + this.swId, this).play();
+							this.$refs[`myVideo${index}${this.swId}`][0].play();
+						}
+					}
+				});
+				return; // 等待回调结果
+			} else {
+				console.log('videoPlay - 跳过VIP权限检查');
+			}
+			
 			// console.log('播放视频myVideo============>' + index)
 			let vodInfo = Object.assign({},this.vodList[index])
 			vodInfo.vodPaly = true;

@@ -128,7 +128,7 @@ import twVideon from '@/components/tsp-video/tsp-video-list/video-n.nvue';
 import twVideov from '@/components/tsp-video/tsp-video-list/video-v.vue';
 // #endif
 
-import Dialog from "@/components/Dialog.vue";
+import Dialog from "@/components/DialogNvue.vue";
 import RecommendUsers from "@/components/recommend-users/RecommendUsers.vue";
 import { getVodData } from '@/static/js/vodData.js';
 import { getContentList } from '@/api/content';
@@ -523,6 +523,14 @@ export default {
 		swiperChange(event) {
 			// console.log('swiper切换当前视频回调',event)
 			this.currIndex = event.videoIndex;
+
+			// 检查当前视频的VIP权限
+			if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
+				const currentVideo = this.$refs.videoGroup.totalPlayList[event.videoIndex];
+				if (currentVideo) {
+					this.checkVipPermission(currentVideo);
+				}
+			}
 		},
 		/* 添加、指定位置插入视频*/
 		addVodData() {

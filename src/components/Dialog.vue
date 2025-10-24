@@ -3,6 +3,15 @@
     <view class="mask" @click="onClickMak"></view>
 
     <view class="content">
+      <!-- APP端：使用背景图片 -->
+      <!-- #ifdef APP-PLUS -->
+      <image
+        class="dialog-bg-image"
+        src="/static/images/dialog-bg.png"
+        mode="aspectFill"
+      ></image>
+      <!-- #endif -->
+
       <view class="dialog-header">
         <view class="dialog-header-title">
           <slot name="title">温馨提示</slot>
@@ -134,13 +143,37 @@ const handleClickClose = () => {
     top: 50%;
     transform: translate(-50%, -50%);
 
+    // 平台区分处理 - APP端和H5端使用不同的样式
+    // #ifdef H5
+    // H5端：使用完整的CSS样式
     background: url("/static/images/dialog-bg.png") 0 0 no-repeat;
     background-size: 100% 100%;
     border-radius: 48rpx;
-    // padding: 40rpx 50rpx;
     color: #3b362e;
     min-width: 534rpx;
     min-height: 120rpx;
+    // #endif
+
+    // #ifdef APP-PLUS
+    // APP端：使用nvue兼容的样式
+    background-color: #ffffff;
+    border-radius: 48rpx;
+    color: #3b362e;
+    width: 534rpx;
+    height: 120rpx;
+    // #endif
+
+    // APP端：背景图片样式
+    // #ifdef APP-PLUS
+    .dialog-bg-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 48rpx;
+    }
+    // #endif
 
     .dialog-header {
       position: relative;
@@ -169,9 +202,19 @@ const handleClickClose = () => {
       padding: 0;
       height: 0;
 
+      // 平台区分处理 - 修复APP端选择器问题
+      // #ifdef H5
       image {
         display: none;
       }
+      // #endif
+
+      // #ifdef APP-PLUS
+      // APP端：使用类选择器
+      .dialog-image {
+        display: none;
+      }
+      // #endif
     }
 
     .dialog-footer {
@@ -180,11 +223,35 @@ const handleClickClose = () => {
       margin-bottom: 40rpx;
 
       .btn {
+        // 平台区分处理 - APP端和H5端使用不同的按钮样式
+        // #ifdef H5
+        // H5端：使用完整的CSS样式
         background: linear-gradient(180deg, #5662e1 0%, #614793 100%);
         font-size: 15px;
         color: #fff;
         height: 80rpx;
         width: 208rpx;
+        border-radius: 40rpx;
+        border: none;
+        box-shadow: 0 4rpx 16rpx rgba(86, 98, 225, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        &:hover {
+          transform: translateY(-2rpx);
+          box-shadow: 0 6rpx 20rpx rgba(86, 98, 225, 0.4);
+        }
+        // #endif
+
+        // #ifdef APP-PLUS
+        // APP端：使用nvue兼容的样式
+        background-color: #5662e1;
+        font-size: 15px;
+        color: #fff;
+        height: 80rpx;
+        width: 208rpx;
+        border-radius: 40rpx;
+        // #endif
+
         &:first-child {
           margin-right: 10rpx;
         }
