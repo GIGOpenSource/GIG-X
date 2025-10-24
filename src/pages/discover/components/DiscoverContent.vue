@@ -347,5 +347,9 @@ const onInsufficientCoinDialogConfirm = () => {
 
 .content-list {
   padding: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: space-between;
 }
 </style>
