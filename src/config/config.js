@@ -7,5 +7,5 @@ console.log = develop ? console.log : () => {};
 console.info = develop ? console.info : () => {};
 
 export {
-	host
+    host
 }

@@ -27,7 +27,9 @@
         :userId="
           isBack
             ? uni.getStorageSync('otherId')
-            : uni.getStorageSync('user_info').user_id
+            : uni.getStorageSync('user_info')?.user_id ||
+              uni.getStorageSync('user_info')?.id ||
+              0
         "
       />
       <vip v-if="!isBack && personInfo.is_vip" />
@@ -66,13 +68,25 @@
 </template>
 
 <script setup>
-	import { onShow } from "@dcloudio/uni-app";
+import { onShow } from "@dcloudio/uni-app";
 import { ref, reactive, onMounted } from "vue";
 import userinfo from "./userinfo.vue";
 import vip from "./vip.vue";
 import { userinfoStore } from "@/store/userinfos";
 import { onPullDownRefresh } from "@dcloudio/uni-app";
-const { personInfo } = userinfoStore();
+// #ifdef H5
+import { storeToRefs } from "pinia";
+// #endif
+const store = userinfoStore();
+// 平台区分处理 - APP端和H5端使用不同的方式获取数据
+// #ifdef H5
+const { personInfo } = storeToRefs(store);
+// #endif
+
+// #ifdef APP-PLUS
+// APP端：直接使用store实例的属性
+const personInfo = ref(store.personInfo || {});
+// #endif
 
 const props = defineProps({
   isBack: {
@@ -112,8 +126,8 @@ onMounted(() => {
   }
 });
 onShow(() => {
-	console.log(personInfo,'personInfo')
-})
+  console.log(personInfo, "personInfo");
+});
 onPullDownRefresh(() => {
   if (current.value == 0) {
     act.value.page = 1;

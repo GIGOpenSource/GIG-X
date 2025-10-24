@@ -35,7 +35,7 @@ defineProps({
 
 <style lang="scss">
 .card-view {
-  width: 340rpx;
+  width: 320rpx;
   padding-bottom: 10rpx;
   border-radius: 20rpx;
   background-color: rgba(255, 255, 255, 0.03);
@@ -52,6 +52,7 @@ defineProps({
     display: -webkit-box; //作为弹性伸缩盒子模型显示。
     -webkit-box-orient: vertical; //设置伸缩盒子的子元素排列方式--从上到下垂直排列
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .auther {
