@@ -18,7 +18,7 @@
     </up-navbar>
     <!-- 作品 -->
     <view class="content">
-      <active1
+      <active
         :isList="false"
         :more="false"
         :isPath="true"
