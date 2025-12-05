@@ -121,6 +121,7 @@
               @showVipDialog="handleShowVipDialog"
               @showCoinDialog="handleShowCoinDialog"
               @showInsufficientCoinDialog="handleShowInsufficientCoinDialog"
+              @checkVipPermission="handleCheckVipPermission"
             ></videoMenu>
 
             <!-- 全屏观看 -->

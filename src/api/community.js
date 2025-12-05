@@ -76,8 +76,28 @@ export const createVideo = (params) => {
 
 //购买动态(金币)
 export const purchase = (params) => {
-	return postRequest(`/comments/v1/${params.id}/purchase/`, params)
+	return postRequest(`/comments/v2/${params.id}/purchase/`, params)
 }
+
+//购买视频(金币) - 首页和发现页专用
+export const purchaseVideo = (params) => {
+    // 平台区分：APP与H5提交方式区分处理
+    // #ifdef APP-PLUS
+    // APP：仅通过路径参数提交，body置空，兼容服务端实现
+    return postRequest(`/comments/v1/${params.id}/purchase/`, {})
+    // #endif
+    // #ifndef APP-PLUS
+    // H5：与后端约定使用JSON参数
+    return postRequest(`/comments/v1/${params.id}/purchase/`, params)
+    // #endif
+}
+
+//获取子评论
+export const childrenComment = (params) => {
+	return getRequest('/comments/v1/all-children-by-parent/', params)
+}
+
+
 
 
 

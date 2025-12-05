@@ -128,6 +128,13 @@ export default {
 				this.pageList[this.tabIndex].showPlay();
 			}
 		});
+		// 通知子组件刷新用户信息（VIP、金币等）
+		try {
+			console.log('index.nvue onShow -> emit refresh-userinfo');
+			uni.$emit('refresh-userinfo');
+		} catch (e) {
+			console.error('emit refresh-userinfo 失败', e);
+		}
 	},
 	onHide() {
 		// this.commentVisible = false

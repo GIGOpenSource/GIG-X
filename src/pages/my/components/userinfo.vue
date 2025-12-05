@@ -75,7 +75,7 @@ onShow(() => {
       id: props.userId,
     })
     .then(() => {
-      console.log("userinfo组件获取用户信息成功:", personInfo);
+      console.log("userinfo组件获取用户信息成功:", personInfo.value);
     })
     .catch((error) => {
       console.error("userinfo组件获取用户信息失败:", error);

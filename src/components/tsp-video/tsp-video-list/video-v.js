@@ -1303,6 +1303,11 @@ export default {
 		console.log("video-v.js 转发金币不足弹窗请求:", data);
 		this.$emit("showInsufficientCoinDialog", data);
 	},
+	/* 处理VIP权限检查请求 */
+	handleCheckVipPermission(data) {
+		console.log("video-v.js 转发VIP权限检查请求:", data);
+		this.$emit("checkVipPermission", data);
+	},
 	/* 更新视频评论数量 */
 	updateVideoCommentCount(videoId, commentCount) {
 		this.totalPlayList.filter((item, index) => {

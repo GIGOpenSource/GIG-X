@@ -38,7 +38,7 @@
     <!-- 标签 -->
     <view class="tags">
       <view v-for="(item, index) in detail.tags || []" :key="index"
-        >#{{ item }}</view
+        >#{{ item.name || item }}</view
       >
     </view>
 

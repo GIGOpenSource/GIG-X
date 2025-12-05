@@ -86,7 +86,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, computed, nextTick, onActivated } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import DiscoverContent from "./components/DiscoverContent.vue";
 import { getCategories } from "@/api/public.js";
 
@@ -254,6 +255,20 @@ const handleSearchClick = () => {
 onMounted(() => {
   console.log("=== discover页面挂载 ===");
   loadSubCategories();
+});
+
+// 页面显示时刷新用户信息（每次进入都调用）
+onShow(() => {
+  console.log("=== discover页面显示 (onShow) ===");
+  console.log("discover页面 onShow -> emit refresh-userinfo");
+  uni.$emit("refresh-userinfo");
+});
+
+// 页面激活时刷新用户信息（用于keep-alive场景）
+onActivated(() => {
+  console.log("=== discover页面激活 (onActivated) ===");
+  console.log("discover页面 onActivated -> emit refresh-userinfo");
+  uni.$emit("refresh-userinfo");
 });
 </script>
 

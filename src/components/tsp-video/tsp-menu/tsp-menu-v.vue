@@ -282,73 +282,46 @@ export default {
         : "";
     },
   },
-  methods: {
-    /* VIP权限检查 */
-    checkVipPermission(actionName) {
-      console.log(`检查${actionName}权限:`, this.item.is_vip, this.is_vip);
-      console.log(`视频购买状态:`, this.item.is_purchase);
-      console.log(`视频价格:`, this.item.price);
-
-      // 如果视频是VIP视频且用户不是VIP
-      if (this.item.is_vip && !this.is_vip) {
-        console.log(`${actionName}需要VIP权限`);
-        // 通知父组件显示VIP弹窗
-        this.$emit("showVipDialog", {
-          action: actionName,
-          videoData: this.item,
-        });
-        return false; // 没有权限
-      }
-
-      // 如果用户是VIP，但视频需要购买且用户未购买
-      if (this.item.is_vip && this.is_vip && !this.item.is_purchase) {
-        console.log(`${actionName}需要购买视频，检查金币余额`);
-        const userGoldCoin = this.userinfo.gold_coin || 0;
-        const videoPrice = this.item.price || 0;
-
-        // 判断金币是否充足
-        if (userGoldCoin >= videoPrice) {
-          console.log("金币充足，显示购买确认弹窗");
-          // 通知父组件显示金币购买弹窗（第一个设计图）
-          this.$emit("showCoinDialog", {
-            action: actionName,
-            videoData: this.item,
-          });
-        } else {
-          console.log("金币不足，显示充值提示弹窗");
-          // 通知父组件显示金币不足弹窗（第二个设计图）
-          this.$emit("showInsufficientCoinDialog", {
-            action: actionName,
-            videoData: this.item,
-          });
-        }
-        return false; // 需要购买
-      }
-
-      return true; // 有权限
+  watch: {
+    item: {
+      handler(newVal, oldVal) {
+        console.log("菜单组件 - item prop 变化:", newVal);
+        console.log("菜单组件 - 新的is_purchase状态:", newVal?.is_purchase);
+        console.log("菜单组件 - 新的is_vip状态:", newVal?.is_vip);
+      },
+      deep: true,
+      immediate: true,
     },
+  },
+  methods: {
     /* 视频点赞动效 */
     fabulousBtn(index) {
-      // 检查VIP权限
-      if (!this.checkVipPermission("点赞")) {
-        return;
-      }
-      let obj = Object.assign({}, this.item);
-      obj.fabulousShow = !obj.fabulousShow;
-      this.likeeffect = obj.fabulousShow;
-      if (obj.fabulousShow) {
-        obj.likeCount = (obj.likeCount || 0) + 1;
-      } else {
-        obj.likeCount = Math.max((obj.likeCount || 0) - 1, 0);
-      }
-      contentLike(this.item.id)
-        .then((res) => {
-          console.log("点赞成功");
-          this.$emit("handleInfo", obj); //点赞成功
-        })
-        .catch((err) => {
-          console.log("点赞失败");
-        });
+      // 通过APP端进行VIP权限检查
+      this.$emit("checkVipPermission", {
+        videoData: this.item,
+        actionType: "点赞",
+        callback: (hasPermission) => {
+          if (hasPermission) {
+            // 有权限，执行点赞操作
+            let obj = Object.assign({}, this.item);
+            obj.fabulousShow = !obj.fabulousShow;
+            this.likeeffect = obj.fabulousShow;
+            if (obj.fabulousShow) {
+              obj.likeCount = (obj.likeCount || 0) + 1;
+            } else {
+              obj.likeCount = Math.max((obj.likeCount || 0) - 1, 0);
+            }
+            contentLike(this.item.id)
+              .then((res) => {
+                console.log("点赞成功");
+                this.$emit("handleInfo", obj); //点赞成功
+              })
+              .catch((err) => {
+                console.log("点赞失败");
+              });
+          }
+        },
+      });
     },
     /* 关注动效 */
     followBtn(index) {
@@ -379,27 +352,33 @@ export default {
     },
     /** 收藏特效 */
     collectionBtn(index) {
-      // 检查VIP权限
-      if (!this.checkVipPermission("收藏")) {
-        return;
-      }
-      let obj = Object.assign({}, this.item);
-      obj.collectionShow = !obj.collectionShow;
-      this.collectionShow = obj.collectionShow;
+      // 通过APP端进行VIP权限检查
+      this.$emit("checkVipPermission", {
+        videoData: this.item,
+        actionType: "收藏",
+        callback: (hasPermission) => {
+          if (hasPermission) {
+            // 有权限，执行收藏操作
+            let obj = Object.assign({}, this.item);
+            obj.collectionShow = !obj.collectionShow;
+            this.collectionShow = obj.collectionShow;
 
-      if (obj.collectionShow) {
-        obj.favoriteCount = (obj.favoriteCount || 0) + 1;
-      } else {
-        obj.favoriteCount = Math.max((obj.favoriteCount || 0) - 1, 0);
-      }
+            if (obj.collectionShow) {
+              obj.favoriteCount = (obj.favoriteCount || 0) + 1;
+            } else {
+              obj.favoriteCount = Math.max((obj.favoriteCount || 0) - 1, 0);
+            }
 
-      contentCollect(this.item.id)
-        .then((res) => {
-          this.$emit("handleInfo", obj); //收藏成功
-        })
-        .catch((err) => {
-          console.log("关注失败");
-        });
+            contentCollect(this.item.id)
+              .then((res) => {
+                this.$emit("handleInfo", obj); //收藏成功
+              })
+              .catch((err) => {
+                console.log("收藏失败");
+              });
+          }
+        },
+      });
     },
     /* 点击右侧菜单选项 1头像 2评论 3转发 4旋转头像 */
     JumpBtn(index) {
@@ -416,19 +395,31 @@ export default {
           break;
         case 2:
           console.log("点击3评论");
-          // 检查VIP权限
-          if (!this.checkVipPermission("评论")) {
-            return;
-          }
-          uni.$emit("updateOpenComment", obj); //触发全局事件
+          // 通过APP端进行VIP权限检查
+          this.$emit("checkVipPermission", {
+            videoData: this.item,
+            actionType: "评论",
+            callback: (hasPermission) => {
+              if (hasPermission) {
+                // 有权限，执行评论操作
+                uni.$emit("updateOpenComment", obj); //触发全局事件
+              }
+            },
+          });
           break;
         case 3:
           console.log("点击4转发");
-          // 检查VIP权限
-          if (!this.checkVipPermission("转发")) {
-            return;
-          }
-          uni.$emit("updateOpenForward", obj); //触发全局事件
+          // 通过APP端进行VIP权限检查
+          this.$emit("checkVipPermission", {
+            videoData: this.item,
+            actionType: "转发",
+            callback: (hasPermission) => {
+              if (hasPermission) {
+                // 有权限，执行转发操作
+                uni.$emit("updateOpenForward", obj); //触发全局事件
+              }
+            },
+          });
           break;
         case 4:
           console.log("5旋转头像");

@@ -34,6 +34,11 @@ export const contentCommentList= (params) => {
 	return getRequest('/comments/v1/', params)
 }
 
+// 获取评论的回复列表
+export const getCommentReplies = (params) => {
+	return getRequest('/comments/v1/all-children-by-parent/', params)
+}
+
 // 内容评论
 export const addContentComment= (params) => {
 	return postRequest('/comments/v1/', params)

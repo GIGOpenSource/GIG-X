@@ -22,10 +22,10 @@ let currentToken = uni.getStorageSync('token') || '';
 let httpConfig;
 
 // #ifdef APP-PLUS
-// APP端：使用form格式
+// APP端：使用JSON格式（与H5端保持一致）
 httpConfig = {
 	header: {
-		'Content-Type': "application/x-www-form-urlencoded",
+		'Content-Type': "application/json",
 		'Authorization': 'Token ' + currentToken,
 		'is-dev': 'true'
 	},
@@ -107,17 +107,16 @@ function executeRequest(url, params, other) {
 				other.timer = null;
 			}, other.loadingTime);
 		}
-		// 平台区分处理 - 不同的数据格式
+		// 根据Content-Type决定数据格式
 		let requestData = params;
-		// #ifdef APP-PLUS
-		// APP端：将JSON对象转换为URL编码格式
+		
+		// 如果Content-Type是form-urlencoded，需要转换数据格式
 		if (other.header['Content-Type'] === 'application/x-www-form-urlencoded') {
 			requestData = Object.keys(params).map(key => 
 				encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
 			).join('&');
-			console.log('APP端：转换后的form数据:', requestData);
+			console.log('转换为form-urlencoded格式:', requestData);
 		}
-		// #endif
 		
 		// 检查是否是登录接口，添加特殊处理
 		if (url.includes('auth/login')) {
@@ -127,6 +126,15 @@ function executeRequest(url, params, other) {
 			console.log('登录请求数据:', requestData);
 			console.log('=====================================');
 		}
+		
+		// 打印所有请求的URL信息
+		console.log('=== HTTP请求信息 ===');
+		console.log('完整URL:', host + url);
+		console.log('请求方法:', other.method);
+		console.log('Content-Type:', other.header['Content-Type']);
+		console.log('请求头:', other.header);
+		console.log('请求数据:', requestData);
+		console.log('==================');
 		
 		uni.request({
 				// #ifdef APP-PLUS
@@ -141,6 +149,7 @@ function executeRequest(url, params, other) {
 			sslVerify: false,
 			timeout: other.timeout,
 			complete: data => {
+				console.log('host + url:', host + url);
 				console.log('params:', params);
 				console.log('requestData:', requestData);
 				
@@ -164,8 +173,11 @@ function executeRequest(url, params, other) {
 								console.log('检测到 auth/users 接口响应，更新用户信息');
 								try {
 									const store = userinfoStore();
-									store.userinfo = data.data.data;
-									console.log('用户信息已自动更新:', data.data.data);
+									// 合并更新，而不是直接覆盖，保留关键字段
+									store.userinfo = { ...store.userinfo, ...data.data.data };
+									// 同时更新本地存储
+									uni.setStorageSync('userinfos_userinfo', store.userinfo);
+									console.log('用户信息已自动更新:', store.userinfo);
 								} catch (error) {
 									console.error('更新用户信息失败:', error);
 								}
@@ -212,13 +224,20 @@ function executeRequest(url, params, other) {
 					isLoginRequesting = true;
 					console.log('开始自动登录...');
 
-					// 使用固定的简单登录参数
+					// 动态获取登录参数
+					const stored_username = uni.getStorageSync("guid_name");
+					const stored_password = uni.getStorageSync("guid_password");
+					
+					// 生成随机用户名和密码作为备用
+					const guid_name = "user_" + Math.random().toString(36).substr(2, 9);
+					const guid_password = "pass_" + Math.random().toString(36).substr(2, 9);
+					
 					const loginParams = {
-						username: "11111",
-						password: "22222"
+						username: stored_username || guid_name,
+						password: stored_password || guid_password
 					};
 					
-					console.log('自动登录使用固定参数:', loginParams);
+					console.log('自动登录使用动态参数:', loginParams);
 					
 					console.log('自动登录参数:', loginParams);
 
@@ -442,7 +461,19 @@ function request(url, params, other) {
 }
 
 function getRequest(url, params = {}, other = {}) {
-	return request(url, params, {
+	// 将GET请求的参数转换为查询字符串
+	let fullUrl = url;
+	if (params && Object.keys(params).length > 0) {
+		const queryString = Object.keys(params)
+			.map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+			.join('&');
+		
+		// 如果URL已经有查询参数，用&连接；否则用?连接
+		const connector = url.includes('?') ? '&' : '?';
+		fullUrl = url + connector + queryString;
+	}
+	
+	return request(fullUrl, {}, {
 		...other,
 		method: 'GET'
 	})

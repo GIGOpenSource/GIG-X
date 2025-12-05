@@ -107,7 +107,7 @@ import {
   getContentsByUser,
   followUser,
 } from "@/api/common";
-import { purchase } from "@/api/community.js";
+import { purchaseVideo } from "@/api/community.js";
 import { userinfoStore } from "@/store/userinfos.js";
 import { computed, ref } from "vue";
 
@@ -568,11 +568,13 @@ export default {
     },
     /* VIP权限检查 */
     checkVipPermission(videoData, actionType = "play") {
+      console.log("=== VIP权限检查开始 ===");
       console.log("检查VIP权限:", videoData, "操作类型:", actionType);
       console.log("视频is_vip:", videoData?.is_vip);
       console.log("视频is_purchase:", videoData?.is_purchase);
       console.log("视频price:", videoData?.price);
       console.log("用户is_vip:", this.is_vip);
+      console.log("视频ID:", videoData?.id);
 
       // 如果视频不是VIP视频，直接允许操作
       if (videoData && !videoData.is_vip) {
@@ -631,6 +633,7 @@ export default {
       }
 
       console.log("用户有权限");
+      console.log("=== VIP权限检查结束 ===");
       return true; // 有权限
     },
     /* VIP弹窗取消 */
@@ -670,8 +673,27 @@ export default {
       console.log("收到VIP权限检查请求:", data);
       const { videoData, actionType, callback } = data;
 
+      // 从totalPlayList中获取最新的视频数据
+      let latestVideoData = videoData;
+      if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
+        const latestData = this.$refs.videoGroup.totalPlayList.find(
+          (item) => item.id === videoData.id
+        );
+        if (latestData) {
+          latestVideoData = latestData;
+          console.log("使用最新的视频数据:", latestVideoData);
+          console.log(
+            "最新数据的is_purchase状态:",
+            latestVideoData.is_purchase
+          );
+        }
+      }
+
       // 检查VIP权限
-      const hasPermission = this.checkVipPermission(videoData, actionType);
+      const hasPermission = this.checkVipPermission(
+        latestVideoData,
+        actionType
+      );
 
       // 调用回调函数返回结果
       if (callback && typeof callback === "function") {
@@ -688,23 +710,35 @@ export default {
       console.log("确认购买视频，花费金币:", this.currentVideoData?.price);
 
       // 调用购买接口
-      purchase({
+      purchaseVideo({
         id: this.currentVideoData?.id,
       })
         .then((res) => {
           console.log("购买成功:", res);
           this.showCoinDialog = false;
 
-          // 购买成功后更新视频的 is_purchase 状态
-          if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
-            const videoIndex = this.$refs.videoGroup.totalPlayList.findIndex(
-              (item) => item.id === this.currentVideoData?.id
-            );
-            if (videoIndex !== -1) {
-              this.$refs.videoGroup.totalPlayList[
-                videoIndex
-              ].is_purchase = true;
-            }
+          // 购买成功后重新获取视频数据
+          this.refreshVideoData(this.currentVideoData?.id)
+            .then(() => {
+              console.log("视频数据已刷新，购买状态已更新");
+            })
+            .catch((err) => {
+              console.error("刷新视频数据失败:", err);
+            });
+
+          // 刷新用户信息，更新金币余额
+          const userId = this.store.userinfo.id;
+          if (userId) {
+            this.store
+              .getUserinfo({ id: userId })
+              .then(() => {
+                console.log("用户信息已刷新，金币余额已更新");
+              })
+              .catch((err) => {
+                console.error("刷新用户信息失败:", err);
+              });
+          } else {
+            console.error("用户ID不存在，无法刷新用户信息");
           }
 
           // 显示成功提示
@@ -739,6 +773,109 @@ export default {
       });
       console.log("跳转到充值页面");
       this.currentVideoData = null;
+    },
+    /* 刷新视频数据 - 购买成功后调用 */
+    refreshVideoData(videoId) {
+      if (!videoId) return Promise.resolve();
+
+      console.log("开始刷新视频数据，视频ID:", videoId);
+
+      return contentList({ id: videoId })
+        .then((res) => {
+          console.log("刷新视频数据响应:", res);
+
+          if (res.code === 200 && res.data) {
+            // 检查返回的数据是数组还是对象
+            let updatedVideoData;
+            if (Array.isArray(res.data)) {
+              // 如果是数组，查找对应的视频
+              updatedVideoData = res.data.find((item) => item.id === videoId);
+              console.log("从数组中查找视频数据:", updatedVideoData);
+            } else if (res.data.results && Array.isArray(res.data.results)) {
+              // 如果data.results是数组，从results中查找
+              updatedVideoData = res.data.results.find(
+                (item) => item.id === videoId
+              );
+              console.log("从results数组中查找视频数据:", updatedVideoData);
+            } else {
+              // 如果是对象，直接使用
+              updatedVideoData = res.data;
+            }
+
+            if (updatedVideoData) {
+              console.log("获取到最新的视频数据:", updatedVideoData);
+              console.log(
+                "更新后的is_purchase状态:",
+                updatedVideoData.is_purchase
+              );
+
+              // 更新视频列表中的数据
+              if (
+                this.$refs.videoGroup &&
+                this.$refs.videoGroup.totalPlayList
+              ) {
+                const videoIndex =
+                  this.$refs.videoGroup.totalPlayList.findIndex(
+                    (item) => item.id === videoId
+                  );
+                console.log("找到视频索引:", videoIndex);
+
+                if (videoIndex !== -1) {
+                  console.log(
+                    "更新前的视频数据:",
+                    this.$refs.videoGroup.totalPlayList[videoIndex]
+                  );
+
+                  // 更新整个视频对象 - 使用更彻底的响应式更新
+                  this.$set(
+                    this.$refs.videoGroup.totalPlayList,
+                    videoIndex,
+                    updatedVideoData
+                  );
+
+                  // 额外确保响应式更新 - 重新创建整个数组
+                  this.$nextTick(() => {
+                    const newList = [...this.$refs.videoGroup.totalPlayList];
+                    newList[videoIndex] = { ...updatedVideoData };
+                    this.$refs.videoGroup.totalPlayList = newList;
+                    console.log("已通过重新创建数组更新数据");
+                  });
+
+                  console.log(
+                    "更新后的视频数据:",
+                    this.$refs.videoGroup.totalPlayList[videoIndex]
+                  );
+                  console.log(
+                    "更新后的is_purchase状态:",
+                    this.$refs.videoGroup.totalPlayList[videoIndex].is_purchase
+                  );
+
+                  // 强制更新组件
+                  this.$forceUpdate();
+                  console.log("已强制更新组件");
+
+                  // 强制重新渲染视频组件
+                  if (this.$refs.videoGroup) {
+                    this.$refs.videoGroup.$forceUpdate();
+                    console.log("已强制更新视频组件");
+                  }
+                } else {
+                  console.error("未找到对应的视频索引");
+                }
+              } else {
+                console.error("videoGroup或totalPlayList不存在");
+              }
+            } else {
+              console.error("未找到对应的视频数据，视频ID:", videoId);
+            }
+          } else {
+            console.error("刷新视频数据失败，响应码:", res.code);
+          }
+        })
+        .catch((error) => {
+          console.error("刷新视频数据失败:", error);
+          throw error;
+        });
     },
     /* 处理推荐用户关注 */
     async handleFollowUser(user) {

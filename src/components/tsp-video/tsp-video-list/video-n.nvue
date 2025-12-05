@@ -76,6 +76,7 @@
 									:moveOpacity="moveOpacity"
 									:style="{ width: videoStyle.width, height: videoStyle.height }"
 									@fabulousBtn="fabulousBtn"
+									@checkVipPermission="handleCheckVipPermission"
 								></videoMenu>
 							</view>
 						</view>

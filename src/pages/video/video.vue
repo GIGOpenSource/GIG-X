@@ -47,28 +47,6 @@
     ></up-tabs>
     <!-- 顶部内容结束 -->
 
-    <!-- 底部内容 -->
-    <view class="comment-btn" v-show="currentTab === 1">
-      <up-input
-        placeholder="输入评论内容"
-        border="surround"
-        shape="circle"
-        :customStyle="{
-          backgroundColor: '#fff',
-        }"
-        v-model="commenValue"
-      ></up-input>
-
-      <up-button
-        text="发表"
-        shape="circle"
-        class="custom-style"
-        :disabled="commenValue === ''"
-        @click="publish"
-      ></up-button>
-    </view>
-    <!-- 底部内容结束 -->
-
     <!-- 简介 -->
     <introduction
       v-show="currentTab === 0"
@@ -81,17 +59,39 @@
       v-show="currentTab === 1"
       :id="id"
       ref="commentRef"
+      class="comment-page"
     ></comment-page>
 
     <!-- 转发弹窗 -->
     <forwardMenu v-model="showForward" :forwardInfo="commentInfo"></forwardMenu>
   </scroll-view>
+
+  <!-- 固定在底部的评论输入框 -->
+  <view class="comment-btn" v-show="currentTab === 1">
+    <up-input
+      placeholder="输入评论内容"
+      border="surround"
+      shape="circle"
+      :customStyle="{
+        backgroundColor: '#fff',
+      }"
+      v-model="commenValue"
+    ></up-input>
+
+    <up-button
+      text="发表"
+      shape="circle"
+      class="custom-style"
+      :disabled="commenValue === ''"
+      @click="publish"
+    ></up-button>
+  </view>
 </template>
 
 <script setup>
 import { reactive, ref } from "vue";
 
-import { onReady, onLoad } from "@dcloudio/uni-app";
+import { onReady, onLoad, onShow } from "@dcloudio/uni-app";
 
 import videoPlayer from "@/components/video-player/index.vue";
 import advertisement from "@/components/advertisement/advertisement.vue";
@@ -128,6 +128,11 @@ onLoad((options) => {
   id.value = options.id;
   // 获取视频数据
   queryList();
+});
+
+onShow(() => {
+  console.log("video页面显示，触发refresh-userinfo事件");
+  uni.$emit("refresh-userinfo");
 });
 
 const currentTab = ref(0);
@@ -235,10 +240,17 @@ const publish = async () => {
 
 <style lang="scss" scoped>
 .comment-btn {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   padding: 24rpx 30rpx;
   background: linear-gradient(175.26deg, #311f4f 14.46%, #1e1b33 122.11%);
   display: flex;
   align-items: center;
+  z-index: 999;
+  /* 添加安全区域适配 */
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
 
   .u-input--circle {
     padding: 3px 20rpx !important;
@@ -262,5 +274,9 @@ const publish = async () => {
   color: #fff;
   border: none;
   margin-left: 20rpx;
+}
+
+.comment-page {
+  padding-bottom: 120rpx; /* 为固定的输入框留出空间 */
 }
 </style>

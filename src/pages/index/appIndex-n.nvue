@@ -54,59 +54,61 @@
 		></tw-videov>
 		<!-- #endif -->
 
-		<!-- VIP权限弹窗 -->
-		<Dialog
-			v-model="showVipDialog"
-			:cancelText="'取消'"
-			:confirmText="'去开通'"
-			:closeOnClickMask="false"
-			@cancel="onVipDialogCancel"
-			@confirm="onVipDialogConfirm"
-			@close="onVipDialogCancel"
-		>
-			<template #title>VIP视频</template>
-			<template #tip>此视频为VIP视频,请开通VIP后观看</template>
-		</Dialog>
+	<!-- VIP权限弹窗 -->
+	<Dialog
+		v-model="showVipDialog"
+		:cancelText="'取消'"
+		:confirmText="'去开通'"
+		:closeOnClickMask="false"
+		title="VIP视频"
+		message="此视频为VIP视频,请开通VIP后观看"
+		@cancel="onVipDialogCancel"
+		@confirm="onVipDialogConfirm"
+		@close="onVipDialogCancel"
+	></Dialog>
 
-		<!-- 金币购买弹窗 -->
-		<Dialog
-			v-model="showCoinDialog"
-			:cancelText="'取消'"
-			:confirmText="'确定'"
-			:closeOnClickMask="false"
-			@cancel="onCoinDialogCancel"
-			@confirm="onCoinDialogConfirm"
-			@close="onCoinDialogCancel"
-		>
-			<template #title>金币视频</template>
-			<template #tip>
-				<text
-					>此视频为金币视频,是否花费{{
-						currentVideoData?.price || 0
-					}}个金币</text
-				>
-			</template>
-		</Dialog>
+		<!-- 评论弹窗 -->
+		<comment-popup 
+			ref="commentRef" 
+			v-model="commentVisible" 
+			:commentInfo="commentInfo" 
+			:tabBarShow="0"
+			:tabBarHeight="60"
+			@submitComment="submitComment" 
+			@updateCommentCount="handleCommentCountUpdate" 
+		/>
 
-		<!-- 金币不足弹窗 -->
-		<Dialog
-			v-model="showInsufficientCoinDialog"
-			:cancelText="'取消'"
-			:confirmText="'去充值'"
-			:closeOnClickMask="false"
-			@cancel="onInsufficientCoinDialogCancel"
-			@confirm="onInsufficientCoinDialogConfirm"
-			@close="onInsufficientCoinDialogCancel"
-		>
-			<template #title>金币不足</template>
-			<template #tip>
-				<text
-					>此视频为金币视频,您的金币不足,需充值{{
-						(currentVideoData?.price || 0) - (store.userinfo.gold_coin || 0)
-					}}金币</text
-				>
-			</template>
-		</Dialog>
+		<!-- 转发弹窗 -->
+		<forwardMenu 
+			v-model="showForward" 
+			:forwardInfo="commentInfo"
+		></forwardMenu>
+
+	<!-- 金币购买弹窗 -->
+	<Dialog
+		v-model="showCoinDialog"
+		:cancelText="'取消'"
+		:confirmText="'确定'"
+		:closeOnClickMask="false"
+		title="金币视频"
+		:message="`此视频为金币视频,是否花费${currentVideoData?.price || 0}个金币`"
+		@cancel="onCoinDialogCancel"
+		@confirm="onCoinDialogConfirm"
+		@close="onCoinDialogCancel"
+	></Dialog>
+
+	<!-- 金币不足弹窗 -->
+	<Dialog
+		v-model="showInsufficientCoinDialog"
+		:cancelText="'取消'"
+		:confirmText="'去充值'"
+		:closeOnClickMask="false"
+		title="金币不足"
+		:message="`此视频为金币视频,您的金币不足,需充值${(currentVideoData?.price || 0) - (store.userinfo.gold_coin || 0)}金币`"
+		@cancel="onInsufficientCoinDialogCancel"
+		@confirm="onInsufficientCoinDialogConfirm"
+		@close="onInsufficientCoinDialogCancel"
+	></Dialog>
 
 		<!-- <view class="automatic">
 			<text class="automatic-item" @click="openAutomatic">{{nextPlay?'关闭自动播放':'开启自动播放'}}</text>
@@ -130,6 +132,8 @@ import twVideov from '@/components/tsp-video/tsp-video-list/video-v.vue';
 
 import Dialog from "@/components/DialogNvue.vue";
 import RecommendUsers from "@/components/recommend-users/RecommendUsers.vue";
+import commentPopup from '@/components/tsp-video/comment/comment-popup.vue';
+import forwardMenu from '@/components/tsp-video/forward-menu/forward-menu.vue';
 import { getVodData } from '@/static/js/vodData.js';
 import { getContentList } from '@/api/content';
 import {
@@ -138,10 +142,11 @@ import {
   getRecommendTagUsers,
   getContentsByUser,
   followUser,
+  addContentComment,
 } from "@/api/common";
-import { purchase } from "@/api/community.js";
+import { purchaseVideo } from "@/api/community";
 import { userinfoStore } from "@/store/userinfos.js";
-import { computed, ref } from "vue";
+import { computed, ref, watch, onMounted, onActivated, onUnmounted } from "vue";
 
 export default {
 	components: {
@@ -154,6 +159,8 @@ export default {
 		// #endif
 		Dialog,
 		RecommendUsers,
+		commentPopup,
+		forwardMenu,
 	},
 	props: {
 		/* 多个tab视频时需传入不同的类型id */
@@ -179,11 +186,149 @@ export default {
 	},
 	setup() {
 		const store = userinfoStore();
-		const is_vip = computed(() => store.userinfo.is_vip);
+		// 在nvue中，computed可能不够响应，直接使用ref
+		const is_vip = ref(store.userinfo.is_vip || false);
 		const showVipDialog = ref(false);
 		const showCoinDialog = ref(false);
 		const showInsufficientCoinDialog = ref(false);
 		const currentVideoData = ref(null);
+		
+		// 评论相关数据
+		const commentVisible = ref(false); //是否显示评论弹窗
+		const commentInfo = ref({});
+		const openVodCommentIndex = ref(null); //已经打开视频评论加载的下标
+		const showForward = ref(false); //是否显示转发弹窗
+
+		// 数据就绪状态与挂起的权限检查
+		const userinfoReady = ref(false);
+		const videosReady = ref(false);
+		const pendingVipCheck = ref(null);
+		const pendingDialogSwitch = ref(null);
+
+		const processPendingVipCheck = () => {
+			if (userinfoReady.value && videosReady.value && pendingVipCheck.value) {
+				const { videoData, actionType, callback } = pendingVipCheck.value;
+				pendingVipCheck.value = null;
+				// 调用组件方法进行权限检查
+				// @ts-ignore
+				const result = typeof checkVipPermission === 'function' ? checkVipPermission(videoData, actionType) : true;
+				if (callback && typeof callback === 'function') callback(result);
+			}
+		};
+
+		const processPendingDialogSwitch = () => {
+			if (userinfoReady.value && pendingDialogSwitch.value) {
+				const { videoId, price } = pendingDialogSwitch.value;
+				pendingDialogSwitch.value = null;
+				const coins = Number((store.userinfo && store.userinfo.gold_coin) || 0);
+				console.log('处理挂起的弹窗切换，视频ID:', videoId, '价格:', price, '当前金币:', coins);
+				
+				if (coins >= price) {
+					console.log('金币已充足，自动展示购买确认弹窗');
+					// 直接操作ref
+					showInsufficientCoinDialog.value = false;
+					showVipDialog.value = false;
+					showCoinDialog.value = true;
+					console.log('弹窗状态已更新 - showInsufficientCoinDialog:', showInsufficientCoinDialog.value, 'showCoinDialog:', showCoinDialog.value);
+				} else {
+					console.log('金币仍不足，保持充值提示弹窗逻辑');
+				}
+			}
+		};
+
+		// 刷新用户信息的方法
+		const refreshUserInfo = async () => {
+			console.log("=== refreshUserInfo 开始执行 ===");
+			try {
+				// 获取用户ID
+				const userId = store.userinfo.id;
+				if (!userId) {
+					console.error("用户ID不存在，无法刷新用户信息");
+					return;
+				}
+				
+				console.log("准备调用API获取用户信息，用户ID:", userId);
+				
+				// 直接调用API接口，不经过store缓存
+				const { getUserinfo } = await import('@/api/public.js');
+				const res = await getUserinfo({ id: userId });
+				
+				console.log("API调用结果:", res);
+				
+				if (res && res.data) {
+					console.log("从服务器获取到最新的用户信息:", res.data);
+					console.log("最新的VIP状态:", res.data.is_vip, "最新金币:", res.data.gold_coin);
+					
+					// 更新store中的用户信息
+					store.userinfo = { ...store.userinfo, ...res.data };
+					
+					// 更新本地存储
+					uni.setStorageSync('userinfos_userinfo', store.userinfo);
+					
+					console.log("用户信息已更新 - VIP状态:", store.userinfo.is_vip, "金币:", store.userinfo.gold_coin);
+				}
+			} catch (err) {
+				console.error("刷新用户信息失败:", err);
+			}
+			console.log("=== refreshUserInfo 执行结束 ===");
+			userinfoReady.value = true;
+			processPendingVipCheck();
+			processPendingDialogSwitch();
+		};
+
+		// 监听store的变化，同步更新is_vip
+		watch(() => store.userinfo, (newVal) => {
+			is_vip.value = newVal?.is_vip || false;
+			console.log('store.userinfo更新，is_vip同步为:', is_vip.value);
+		}, { deep: true, immediate: true });
+
+		// 组件挂载时刷新用户信息
+		onMounted(() => {
+			console.log("=== setup onMounted 执行 ===");
+			console.log("准备调用 refreshUserInfo");
+			refreshUserInfo();
+			// 监听来自父页面的刷新事件
+			uni.$on('refresh-userinfo', async () => {
+				console.log('收到refresh-userinfo事件，等待接口返回后再切换弹窗');
+				// 检查是否有待切换弹窗的记录
+				const pending = uni.getStorageSync('pending_purchase');
+				if (pending && pending.videoId) {
+					console.log('发现待切换弹窗记录，挂起等待接口返回');
+					pendingDialogSwitch.value = {
+						videoId: pending.videoId,
+						price: pending.price
+					};
+					uni.removeStorageSync('pending_purchase');
+				}
+				await refreshUserInfo();
+			});
+		});
+
+		// 组件激活时刷新用户信息（用于页面切换回来时）
+		onActivated(async () => {
+			console.log("=== setup onActivated 执行 ===");
+			console.log("准备调用 refreshUserInfo");
+			try {
+				// 检查是否有待切换弹窗的记录
+				const pending = uni.getStorageSync('pending_purchase');
+				if (pending && pending.videoId) {
+					console.log('onActivated发现待切换弹窗记录，挂起等待接口返回');
+					pendingDialogSwitch.value = {
+						videoId: pending.videoId,
+						price: pending.price
+					};
+					uni.removeStorageSync('pending_purchase');
+				}
+				await refreshUserInfo();
+			} catch(e) {
+				console.warn('onActivated 刷新与回流检查失败:', e);
+			}
+		});
+
+		// 组件卸载时移除事件监听
+		onUnmounted(() => {
+			uni.$off('refresh-userinfo', refreshUserInfo);
+		});
 
 		return {
 			store,
@@ -192,6 +337,15 @@ export default {
 			showCoinDialog,
 			showInsufficientCoinDialog,
 			currentVideoData,
+			commentVisible,
+			commentInfo,
+			openVodCommentIndex,
+			showForward,
+			refreshUserInfo, // 暴露给组件实例使用
+			userinfoReady,
+			videosReady,
+			pendingVipCheck,
+			processPendingVipCheck,
 		};
 	},
 	data() {
@@ -213,17 +367,64 @@ export default {
 		
 		// 监听视频购买成功事件
 		uni.$on("video-purchased", this.handleVideoPurchased);
+		
+		/* 监听打开评论*/
+		uni.$on('updateOpenComment', (data) => {
+			this.commentInfo = data.item;
+			this.commentVisible = true;
+			this.$nextTick(() => {
+				if (this.openVodCommentIndex != data.vodCurIndex) {
+					this.openVodCommentIndex = data.vodCurIndex;
+					this.$refs.commentRef.loadData(); //调用评论组件的加载方法
+				}
+			});
+		});
+
+		/* 监听打开转发*/
+		uni.$on('updateOpenForward', (data) => {
+			this.commentInfo = data.item;
+			this.showForward = true;
+		});
 	},
 	beforeUnmount() {
 		// 移除事件监听
 		uni.$off("video-purchased", this.handleVideoPurchased);
+		uni.$off("updateOpenComment");
+		uni.$off("updateOpenForward");
 	},
 	onShow() {
+		console.log("=== onShow 执行 ===");
+		console.log("this对象:", this);
+		console.log("this.refreshUserInfo:", this.refreshUserInfo);
+		console.log("typeof this.refreshUserInfo:", typeof this.refreshUserInfo);
+		
 		/* 播放视频 */
 		if (this.$refs.videoGroup) {
 			this.$refs.videoGroup.showPlay();
 			this.$refs.videoGroup.muteVideo(false); //取消视频播放设置为静音，解决切换到其他页面后因为网络问题还在有声音播放
 		}
+		
+		/* 每次进入首页都获取当前用户VIP状态 */
+		console.log("onShow - 开始执行refreshUserInfo");
+		if (typeof this.refreshUserInfo === 'function') {
+			console.log("refreshUserInfo方法存在，开始调用");
+			this.refreshUserInfo();
+		} else {
+			console.error("refreshUserInfo方法不存在");
+		}
+		console.log("=== onShow 执行结束 ===");
+	},
+	onPageShow() {
+		console.log("=== onPageShow 执行 ===");
+		/* 每次进入首页都获取当前用户VIP状态 */
+		console.log("onPageShow - 开始执行refreshUserInfo");
+		if (typeof this.refreshUserInfo === 'function') {
+			console.log("refreshUserInfo方法存在，开始调用");
+			this.refreshUserInfo();
+		} else {
+			console.error("refreshUserInfo方法不存在");
+		}
+		console.log("=== onPageShow 执行结束 ===");
 	},
 	onHide() {
 		/* 暂停视频 */
@@ -245,6 +446,12 @@ export default {
 					}
 				}
 			});
+			
+			// 当tab切换到当前页面时，刷新用户信息
+			if (val == this.pageIndex && this.refreshUserInfo) {
+				console.log("tabIndex变化，切换到当前页面，刷新用户信息");
+				this.refreshUserInfo();
+			}
 		},
 		tabItem: {
 			handler(newVal, oldVal) {
@@ -461,6 +668,9 @@ export default {
 								this.checkVipPermission(res[0]);
 							}
 						}, 200);
+					// 标记视频数据已就绪并尝试处理挂起的权限检查
+					this.videosReady = true;
+					if (typeof this.processPendingVipCheck === 'function') this.processPendingVipCheck();
 					});
 				}
 			});
@@ -519,10 +729,21 @@ export default {
 			this.nextPlay = !this.nextPlay;
 			this.loopPlay = this.nextPlay ? false : true;
 		},
+		/* 清除VIP限制状态 */
+		clearVipRestriction() {
+			// 清除所有VIP相关的弹窗和状态
+			this.showVipDialog = false;
+			this.showCoinDialog = false;
+			this.showInsufficientCoinDialog = false;
+			this.currentVideoData = null;
+		},
 		/* swiper切换当前视频回调 */
 		swiperChange(event) {
 			// console.log('swiper切换当前视频回调',event)
 			this.currIndex = event.videoIndex;
+
+			// 清除之前的VIP限制状态
+			this.clearVipRestriction();
 
 			// 检查当前视频的VIP权限
 			if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
@@ -596,11 +817,16 @@ export default {
 		},
 		/* VIP权限检查 */
 		checkVipPermission(videoData, actionType = "play") {
+			console.log("=== VIP权限检查开始 ===");
 			console.log("检查VIP权限:", videoData, "操作类型:", actionType);
 			console.log("视频is_vip:", videoData?.is_vip);
 			console.log("视频is_purchase:", videoData?.is_purchase);
 			console.log("视频price:", videoData?.price);
-			console.log("用户is_vip:", this.is_vip);
+			// 统一判定用户VIP，防止瞬时不同步
+			const storedVip = (uni.getStorageSync('userinfos_userinfo') || {}).is_vip === true;
+			const userIsVip = this.is_vip === true || (this.store?.userinfo?.is_vip === true) || storedVip;
+			console.log("用户is_vip:", userIsVip);
+			console.log("视频ID:", videoData?.id);
 
 			// 如果视频不是VIP视频，直接允许操作
 			if (videoData && !videoData.is_vip) {
@@ -609,7 +835,7 @@ export default {
 			}
 
 			// 如果视频是VIP视频且用户不是VIP
-			if (videoData && videoData.is_vip && !this.is_vip) {
+			if (videoData && videoData.is_vip && !userIsVip) {
 				console.log("检测到VIP视频且用户非VIP，显示弹窗");
 				this.currentVideoData = videoData;
 				this.showVipDialog = true;
@@ -625,18 +851,30 @@ export default {
 				return false; // 没有权限
 			}
 
-			// 如果用户是VIP，但视频需要购买且用户未购买
-			if (
-				videoData &&
-				this.is_vip &&
-				videoData.is_vip &&
-				!videoData.is_purchase
-			) {
-				console.log("检测到VIP用户但视频需要购买，检查金币余额");
-				const userGoldCoin = this.store.userinfo.gold_coin || 0;
-				const videoPrice = videoData.price || 0;
+		// 如果用户是VIP，但视频需要购买且用户未购买
+		// 注意：如果视频价格为0或已购买，不需要检查金币
+		const videoPrice = videoData.price || 0;
+		const isPurchased = videoData.is_purchase === true;
+		
+		console.log("VIP用户观看VIP视频 - 价格:", videoPrice, "是否已购买:", isPurchased);
+		
+		// 如果VIP用户观看VIP视频，价格为0或已购买，直接允许观看
+		if (videoData && userIsVip && videoData.is_vip) {
+			if (videoPrice === 0 || isPurchased) {
+				console.log("VIP用户观看VIP视频，价格为0或已购买，允许观看");
+				return true; // 有权限
+			}
+			
+		// 需要购买且未购买
+		if (!isPurchased && videoPrice > 0) {
+			console.log("检测到VIP用户但视频需要购买，检查金币余额");
+			const userGoldCoin = this.store.userinfo.gold_coin || 0;
+			console.log("从store获取的金币:", userGoldCoin, "store.userinfo:", this.store.userinfo);
 
 				this.currentVideoData = videoData;
+				
+				// 确保其他弹窗关闭
+				this.showVipDialog = false;
 
 				// 根据操作类型进行不同处理
 				if (actionType === "play") {
@@ -646,25 +884,33 @@ export default {
 					}
 				}
 
-				// 判断金币是否充足
-				if (userGoldCoin >= videoPrice) {
-					console.log("金币充足，显示购买确认弹窗");
-					this.showCoinDialog = true; // 第一个设计图：是否花费金币购买
-				} else {
-					console.log("金币不足，显示充值提示弹窗");
-					this.showInsufficientCoinDialog = true; // 第二个设计图：金币不足，请充值
-				}
+			// 判断金币是否充足
+			if (userGoldCoin >= videoPrice) {
+				console.log("金币充足，显示购买确认弹窗");
+				this.showInsufficientCoinDialog = false; // 确保金币不足弹窗关闭
+				this.showCoinDialog = true; // 第一个设计图：是否花费金币购买
+			} else {
+				console.log("金币不足，显示充值提示弹窗");
+				console.log("当前金币:", userGoldCoin, "视频价格:", videoPrice);
+				console.log("设置弹窗状态 - showCoinDialog: false, showInsufficientCoinDialog: true");
+				this.showCoinDialog = false; // 确保购买确认弹窗关闭
+				this.showInsufficientCoinDialog = true; // 第二个设计图：金币不足，请充值
+				console.log("弹窗状态已设置");
+			}
 
 				return false; // 需要购买
 			}
-
-			console.log("用户有权限");
-			return true; // 有权限
-		},
+		}
+	
+	console.log("用户有权限");
+	console.log("=== VIP权限检查结束 ===");
+	return true; // 有权限
+},
 		/* VIP弹窗取消 */
 		onVipDialogCancel() {
 			this.showVipDialog = false;
-			this.currentVideoData = null;
+			// 不清空currentVideoData，保持对当前VIP视频的限制状态
+			console.log("VIP弹窗取消，保持限制状态");
 		},
 		/* VIP弹窗确认 - 跳转到VIP开通页面 */
 		onVipDialogConfirm() {
@@ -674,6 +920,98 @@ export default {
 				url: "/pages/my/recharge",
 			});
 			console.log("跳转到VIP开通页面");
+		},
+		/* 刷新视频数据 - 购买成功后调用 */
+		async refreshVideoData(videoId) {
+			if (!videoId) return;
+			
+			console.log("开始刷新视频数据，视频ID:", videoId);
+			
+			try {
+				// 调用contents接口获取最新的视频数据
+				const res = await contentList({ id: videoId });
+				console.log("刷新视频数据响应:", res);
+				
+				if (res.code === 200 && res.data) {
+					// 检查返回的数据是数组还是对象
+					let updatedVideoData;
+					if (Array.isArray(res.data)) {
+						// 如果是数组，查找对应的视频
+						updatedVideoData = res.data.find(item => item.id === videoId);
+						console.log("从数组中查找视频数据:", updatedVideoData);
+					} else if (res.data.results && Array.isArray(res.data.results)) {
+						// 如果data.results是数组，从results中查找
+						updatedVideoData = res.data.results.find(item => item.id === videoId);
+						console.log("从results数组中查找视频数据:", updatedVideoData);
+					} else {
+						// 如果是对象，直接使用
+						updatedVideoData = res.data;
+					}
+
+					if (updatedVideoData) {
+						console.log("获取到最新的视频数据:", updatedVideoData);
+						console.log("更新后的is_purchase状态:", updatedVideoData.is_purchase);
+					
+					// 更新视频列表中的数据
+					if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
+						const videoIndex = this.$refs.videoGroup.totalPlayList.findIndex(
+							(item) => item.id === videoId
+						);
+						console.log("找到视频索引:", videoIndex);
+						
+						if (videoIndex !== -1) {
+							console.log("更新前的视频数据:", this.$refs.videoGroup.totalPlayList[videoIndex]);
+							
+							// 更新整个视频对象 - 使用更彻底的响应式更新
+							this.$set(this.$refs.videoGroup.totalPlayList, videoIndex, updatedVideoData);
+							
+							// 额外确保响应式更新 - 重新创建整个数组
+							this.$nextTick(() => {
+								const newList = [...this.$refs.videoGroup.totalPlayList];
+								newList[videoIndex] = { ...updatedVideoData };
+								this.$refs.videoGroup.totalPlayList = newList;
+								console.log("已通过重新创建数组更新数据");
+							});
+							console.log("更新后的视频数据:", this.$refs.videoGroup.totalPlayList[videoIndex]);
+							console.log("更新后的is_purchase状态:", this.$refs.videoGroup.totalPlayList[videoIndex].is_purchase);
+							
+							// 强制更新组件
+							this.$forceUpdate();
+							console.log("已强制更新组件");
+							
+							// 强制重新渲染视频组件
+							if (this.$refs.videoGroup) {
+								this.$refs.videoGroup.$forceUpdate();
+								console.log("已强制更新视频组件");
+							}
+					} else {
+						console.error("未找到对应的视频索引");
+					}
+					} else {
+						console.warn("videoGroup或totalPlayList不存在，延迟重试更新视频状态");
+						setTimeout(() => {
+							try {
+								if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
+									const videoIndex = this.$refs.videoGroup.totalPlayList.findIndex((item) => item.id === videoId);
+									if (videoIndex !== -1) {
+										this.$set(this.$refs.videoGroup.totalPlayList, videoIndex, updatedVideoData);
+									}
+								}
+							} catch (e) {
+								console.error('重试更新视频状态失败:', e);
+							}
+						}, 200);
+					}
+					} else {
+						console.error("未找到对应的视频数据，视频ID:", videoId);
+					}
+				} else {
+					console.error("刷新视频数据失败，响应码:", res.code);
+				}
+			} catch (error) {
+				console.error("刷新视频数据失败:", error);
+				throw error;
+			}
 		},
 		/* 处理来自菜单组件的VIP权限弹窗请求 */
 		onShowVipDialog(data) {
@@ -698,14 +1036,35 @@ export default {
 			console.log("收到VIP权限检查请求:", data);
 			const { videoData, actionType, callback } = data;
 
-			// 检查VIP权限
-			const hasPermission = this.checkVipPermission(videoData, actionType);
-
-			// 调用回调函数返回结果
-			if (callback && typeof callback === "function") {
-				callback(hasPermission);
+			// 若用户信息或视频数据未就绪，挂起检查，待就绪后再执行
+			if (!this.userinfoReady || !this.videosReady) {
+				console.log('数据未就绪，挂起VIP权限检查。userinfoReady:', this.userinfoReady, 'videosReady:', this.videosReady);
+				this.pendingVipCheck = { videoData, actionType, callback };
+				return;
 			}
-		},
+
+			// 从totalPlayList中获取最新的视频数据
+			let latestVideoData = videoData;
+			if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
+				const latestData = this.$refs.videoGroup.totalPlayList.find(item => item.id === videoData.id);
+				if (latestData) {
+					latestVideoData = latestData;
+					console.log("使用最新的视频数据:", latestVideoData);
+					console.log("最新数据的is_purchase状态:", latestVideoData.is_purchase);
+				}
+			}
+
+		// 检查VIP权限
+		const hasPermission = this.checkVipPermission(latestVideoData, actionType);
+		
+		console.log("onCheckVipPermission - 最终返回的权限结果:", hasPermission);
+		console.log("onCheckVipPermission - 当前弹窗状态 - showVipDialog:", this.showVipDialog, "showCoinDialog:", this.showCoinDialog, "showInsufficientCoinDialog:", this.showInsufficientCoinDialog);
+
+		// 调用回调函数返回结果
+		if (callback && typeof callback === "function") {
+			callback(hasPermission);
+		}
+	},
 		/* 金币购买弹窗取消 */
 		onCoinDialogCancel() {
 			this.showCoinDialog = false;
@@ -714,25 +1073,44 @@ export default {
 		/* 金币购买弹窗确认 */
 		onCoinDialogConfirm() {
 			console.log("确认购买视频，花费金币:", this.currentVideoData?.price);
+			const purchaseId = this.currentVideoData?.id;
+			console.log("购买接口(POST): /api/comments/v1/" + purchaseId + "/purchase/");
 
 			// 调用购买接口
-			purchase({
+			purchaseVideo({
 				id: this.currentVideoData?.id,
 			})
 				.then((res) => {
-					console.log("购买成功:", res);
+					console.log("购买接口响应:", res);
+					if (res && (res.code === 200 || res.code === 201)) {
+						console.log("购买成功，code:", res.code, "message:", res.message);
+					} else {
+						console.warn("购买接口返回非成功状态，code:", res?.code, "message:", res?.message);
+					}
 					this.showCoinDialog = false;
 
-					// 购买成功后更新视频的 is_purchase 状态
-					if (this.$refs.videoGroup && this.$refs.videoGroup.totalPlayList) {
-						const videoIndex = this.$refs.videoGroup.totalPlayList.findIndex(
-							(item) => item.id === this.currentVideoData?.id
-						);
-						if (videoIndex !== -1) {
-							this.$refs.videoGroup.totalPlayList[
-								videoIndex
-							].is_purchase = true;
-						}
+					// 兜底：立即将当前视频标记为已购买，防止列表未及时更新导致再次弹窗
+					if (this.currentVideoData) {
+						this.currentVideoData.is_purchase = true;
+					}
+
+					// 购买成功后重新获取视频数据
+					this.refreshVideoData(this.currentVideoData?.id).then(() => {
+						console.log("视频数据已刷新，购买状态已更新");
+					}).catch((err) => {
+						console.error("刷新视频数据失败:", err);
+					});
+
+					// 刷新用户信息，更新金币余额
+					const userId = this.store.userinfo.id;
+					if (userId) {
+						this.store.getUserinfo({ id: userId }).then(() => {
+							console.log("用户信息已刷新，金币余额已更新");
+						}).catch((err) => {
+							console.error("刷新用户信息失败:", err);
+						});
+					} else {
+						console.error("用户ID不存在，无法刷新用户信息");
 					}
 
 					// 显示成功提示
@@ -744,14 +1122,25 @@ export default {
 
 					this.currentVideoData = null;
 				})
-				.catch((err) => {
-					console.error("购买失败:", err);
+			.catch((err) => {
+				console.error("购买失败:", err);
+				
+				// 关闭金币购买弹窗
+				this.showCoinDialog = false;
+				
+				// 如果金币不足，显示金币不足弹窗
+				if (err.code === 400 || err.message?.includes('金币') || err.message?.includes('不足')) {
+					console.log("金币不足，显示充值弹窗");
+					this.showInsufficientCoinDialog = true;
+				} else {
+					// 其他错误，显示错误提示
 					uni.showToast({
 						title: err.message || "购买失败，请重试",
 						icon: "none",
 						duration: 2000,
 					});
-				});
+				}
+			});
 		},
 		/* 金币不足弹窗取消 */
 		onInsufficientCoinDialogCancel() {
@@ -761,6 +1150,15 @@ export default {
 		/* 金币不足弹窗确认 - 跳转到充值页面 */
 		onInsufficientCoinDialogConfirm() {
 			this.showInsufficientCoinDialog = false;
+			// 记录待购买信息，充值返回后自动切换为购买确认
+			try {
+				if (this.currentVideoData) {
+					uni.setStorageSync('pending_purchase', {
+						videoId: this.currentVideoData.id,
+						price: this.currentVideoData.price || 0
+					});
+				}
+			} catch(e) { console.warn('记录待购买信息失败:', e); }
 			// 跳转到充值页面
 			uni.navigateTo({
 				url: "/pages/my/recharge",
@@ -862,6 +1260,45 @@ export default {
 			// 更新推荐用户组件中的视频购买状态
 			if (this.$refs.recommendUsers) {
 				this.$refs.recommendUsers.updateVideoPurchaseStatus(contentId);
+			}
+		},
+		
+		/* 评论组件内容回调 */
+		async submitComment(contentInfo, replyInfo) {
+			console.log("评论内容:", contentInfo);
+			console.log("回复信息:", replyInfo);
+			console.log("当前视频信息:", this.commentInfo);
+			
+			const params = {
+				type: "short",
+				tabs: "recommend",
+				target_id: this.commentInfo.id,
+				parent_comment_id: replyInfo ? replyInfo.id : 0,
+				content: contentInfo.text,
+			};
+			const res = await addContentComment(params);
+			console.log(params, 'paramsparamsparams');
+			console.log('reschuangjianchenggqb', res);
+			if (res.code === 201) {
+				// 重新加载评论列表，列表加载后会通过updateCommentCount事件更新数量
+				this.$nextTick(() => {
+					if (this.$refs.commentRef) {
+						this.$refs.commentRef.loadData();
+					}
+				});
+			}
+		},
+		
+		/* 处理评论数量更新 */
+		handleCommentCountUpdate(total) {
+			try {
+				// 获取当前页面的视频组件
+				if (this.$refs.videoGroup && this.$refs.videoGroup.updateVideoCommentCount) {
+					// 使用接口返回的实际评论数量更新
+					this.$refs.videoGroup.updateVideoCommentCount(this.commentInfo.id, total);
+				}
+			} catch (error) {
+				console.error("更新评论数量失败", error);
 			}
 		}
 	}

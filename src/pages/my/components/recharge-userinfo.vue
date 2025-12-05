@@ -35,7 +35,8 @@ import { storeToRefs } from "pinia";
 import { userinfoStore } from "@/store/userinfos.js";
 const store = userinfoStore();
 const { personInfo } = storeToRefs(store);
-const { current } = defineProps(["current"]);
+const props = defineProps(["current"]);
+const current = props.current;
 const src = ref(
   "http://pic2.sc.chinaz.com/Files/pic/pic9/202002/hpic2119_s.jpg"
 );

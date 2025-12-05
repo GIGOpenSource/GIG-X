@@ -372,8 +372,8 @@ export default {
 						callback: (hasPermission) => {
 							console.log('playSpot - VIP权限检查结果:', hasPermission);
 							if (!hasPermission) {
-								console.log('playSpot - 没有VIP权限，停止播放');
-								// 没有VIP权限，不播放视频
+								console.log('playSpot - 权限检查失败（可能是需要购买或需要VIP），停止播放');
+								// 没有权限或需要购买，不播放视频，等待用户操作（购买或开通VIP）
 								return;
 							} else {
 								// 有权限，继续播放
@@ -422,8 +422,8 @@ export default {
 					callback: (hasPermission) => {
 						console.log('videoPlay - VIP权限检查结果:', hasPermission);
 						if (!hasPermission) {
-							console.log('videoPlay - 没有VIP权限，停止播放');
-							// 没有VIP权限，不播放视频
+							console.log('videoPlay - 权限检查失败（可能是需要购买或需要VIP），停止播放');
+							// 没有权限或需要购买，不播放视频，等待用户操作（购买或开通VIP）
 							return;
 						} else {
 							// 有权限，继续播放
@@ -875,6 +875,11 @@ export default {
 	/* 视频点赞、关注 */
 	fabulousBtn(data) {
 		this.$set(this.vodList, data.index, data.obj)
+	},
+	/* 处理VIP权限检查请求 */
+	handleCheckVipPermission(data) {
+		console.log("video-n.js 转发VIP权限检查请求:", data);
+		this.$emit("checkVipPermission", data);
 	},
 	/* 更新视频评论数量 */
 	updateVideoCommentCount(videoId, commentCount) {

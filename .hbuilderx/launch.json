@@ -2,7 +2,7 @@
     "version" : "1.0",
     "configurations" : [
         {
-            "customPlaygroundType" : "local",
+            "customPlaygroundType" : "device",
             "localRepoPath" : "C:/Users/GIG/Desktop/GIG-X",
             "packageName" : "com.unionpay.tsmservice",
             "playground" : "standard",

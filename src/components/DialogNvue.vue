@@ -7,7 +7,7 @@
         <!-- 弹窗头部 -->
         <view class="dialog-header">
           <view class="dialog-title">
-            <text class="title-text">VIP视频</text>
+            <text class="title-text">{{ title }}</text>
           </view>
           <view class="close-btn" @click="handleClickClose">
             <text class="close-icon">×</text>
@@ -17,7 +17,7 @@
         <!-- 弹窗内容 -->
         <view class="dialog-content">
           <view class="dialog-message">
-            <text class="message-text">此视频为VIP视频,请开通VIP后观看</text>
+            <text class="message-text">{{ message }}</text>
           </view>
         </view>
 
@@ -55,6 +55,14 @@ export default {
     confirmText: {
       type: String,
       default: "去开通",
+    },
+    title: {
+      type: String,
+      default: "提示",
+    },
+    message: {
+      type: String,
+      default: "",
     },
   },
   emits: ["update:modelValue", "cancel", "confirm", "close"],

@@ -30,10 +30,10 @@
     </view>
     <!-- 评论 -->
     <comment ref="commentList" @onfocus="onfocus" :detailId="detailId" />
-    <view style="height: 100rpx"></view>
+    <view style="height: 200rpx"></view>
     <!-- 发表评论 -->
     <view class="bottom">
-      <input type="text" v-model="con" placeholder="输入评价内容" />
+      <input type="text" v-model="con" :placeholder="!aite ? '输入评价内容' : aite" />
       <view class="publish" @click="publish">发表</view>
     </view>
     <operation :show="show" @update:show="(val) => (show = val)" />
@@ -55,13 +55,14 @@ const con = ref("");
 const show = ref(false);
 const activelist = ref(null);
 const commentList = ref(null);
+const commentData = ref({})
+const aite = ref('')
 //发表评论
 const publish = () => {
   if (!con.value) return uni.showToast({ title: "内容不能为空", icon: "none" });
   addComment({
-    // type:'dynamic',
     target_id: detailId.value,
-    parent_comment_id: 0,
+    parent_comment_id: commentData.value.id || 0,
     content: con.value,
   }).then((res) => {
     commentList.value.resetData();
@@ -72,8 +73,9 @@ const publish = () => {
 const oparea = () => {
   show.value = true;
 };
-const onfocus = () => {
-  con.value = "@用户名";
+const onfocus = (item) => {
+  aite.value = "@" + item.user_nickname
+  commentData.value = item
 };
 onLoad((options) => {
   detailId.value = options.id;
